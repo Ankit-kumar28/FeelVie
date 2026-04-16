@@ -56,7 +56,7 @@ export default function FAQsScreen() {
       {/* Header */}
       <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? 44 : 16 }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-          <Icon name="arrow-left" size={26} color="#111827" />
+         <Icon name="arrow-left" size={26} color="#111111" />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>FAQs</Text>
@@ -77,7 +77,7 @@ export default function FAQsScreen() {
               <Icon
                 name={expandedIndex === index ? 'chevron-up' : 'chevron-down'}
                 size={24}
-                color="#B03385"
+                color="#000000"
               />
             </TouchableOpacity>
 
@@ -115,9 +115,10 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e5e7eb',
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
+   fontSize: 20,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    letterSpacing: -0.3,
   },
 
   scrollContent: {
@@ -134,8 +135,8 @@ const styles = StyleSheet.create({
   questionText: {
     flex: 1,
     fontSize: 16,
-    fontWeight: '500',
-    color: '#1f2937',
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
     lineHeight: 24,
     paddingRight: 16,
   },

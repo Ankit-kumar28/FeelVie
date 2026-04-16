@@ -20,9 +20,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Toast from "react-native-toast-message";
 import RazorpayCheckout from 'react-native-razorpay';
+import { BASE_URL } from '../../config/env';
 
 const { width } = Dimensions.get('window');
-const BASE_URL = 'https://feelvie.yaytech.in';
+// const BASE_URL = 'https://feelvie.yaytech.in';
 
 type ModalType = 'success' | 'error' | 'warning' | 'info';
 

@@ -4,31 +4,28 @@ import {
   Text,
   StyleSheet,
   Platform,
-  Dimensions,
   TouchableOpacity,
 } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import Svg, { Path } from 'react-native-svg';
+// import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import HomeScreen from '../screens/HomeScreen';
-import SellOptionsScreen from '../screens/sell/SellOptionsScreen';
-import CartScreen from '../screens/cart/CartScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import VirtualTryOnScreen from '../screens/virtualTry/VirtualTryOnScreen';
-import MarketplaceScreen from '../screens/MarketplaceScreen';
 
 const Tab = createBottomTabNavigator();
 
-// ── Theme Colors ──
-const MAIN_COLOR    = '#B03385';
-const ACCENT        = '#ffffff';
-const INACTIVE      = '#d0cfd0';
+// ── Black & White Theme (matches reference image) ──
+const BG_COLOR     = '#FFFFFF';   // tab bar background
+const ACTIVE_COLOR = '#636262';   // active icon + label
+const INACTIVE_COLOR = '#AAAAAA'; // inactive icon + label
+const BORDER_COLOR = '#E8E8E8';   // top border line
+const INDICATOR_COLOR = '#111111'; // active top indicator dot/line
 
 export default function MainTabNavigator() {
   return (
     <Tab.Navigator
-      initialRouteName="Home"
+      initialRouteName="TryOn"
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
@@ -36,11 +33,15 @@ export default function MainTabNavigator() {
       }}
       tabBar={(props) => <CustomTabBar {...props} />}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Marketplace" component={MarketplaceScreen} />
-      <Tab.Screen name="TryOn" component={VirtualTryOnScreen} />
-      <Tab.Screen name="Cart" component={CartScreen} />
+      {/* ── DEMO MODE: Only 2 tabs active ── */}
+      <Tab.Screen name="TryOn"   component={VirtualTryOnScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
+
+      {/* ── Restore these for full app ──
+      <Tab.Screen name="Home"        component={HomeScreen} />
+      <Tab.Screen name="Marketplace" component={MarketplaceScreen} />
+      <Tab.Screen name="Cart"        component={CartScreen} />
+      */}
     </Tab.Navigator>
   );
 }
@@ -48,28 +49,8 @@ export default function MainTabNavigator() {
 function CustomTabBar({ state, descriptors, navigation }) {
   return (
     <View style={styles.tabBarContainer}>
-      {/* Curved background – unchanged */}
-      <View style={styles.svgWrapper}>
-        <Svg
-          width={Dimensions.get('window').width}
-          height={120}
-          viewBox="0 0 400 10"
-        >
-          <Path
-            d="
-              M0 0 
-              H135 
-              C160 0 178 32 200 32 
-              C222 32 240 0 265 0 
-              H400 
-              V120 
-              H0 
-              Z
-            "
-            fill={MAIN_COLOR}
-          />
-        </Svg>
-      </View>
+      {/* Clean white background with subtle top border */}
+      <View style={styles.background} />
 
       <View style={styles.tabsRow}>
         {state.routes.map((route, index) => {
@@ -86,54 +67,41 @@ function CustomTabBar({ state, descriptors, navigation }) {
             }
           };
 
-          if (route.name === 'TryOn') {
-            return (
-              <View key={route.key} style={styles.centerContainer}>
-                <TouchableOpacity
-                  onPress={onPress}
-                  activeOpacity={0.85}
-                  style={[
-                    styles.floatingCircle,
-                    isFocused && styles.floatingCircleActive,
-                  ]}
-                >
-                  <Icon
-                    name="tshirt-crew"
-                    size={36}
-                    color={isFocused ? ACCENT : INACTIVE}
-                  />
-                </TouchableOpacity>
-              </View>
-            );
-          }
-
           const iconName = getIconName(route.name);
+          const label    = getLabel(route.name);
 
           return (
             <TouchableOpacity
               key={route.key}
               onPress={onPress}
-              activeOpacity={0.8}
-              style={[
-                styles.tabItem,
-                route.name === 'Sell' && styles.sellTabExtraSpace,
-                route.name === 'Cart' && styles.cartTabExtraSpace,
-                // Only add dark shadow when this tab is active
-                isFocused && styles.tabItemShadowActive,
-              ]}
+              activeOpacity={0.7}
+              style={styles.tabItem}
             >
-              <Icon
+              {/* Active top indicator bar */}
+              {/* <View
+                style={[
+                  styles.activeIndicator,
+                  { backgroundColor: isFocused ? INDICATOR_COLOR : 'transparent' },
+                ]}
+              /> */}
+
+              {/* Icon */}
+              <Ionicons
                 name={iconName}
-                size={22}
-                color={isFocused ? ACCENT : INACTIVE}
+                size={24}
+                color={isFocused ? ACTIVE_COLOR : INACTIVE_COLOR}
+                style={styles.icon}
               />
+
+              {/* Label */}
               <Text
                 style={[
                   styles.label,
-                  { color: isFocused ? ACCENT : INACTIVE },
+                  { color: isFocused ? ACTIVE_COLOR : INACTIVE_COLOR,
+                    fontWeight: isFocused ? '700' : '400' },
                 ]}
               >
-                {route.name}
+                {label}
               </Text>
             </TouchableOpacity>
           );
@@ -145,92 +113,76 @@ function CustomTabBar({ state, descriptors, navigation }) {
 
 function getIconName(name: string) {
   switch (name) {
-    case 'Home':    return 'home-outline';
-    case 'Marketplace':    return 'tag-outline';
-    case 'Cart':    return 'cart-outline';
-    case 'Profile': return 'account-outline';
-    default:        return 'circle';
+    case 'TryOn':   return 'shirt-outline';
+    case 'Profile': return 'person-outline';
+    // case 'Home':        return 'home-outline';
+    // case 'Marketplace': return 'tag-outline';
+    // case 'Cart':        return 'shopping-bag-outline';
+    default: return 'circle-outline';
   }
 }
 
-const { width } = Dimensions.get('window');
-const CENTER_SIZE = 55; // slightly bigger looks better with more space
+function getLabel(name: string) {
+  switch (name) {
+    case 'TryOn':   return 'Try On';
+    case 'Profile': return 'Me';
+    default: return name;
+  }
+}
+
+const TAB_BAR_HEIGHT = Platform.OS === 'ios' ? 82 : 74;
 
 const styles = StyleSheet.create({
   tabBarContainer: {
     position: 'absolute',
     bottom: 0,
     width: '100%',
-    height: 100,           // increased a bit
-    // marginTop:10,
+    height: TAB_BAR_HEIGHT,
+    // Crisp shadow matching reference image style
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: -1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 0,
+    elevation: 8,
   },
-  svgWrapper: {
+  background: {
     position: 'absolute',
-    bottom: 0,
+    top: 0,
     left: 0,
     right: 0,
+    bottom: 0,
+    backgroundColor: BG_COLOR,
+    // borderTopWidth: 1,
+    // borderTopColor: BORDER_COLOR,
   },
   tabsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    height: 100,
-    paddingHorizontal: 16,      // ← increased side padding
+    justifyContent: 'space-evenly',
+    alignItems: 'flex-start',
+    height: TAB_BAR_HEIGHT,
+    paddingTop: 0,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 0,
   },
   tabItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
     flex: 1,
-    maxWidth: 80,
-    paddingBottom: Platform.OS === 'ios' ? 32 : 16,
-  },
-  tabItemShadowActive: {
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.50,     // quite visible dark shadow
-    shadowRadius: 10,
-    elevation: 14,           // strong on Android
-  },
-
-  // Extra spacing for Sell and Cart tabs (the ones next to center)
-  sellTabExtraSpace: {
-    marginRight: 20,            // pushes Sell away from center
-  },
-  cartTabExtraSpace: {
-    marginLeft: 70,             // pushes Cart away from center
-  },
-
-  centerContainer: {
-    position: 'absolute',
-    bottom: 40,                 // ← raised a little higher
-    left: width / 2 - CENTER_SIZE / 2,
     alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 10,
   },
-  floatingCircle: {
-    width: CENTER_SIZE,
-    height: CENTER_SIZE,
-    borderRadius: CENTER_SIZE / 2,
-    backgroundColor: MAIN_COLOR,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 4,
-    borderColor: MAIN_COLOR,
-    // shadowColor: '#000',
-    // shadowOffset: { width: 0, height: 8 },
-    // shadowOpacity: 0.4,
-    // shadowRadius: 12,
-    elevation: 5,
+  activeIndicator: {
+    width: 24,
+    height: 2,
+    // borderRadius: 1,
+    marginBottom: 6,
+    marginTop: 0,
   },
-  floatingCircleActive: {
-    borderColor: ACCENT,
-    borderWidth: .5,
-    shadowOpacity: 0.55,
-    shadowRadius: 16,
+  icon: {
+    marginBottom: 3,
   },
   label: {
-    fontSize: 12,
-    marginTop: 2,
-    fontWeight: '700',
-    letterSpacing: 0.4,
+    fontSize: 10,
+    letterSpacing: 0.3,
+    // Use a clean system serif/sans — matches the thin stroke style in image
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'Poppins-Regular',
   },
 });

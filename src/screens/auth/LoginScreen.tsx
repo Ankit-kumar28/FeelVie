@@ -24,6 +24,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../../context/AuthContext';
 import { loginUser, saveAuthData } from '../../api/authApi';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BASE_URL } from '../../config/env';
 
 const { width, height } = Dimensions.get('window');
 const isIOS = Platform.OS === 'ios';
@@ -64,7 +65,6 @@ export default function LoginScreen() {
   const [errorTitle, setErrorTitle] = useState('Oops!');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Track header layout to position login title dynamically
   const [headerY, setHeaderY] = useState(0);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
@@ -74,7 +74,6 @@ export default function LoginScreen() {
   const loginTitleOpacity = useState(new Animated.Value(0))[0];
   const formTranslateY = useState(new Animated.Value(0))[0];
 
-  // Keyboard height ref for dynamic form shift
   const keyboardHeightRef = useRef(0);
 
   useEffect(() => {
@@ -86,27 +85,10 @@ export default function LoginScreen() {
 
         setIsKeyboardVisible(true);
         Animated.parallel([
-          Animated.timing(headerOpacity, {
-            toValue: 0,
-            duration: 220,
-            useNativeDriver: true,
-          }),
-          Animated.timing(headerTranslateY, {
-            toValue: -140,
-            duration: 260,
-            useNativeDriver: true,
-          }),
-          Animated.timing(loginTitleOpacity, {
-            toValue: 1,
-            duration: 300,
-            delay: 80,
-            useNativeDriver: true,
-          }),
-          Animated.timing(formTranslateY, {
-            toValue: formShift,
-            duration: 300,
-            useNativeDriver: true,
-          }),
+          Animated.timing(headerOpacity, { toValue: 0, duration: 220, useNativeDriver: true }),
+          Animated.timing(headerTranslateY, { toValue: -140, duration: 260, useNativeDriver: true }),
+          Animated.timing(loginTitleOpacity, { toValue: 1, duration: 300, delay: 80, useNativeDriver: true }),
+          Animated.timing(formTranslateY, { toValue: formShift, duration: 300, useNativeDriver: true }),
         ]).start();
       }
     );
@@ -116,26 +98,10 @@ export default function LoginScreen() {
       () => {
         setIsKeyboardVisible(false);
         Animated.parallel([
-          Animated.timing(headerOpacity, {
-            toValue: 1,
-            duration: 280,
-            useNativeDriver: true,
-          }),
-          Animated.timing(headerTranslateY, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          Animated.timing(loginTitleOpacity, {
-            toValue: 0,
-            duration: 180,
-            useNativeDriver: true,
-          }),
-          Animated.timing(formTranslateY, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }),
+          Animated.timing(headerOpacity, { toValue: 1, duration: 280, useNativeDriver: true }),
+          Animated.timing(headerTranslateY, { toValue: 0, duration: 300, useNativeDriver: true }),
+          Animated.timing(loginTitleOpacity, { toValue: 0, duration: 180, useNativeDriver: true }),
+          Animated.timing(formTranslateY, { toValue: 0, duration: 300, useNativeDriver: true }),
         ]).start();
       }
     );
@@ -155,7 +121,7 @@ export default function LoginScreen() {
       setEmailError('Please enter your email');
       valid = false;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setEmailError('That email doesnot look right');
+      setEmailError('That email doesn\'t look right');
       valid = false;
     }
 
@@ -184,7 +150,7 @@ export default function LoginScreen() {
         message = 'Please check your details.';
       } else if (status === 403) {
         title = 'Access Denied';
-        message = 'You donot have permission to sign in at this time.';
+        message = 'You don\'t have permission to sign in at this time.';
       } else if (status === 429) {
         title = 'Too Many Attempts';
         message = 'Please wait a few minutes and try again.';
@@ -212,13 +178,11 @@ export default function LoginScreen() {
       };
 
       const loginResponse = await loginUser(payload);
-      if (!loginResponse?.access) {
-        throw new Error('Invalid credentials');
-      }
+      if (!loginResponse?.access) throw new Error('Invalid credentials');
 
       const token = loginResponse.access;
 
-      const profileResponse = await fetch('https://feelvie.yaytech.in/api/auth/me/', {
+      const profileResponse = await fetch(`${BASE_URL}/api/auth/me/`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -250,16 +214,16 @@ export default function LoginScreen() {
 
   const SvgIllustration = () => (
     <Svg width={width * 0.55} height={width * 0.45} viewBox="0 0 300 220">
-      <Circle cx="150" cy="100" r="90" fill="#F3E8FF" opacity="0.4" />
-      <Rect x="70" y="20" width="160" height="280" rx="32" fill="#FFFFFF" stroke="#E0BBFF" strokeWidth="6" />
-      <Rect x="85" y="45" width="130" height="210" rx="12" fill="#FAF5FF" />
-      <Circle cx="150" cy="90" r="28" fill="#D8BFD8" />
-      <Rect x="110" y="135" width="80" height="12" rx="6" fill="#E0BBFF" />
-      <Rect x="95" y="155" width="110" height="12" rx="6" fill="#E0BBFF" opacity="0.7" />
+      <Circle cx="150" cy="100" r="90" fill="#F7F7F7" opacity="0.6" />
+      <Rect x="70" y="20" width="160" height="280" rx="32" fill="#FFFFFF" stroke="#E8E8E8" strokeWidth="6" />
+      <Rect x="85" y="45" width="130" height="210" rx="12" fill="#F7F7F7" />
+      <Circle cx="150" cy="90" r="28" fill="#E8E8E8" />
+      <Rect x="110" y="135" width="80" height="12" rx="6" fill="#E8E8E8" />
+      <Rect x="95" y="155" width="110" height="12" rx="6" fill="#E8E8E8" opacity="0.7" />
       <Path
         d="M150 190 L150 210 M130 190 C130 175 170 175 170 190 L170 210 L130 210 Z"
         fill="none"
-        stroke="#bf5299"
+        stroke="#111111"
         strokeWidth="8"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -267,13 +231,11 @@ export default function LoginScreen() {
     </Svg>
   );
 
-  // Dynamic top offset for login title: sits just above the form area
-  // Uses insets.top for safe area + a fixed visual offset
   const loginTitleTop = insets.top + verticalScale(16);
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F9F5FF" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
@@ -297,45 +259,25 @@ export default function LoginScreen() {
             </View>
             <View style={styles.welcomeText}>
               <Text style={styles.title}>Welcome Back</Text>
-              <Text style={styles.subtitle}>Login to continue your wellness journey</Text>
+              <Text style={styles.subtitle}>Login to continue your shopping journey</Text>
             </View>
           </Animated.View>
 
-          {/*
-            LOGIN TITLE — now uses insets-aware dynamic top instead of
-            a hardcoded platform value, so it sits correctly on every
-            screen size (small Android phones, large iPhones, tablets).
-          */}
-          <Animated.View
-            style={[
-              styles.loginTitleContainer,
-              {
-                opacity: loginTitleOpacity,
-                top: loginTitleTop,
-              },
-            ]}
-          >
-            <Text style={styles.loginTitle}>Login</Text>
-          </Animated.View>
-
-          {/* Animated Form Container */}
           <Animated.View
             style={[
               styles.formContainer,
-              {
-                transform: [{ translateY: formTranslateY }],
-              },
+              { transform: [{ translateY: formTranslateY }] },
             ]}
           >
             <View style={styles.form}>
               <View style={styles.inputWrapper}>
                 <Text style={styles.inputLabel}>Email</Text>
                 <View style={[styles.inputCard, emailError && styles.inputErrorBorder]}>
-                  <Icon name="email" size={22} color="#777" style={styles.leftIcon} />
+                  <Icon name="email" size={22} color="#AAAAAA" style={styles.leftIcon} />
                   <TextInput
                     style={styles.input}
                     placeholder="hello@example.com"
-                    placeholderTextColor="#A0A0C0"
+                    placeholderTextColor="#AAAAAA"
                     value={email}
                     onChangeText={setEmail}
                     keyboardType="email-address"
@@ -350,11 +292,11 @@ export default function LoginScreen() {
               <View style={styles.inputWrapper}>
                 <Text style={styles.inputLabel}>Password</Text>
                 <View style={[styles.inputCard, passwordError && styles.inputErrorBorder]}>
-                  <Icon name="lock" size={22} color="#777" style={styles.leftIcon} />
+                  <Icon name="lock" size={22} color="#AAAAAA" style={styles.leftIcon} />
                   <TextInput
                     style={styles.input}
                     placeholder="••••••••"
-                    placeholderTextColor="#A0A0C0"
+                    placeholderTextColor="#AAAAAA"
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
@@ -369,14 +311,14 @@ export default function LoginScreen() {
                     <Icon
                       name={showPassword ? 'visibility' : 'visibility-off'}
                       size={22}
-                      color="#777"
+                      color="#AAAAAA"
                     />
                   </TouchableOpacity>
                 </View>
                 {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
               </View>
 
-              <TouchableOpacity style={styles.forgotLink}>
+              <TouchableOpacity style={styles.forgotLink} onPress={() => navigation.navigate('ForgotPassword')}>
                 <Text style={styles.forgotText}>Forgot Password?</Text>
               </TouchableOpacity>
 
@@ -387,7 +329,7 @@ export default function LoginScreen() {
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <ActivityIndicator color="#fff" size="small" />
+                  <ActivityIndicator color="#FFFFFF" size="small" />
                 ) : (
                   <Text style={styles.buttonText}>Sign In</Text>
                 )}
@@ -395,7 +337,7 @@ export default function LoginScreen() {
 
               <View style={styles.signupRow}>
                 <Text style={styles.signupText}>Don't have an account? </Text>
-                <TouchableOpacity onPress={() => navigation.navigate('Onboarding2')}>
+                <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
                   <Text style={styles.signupHighlight}>Register</Text>
                 </TouchableOpacity>
               </View>
@@ -410,7 +352,7 @@ export default function LoginScreen() {
       <Modal visible={successModalVisible} transparent animationType="fade">
         <View style={modalStyles.overlay}>
           <View style={modalStyles.container}>
-            <Icon name="check-circle" size={64} color="#4CAF50" />
+            <Icon name="check-circle" size={64} color="#111111" />
             <Text style={modalStyles.title}>Welcome back!</Text>
             <Text style={modalStyles.message}>You're all set. Taking you to dashboard...</Text>
           </View>
@@ -421,8 +363,8 @@ export default function LoginScreen() {
       <Modal visible={errorModalVisible} transparent animationType="fade">
         <View style={modalStyles.overlay}>
           <View style={modalStyles.container}>
-            <Icon name="error-outline" size={64} color="#F44336" />
-            <Text style={[modalStyles.title, { color: '#D32F2F' }]}>{errorTitle}</Text>
+            <Icon name="error-outline" size={64} color="#111111" />
+            <Text style={modalStyles.title}>{errorTitle}</Text>
             <Text style={modalStyles.message}>{errorMessage}</Text>
             <TouchableOpacity
               style={modalStyles.closeButton}
@@ -440,12 +382,9 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9F5FF',
-    paddingTop: 80,
+    backgroundColor: '#FFFFFF',
   },
-  keyboardAvoid: {
-    flex: 1,
-  },
+  keyboardAvoid: { flex: 1 },
   innerContent: {
     flex: 1,
     paddingHorizontal: 28,
@@ -457,42 +396,24 @@ const styles = StyleSheet.create({
   },
   illustrationContainer: {
     alignItems: 'center',
-    marginTop: Platform.select({
-      ios: 60,
-      android: 50,
-    }),
+    marginTop: Platform.select({ ios: 60, android: 50 }),
     marginBottom: 28,
   },
   welcomeText: {
     alignItems: 'center',
   },
-  loginTitleContainer: {
-    // KEY FIX: removed hardcoded top values.
-    // `top` is now injected dynamically from insets in the component,
-    // so it adapts to every screen's safe area automatically.
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    zIndex: 5,
-  },
-  loginTitle: {
-    fontSize: moderateScale(40),
-    fontWeight: '800',
-    color: '#1A1A2E',
-    letterSpacing: -0.6,
-  },
   title: {
     fontSize: moderateScale(36),
-    fontWeight: '800',
-    color: '#1A1A2E',
-    letterSpacing: -0.5,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    letterSpacing: -0.8,
   },
   subtitle: {
     fontSize: moderateScale(15),
-    color: '#6B7280',
+    color: '#6c6c6c',
     marginTop: 8,
     textAlign: 'center',
+    fontFamily: 'Poppins-Regular',
   },
   formContainer: {
     width: '100%',
@@ -502,28 +423,24 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   inputLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 6,
+    fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    marginBottom: 8,
+    letterSpacing: 0.5,
   },
   inputCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 8,
     height: 58,
     paddingHorizontal: 16,
-    borderWidth: 1.5,
-    borderColor: '#E0D4FF',
-    shadowColor: '#993c89',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#6f6f6f',
   },
   inputErrorBorder: {
-    borderColor: '#EF4444',
+    borderColor: '#111111',
   },
   leftIcon: {
     marginRight: 12,
@@ -531,45 +448,42 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#111827',
+    color: '#111111',
+    fontFamily: 'Poppins-Regular',
   },
   eyeButton: {
     padding: 8,
   },
   errorText: {
-    color: '#EF4444',
+    color: '#111111',
     fontSize: 13,
     marginTop: 6,
     marginLeft: 4,
+    fontFamily: 'Poppins-Regular',
   },
   forgotLink: {
     alignSelf: 'flex-end',
     marginBottom: 25,
   },
   forgotText: {
-    color: '#B03385',
+    color: '#111111',
     fontSize: 15,
-    fontWeight: '500',
+    fontFamily: 'Poppins-Regular',
   },
   loginButton: {
-    backgroundColor: '#b03384de',
+    backgroundColor: '#111111',
     height: 58,
-    borderRadius: 16,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#B03385',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 6,
   },
   buttonDisabled: {
-    opacity: 0.6,
+    opacity: 0.7,
   },
   buttonText: {
     color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 17,
+    fontFamily: 'Poppins-SemiBold',
   },
   signupRow: {
     flexDirection: 'row',
@@ -579,58 +493,57 @@ const styles = StyleSheet.create({
   },
   signupText: {
     fontSize: 15,
-    color: '#4B5563',
+    color: '#AAAAAA',
+    fontFamily: 'Poppins-Regular',
   },
   signupHighlight: {
-    color: '#B03385',
-    fontWeight: '700',
+    color: '#111111',
+    fontFamily: 'Poppins-SemiBold',
   },
 });
 
 const modalStyles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.60)',
+    backgroundColor: 'rgba(0,0,0,0.65)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   container: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
+    borderRadius: 12,
     padding: 32,
     width: '84%',
     maxWidth: 360,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 15,
+    borderWidth: 1,
+    borderColor: '#aeaeae',
   },
   title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
+    fontSize: 22,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
     marginTop: 16,
     marginBottom: 8,
   },
   message: {
     fontSize: 15,
-    color: '#6B7280',
+    color: '#AAAAAA',
     textAlign: 'center',
     marginBottom: 24,
     lineHeight: 22,
+    fontFamily: 'Poppins-Regular',
   },
   closeButton: {
-    backgroundColor: '#d6372cf4',
+    backgroundColor: '#111111',
     paddingVertical: 14,
     paddingHorizontal: 40,
-    borderRadius: 14,
+    borderRadius: 8,
     marginTop: 8,
   },
   closeButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
 });

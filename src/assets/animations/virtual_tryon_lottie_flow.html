@@ -1,0 +1,358 @@
+
+<style>
+  #vto-root { font-family: sans-serif; background: #fff; border-radius: 20px; overflow: hidden; width: 100%; max-width: 680px; margin: 0 auto; }
+  #vto-canvas { width: 100%; display: block; }
+
+  @keyframes vto-fadein { from { opacity:0 } to { opacity:1 } }
+  @keyframes vto-slideup { from { opacity:0; transform:translateY(18px) } to { opacity:1; transform:translateY(0) } }
+  @keyframes vto-phone-appear { from { opacity:0; transform: scale(0.82) translateY(24px) } to { opacity:1; transform: scale(1) translateY(0) } }
+
+  @keyframes vto-scan { 0%,100% { transform: translateY(0px) } 50% { transform: translateY(130px) } }
+  @keyframes vto-pulse { 0%,100% { opacity:0.25; transform:scale(1) } 50% { opacity:0.7; transform:scale(1.15) } }
+  @keyframes vto-spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+  @keyframes vto-sparkle { 0%,100% { opacity:0; transform:scale(0) rotate(0deg) } 50% { opacity:1; transform:scale(1) rotate(180deg) } }
+  @keyframes vto-bounce { 0%,100% { transform:translateY(0) } 40% { transform:translateY(-9px) } }
+  @keyframes vto-barfill { from { width:0% } to { width:100% } }
+  @keyframes vto-checkpop { 0% { transform:scale(0) } 70% { transform:scale(1.2) } 100% { transform:scale(1) } }
+  @keyframes vto-shimmer { 0%,100% { opacity:0.55 } 50% { opacity:1 } }
+  @keyframes vto-float { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-7px) } }
+  @keyframes vto-glow-ring { 0%,100% { opacity:0.18; r:22 } 50% { opacity:0.55; r:28 } }
+  @keyframes vto-upload-arrow { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-6px) } }
+  @keyframes vto-result-slide { from { opacity:0; transform:translateX(22px) } to { opacity:1; transform:translateX(0) } }
+  @keyframes vto-tag-pop { 0% { transform:scale(0) } 80% { transform:scale(1.1) } 100% { transform:scale(1) } }
+
+  .step-card {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 20px 22px;
+    min-height: 420px;
+    justify-content: flex-start;
+    background: #fff;
+  }
+  .step-card.active { display: flex; animation: vto-fadein 0.45s ease; }
+
+  .step-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.2px;
+    color: #B03385;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .step-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 22px;
+    text-align: center;
+  }
+
+  .phone-frame {
+    width: 148px;
+    height: 270px;
+    border-radius: 24px;
+    border: 2.5px solid #ddd;
+    background: #f8f0f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+    position: relative;
+    animation: vto-phone-appear 0.5s ease;
+  }
+  .phone-notch {
+    width: 52px; height: 10px;
+    background: #ddd;
+    border-radius: 0 0 8px 8px;
+    margin-top: 0;
+    flex-shrink: 0;
+  }
+  .phone-screen {
+    flex: 1; width: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+
+  .btn-generate {
+    background: #B03385;
+    color: #fff;
+    border: none;
+    border-radius: 22px;
+    padding: 11px 32px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 20px;
+    animation: vto-shimmer 2s ease-in-out infinite;
+  }
+  .btn-generate:hover { background: #8C2668; }
+
+  .dots-row {
+    display: flex; gap: 8px; margin-top: 24px;
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #e0b8d4;
+  }
+  .dot.active { background: #B03385; }
+
+  .nav-row {
+    display: flex; gap: 12px; margin-top: 20px; align-items: center;
+  }
+  .nav-btn {
+    background: transparent;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 7px 22px;
+    font-size: 13px;
+    color: #555;
+    cursor: pointer;
+  }
+  .nav-btn:hover { background: #f5f0f8; }
+  .nav-btn.primary {
+    background: #B03385; color: #fff; border-color: #B03385;
+  }
+  .nav-btn.primary:hover { background: #8C2668; }
+</style>
+
+<div id="vto-root">
+
+  <div class="step-card active" id="step-0">
+    <div class="step-label">Step 1 of 5</div>
+    <div class="step-title">Open the app</div>
+    <svg width="180" height="280" viewBox="0 0 180 280" style="animation:vto-phone-appear 0.6s ease;">
+      <rect x="16" y="4" width="148" height="272" rx="24" fill="#f8f0f5" stroke="#ddd" stroke-width="2.5"/>
+      <rect x="64" y="4" width="52" height="10" rx="5" fill="#ddd"/>
+      <rect x="28" y="26" width="124" height="236" rx="14" fill="#fff"/>
+      <text x="90" y="90" text-anchor="middle" font-size="36" fill="#B03385">★</text>
+      <rect x="55" y="108" width="70" height="8" rx="4" fill="#F4C0D1"/>
+      <rect x="65" y="122" width="50" height="6" rx="3" fill="#f0e0ec"/>
+      <rect x="44" y="178" width="92" height="30" rx="14" fill="#B03385"/>
+      <text x="90" y="198" text-anchor="middle" font-size="12" fill="#fff" font-weight="500">Get Started</text>
+      <circle cx="90" cy="78" r="20" fill="#FBEAF0" stroke="#F4C0D1" stroke-width="1.5"/>
+      <path d="M82 78 Q90 66 98 78 Q90 90 82 78Z" fill="#B03385" opacity="0.7"/>
+      <text x="90" y="150" text-anchor="middle" font-size="11" fill="#B03385" font-weight="500">FeelVie</text>
+      <text x="90" y="164" text-anchor="middle" font-size="9" fill="#D4537E">Virtual Try-On</text>
+      <g style="animation:vto-bounce 2s ease-in-out infinite; transform-origin:90px 230px;">
+        <rect x="44" y="216" width="92" height="30" rx="14" fill="#f5e8f2" stroke="#E8A0C8" stroke-width="1"/>
+        <text x="90" y="235" text-anchor="middle" font-size="11" fill="#B03385">Explore looks</text>
+      </g>
+    </svg>
+    <div class="dots-row">
+      <div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn primary" onclick="goStep(1)">Next →</button>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-1">
+    <div class="step-label">Step 2 of 5</div>
+    <div class="step-title">Upload your photo</div>
+    <svg width="210" height="280" viewBox="0 0 210 280" id="svg-upload">
+      <rect x="16" y="4" width="148" height="272" rx="24" fill="#f8f0f5" stroke="#ddd" stroke-width="2.5"/>
+      <rect x="64" y="4" width="52" height="10" rx="5" fill="#ddd"/>
+      <rect x="28" y="26" width="124" height="236" rx="14" fill="#fff"/>
+      <text x="90" y="52" text-anchor="middle" font-size="10" fill="#B03385" font-weight="500">Upload your photo</text>
+      <rect x="42" y="62" width="96" height="110" rx="10" fill="#FBEAF0" stroke="#F4C0D1" stroke-width="1" stroke-dasharray="5,3"/>
+      <g style="animation:vto-upload-arrow 1.4s ease-in-out infinite; transform-origin:90px 107px;">
+        <path d="M78 115 L90 100 L102 115" fill="none" stroke="#B03385" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="90" y1="100" x2="90" y2="125" stroke="#B03385" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <text x="90" y="144" text-anchor="middle" font-size="9" fill="#D4537E">Tap to choose</text>
+      <text x="90" y="157" text-anchor="middle" font-size="8" fill="#ccc">or drag & drop</text>
+      <rect x="42" y="186" width="44" height="56" rx="6" fill="#E8A0C8" opacity="0.4"/>
+      <ellipse cx="64" cy="202" rx="9" ry="10" fill="#F5C6DC" stroke="#E8A0C8" stroke-width="0.8"/>
+      <path d="M48 242 Q55 220 64 218 Q73 220 80 242Z" fill="#D4537E" opacity="0.6"/>
+      <rect x="92" y="186" width="46" height="56" rx="6" fill="#E8A0C8" opacity="0.25" stroke="#F4C0D1" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <text x="115" y="218" text-anchor="middle" font-size="18" fill="#E8A0C8">+</text>
+      <g id="upload-check" style="opacity:0;">
+        <circle cx="152" cy="62" r="12" fill="#3B6D11"/>
+        <path d="M146 62 L150 66 L158 58" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      </g>
+    </svg>
+    <div class="dots-row">
+      <div class="dot"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goStep(0)">← Back</button>
+      <button class="nav-btn primary" onclick="animateUpload()">Upload photo ↑</button>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-2">
+    <div class="step-label">Step 3 of 5</div>
+    <div class="step-title">Select a garment</div>
+    <svg width="210" height="280" viewBox="0 0 210 280">
+      <rect x="16" y="4" width="148" height="272" rx="24" fill="#f8f0f5" stroke="#ddd" stroke-width="2.5"/>
+      <rect x="64" y="4" width="52" height="10" rx="5" fill="#ddd"/>
+      <rect x="28" y="26" width="124" height="236" rx="14" fill="#fff"/>
+      <text x="90" y="50" text-anchor="middle" font-size="10" fill="#B03385" font-weight="500">Choose garment</text>
+      <rect x="33" y="56" width="114" height="28" rx="6" fill="#f8f0f5" stroke="#edd" stroke-width="0.8"/>
+      <text x="70" y="74" text-anchor="middle" font-size="9" fill="#aaa">Search clothes...</text>
+      <rect x="33" y="92" width="50" height="62" rx="8" fill="#FBEAF0" stroke="#B03385" stroke-width="1.5"/>
+      <path d="M42 106 Q43 102 58 102 Q73 102 74 106 L76 148 Q58 152 40 148Z" fill="#B03385" opacity="0.85"/>
+      <path d="M35 108 Q37 106 42 106 L40 130 Q36 126 35 120Z" fill="#B03385" opacity="0.7"/>
+      <path d="M81 108 Q79 106 74 106 L76 130 Q80 126 81 120Z" fill="#B03385" opacity="0.7"/>
+      <path d="M51 102 Q58 112 65 102" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+      <text x="58" y="163" text-anchor="middle" font-size="8" fill="#B03385">Shirt</text>
+      <rect x="91" y="92" width="50" height="62" rx="8" fill="#f0f5fb" stroke="#ddd" stroke-width="0.8"/>
+      <rect x="97" y="108" width="38" height="44" rx="4" fill="#378ADD" opacity="0.7"/>
+      <rect x="97" y="108" width="18" height="44" rx="4" fill="#185FA5" opacity="0.6"/>
+      <text x="116" y="163" text-anchor="middle" font-size="8" fill="#555">Jacket</text>
+      <rect x="33" y="164" width="50" height="62" rx="8" fill="#f0f5fb" stroke="#ddd" stroke-width="0.8"/>
+      <rect x="40" y="172" width="36" height="50" rx="4" fill="#7B1FA2" opacity="0.6"/>
+      <rect x="40" y="172" width="36" height="26" rx="4" fill="#4A0E6E" opacity="0.5"/>
+      <text x="58" y="235" text-anchor="middle" font-size="8" fill="#555">Dress</text>
+      <rect x="91" y="164" width="50" height="62" rx="8" fill="#f0f5fb" stroke="#ddd" stroke-width="0.8"/>
+      <rect x="98" y="178" width="16" height="42" rx="4" fill="#888" opacity="0.5"/>
+      <rect x="118" y="178" width="16" height="42" rx="4" fill="#888" opacity="0.5"/>
+      <text x="116" y="235" text-anchor="middle" font-size="8" fill="#555">Pants</text>
+      <circle cx="36" cy="95" r="5" fill="#B03385"/>
+      <path d="M33 95 L36 98 L40 91" fill="none" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+      <rect x="33" y="246" width="114" height="8" rx="4" fill="#f5e8f2"/>
+    </svg>
+    <div class="dots-row">
+      <div class="dot"></div><div class="dot"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goStep(1)">← Back</button>
+      <button class="nav-btn primary" onclick="goStep(3)">Select →</button>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-3">
+    <div class="step-label">Step 4 of 5</div>
+    <div class="step-title">Generate try-on</div>
+    <svg width="210" height="280" viewBox="0 0 210 280" id="svg-gen">
+      <rect x="16" y="4" width="148" height="272" rx="24" fill="#f8f0f5" stroke="#ddd" stroke-width="2.5"/>
+      <rect x="64" y="4" width="52" height="10" rx="5" fill="#ddd"/>
+      <rect x="28" y="26" width="124" height="236" rx="14" fill="#fff"/>
+      <ellipse cx="90" cy="75" rx="18" ry="20" fill="#F5C6DC" stroke="#E8A0C8" stroke-width="0.8"/>
+      <rect x="84" y="93" width="12" height="9" rx="3" fill="#F5C6DC"/>
+      <path d="M55 104 Q67 100 90 102 Q113 100 125 104 L128 175 Q113 180 90 181 Q67 180 52 175Z" fill="#B03385" opacity="0.9"/>
+      <path d="M52 106 Q42 120 40 155 Q40 165 50 167 Q57 160 58 145 Q60 125 66 110Z" fill="#B03385" opacity="0.8"/>
+      <path d="M128 106 Q138 120 140 155 Q140 165 130 167 Q123 160 122 145 Q120 125 114 110Z" fill="#B03385" opacity="0.8"/>
+      <rect x="60" y="181" width="60" height="68" rx="8" fill="#7B1FA2" opacity="0.7"/>
+      <rect x="60" y="181" width="28" height="68" rx="8" fill="#4A0E6E" opacity="0.5"/>
+      <rect x="54" y="249" width="32" height="18" rx="8" fill="#4A0E6E" opacity="0.8"/>
+      <rect x="94" y="249" width="32" height="18" rx="8" fill="#4A0E6E" opacity="0.8"/>
+      <g id="scan-grp" style="clip-path:inset(0 0 0 0 round 14px);">
+        <rect x="28" y="60" width="124" height="3" rx="1.5" fill="#B03385" opacity="0.7" id="scan-bar"
+          style="animation:vto-scan 2s ease-in-out infinite;"/>
+      </g>
+      <rect x="28" y="26" width="124" height="236" rx="14" fill="none" stroke="#B03385" stroke-width="0.8" stroke-dasharray="4,4" opacity="0.35"/>
+      <path d="M28 42 L42 42 M28 42 L28 58" stroke="#B03385" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M152 42 L138 42 M152 42 L152 58" stroke="#B03385" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M28 248 L42 248 M28 248 L28 232" stroke="#B03385" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M152 248 L138 248 M152 248 L152 232" stroke="#B03385" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <g id="processing-ring" style="transform-origin:90px 145px; animation:vto-spin 1.4s linear infinite;">
+        <circle cx="90" cy="145" r="50" fill="none" stroke="#F4C0D1" stroke-width="2" stroke-dasharray="30,20" opacity="0.5"/>
+      </g>
+    </svg>
+    <button class="btn-generate" id="gen-btn" onclick="animateGenerate()">Generate Try-On</button>
+    <div class="dots-row">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot active"></div><div class="dot"></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goStep(2)">← Back</button>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-4">
+    <div class="step-label">Step 5 of 5</div>
+    <div class="step-title">Your look is ready!</div>
+    <div style="display:flex; gap:18px; align-items:flex-start; animation:vto-result-slide 0.6s ease;">
+      <svg width="130" height="260" viewBox="0 0 130 260">
+        <rect x="4" y="4" width="122" height="252" rx="20" fill="#f8f0f5" stroke="#E8A0C8" stroke-width="1.5"/>
+        <rect x="12" y="16" width="106" height="228" rx="12" fill="#fff"/>
+        <ellipse cx="65" cy="58" rx="15" ry="17" fill="#F5C6DC" stroke="#E8A0C8" stroke-width="0.8"/>
+        <rect x="60" y="73" width="10" height="8" rx="3" fill="#F5C6DC"/>
+        <path d="M34 84 Q48 80 65 82 Q82 80 96 84 L98 155 Q82 160 65 161 Q48 160 32 155Z" fill="#B03385"/>
+        <path d="M32 86 Q24 97 22 125 Q22 133 30 134 Q36 128 37 116 Q39 100 44 88Z" fill="#B03385" opacity="0.85"/>
+        <path d="M98 86 Q106 97 108 125 Q108 133 100 134 Q94 128 93 116 Q91 100 86 88Z" fill="#B03385" opacity="0.85"/>
+        <path d="M47 82 Q65 94 83 82" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+        <rect x="38" y="161" width="54" height="66" rx="7" fill="#7B1FA2" opacity="0.8"/>
+        <rect x="38" y="161" width="26" height="66" rx="7" fill="#4A0E6E" opacity="0.55"/>
+        <rect x="32" y="227" width="28" height="16" rx="7" fill="#4A0E6E"/>
+        <rect x="70" y="227" width="28" height="16" rx="7" fill="#4A0E6E"/>
+        <g style="animation:vto-sparkle 1.6s ease-in-out infinite; animation-delay:0s; transform-origin:112px 30px;">
+          <polygon points="112,24 114,29 119,29 115,32 117,37 112,34 107,37 109,32 105,29 110,29" fill="#B03385" opacity="0.85"/>
+        </g>
+        <g style="animation:vto-sparkle 1.6s ease-in-out infinite; animation-delay:0.7s; transform-origin:16px 70px;">
+          <polygon points="16,65 17.5,69 22,69 18.5,72 20,76 16,73 12,76 13.5,72 10,69 14.5,69" fill="#E040A0" opacity="0.7"/>
+        </g>
+        <g style="animation:vto-sparkle 1.6s ease-in-out infinite; animation-delay:1.2s; transform-origin:118px 180px;">
+          <polygon points="118,176 119,179 122,179 120,181 121,184 118,182 115,184 116,181 114,179 117,179" fill="#B03385" opacity="0.6"/>
+        </g>
+        <g style="animation:vto-float 3s ease-in-out infinite; transform-origin:65px 140px;">
+          <rect x="20" y="100" width="90" height="2" rx="1" fill="#B03385" opacity="0.1"/>
+        </g>
+      </svg>
+      <div style="display:flex; flex-direction:column; gap:10px; padding-top:8px;">
+        <div style="background:#FBEAF0; border-radius:10px; padding:10px 13px; animation:vto-tag-pop 0.5s ease 0.2s both;">
+          <div style="font-size:10px; color:#B03385; font-weight:500;">Garment fit</div>
+          <div style="font-size:13px; color:#3C3489; font-weight:500; margin-top:2px;">Perfect match</div>
+        </div>
+        <div style="background:#EAF3DE; border-radius:10px; padding:10px 13px; animation:vto-tag-pop 0.5s ease 0.45s both;">
+          <div style="font-size:10px; color:#3B6D11; font-weight:500;">Style score</div>
+          <div style="font-size:13px; color:#27500A; font-weight:500; margin-top:2px;">94 / 100</div>
+        </div>
+        <div style="background:#E6F1FB; border-radius:10px; padding:10px 13px; animation:vto-tag-pop 0.5s ease 0.7s both;">
+          <div style="font-size:10px; color:#185FA5; font-weight:500;">Size</div>
+          <div style="font-size:13px; color:#0C447C; font-weight:500; margin-top:2px;">M — recommended</div>
+        </div>
+        <div style="background:#B03385; border-radius:10px; padding:10px 13px; cursor:pointer; animation:vto-tag-pop 0.5s ease 0.9s both;">
+          <div style="font-size:12px; color:#fff; font-weight:500; text-align:center;">Save look</div>
+        </div>
+        <div style="border:1px solid #E8A0C8; border-radius:10px; padding:9px 13px; cursor:pointer; animation:vto-tag-pop 0.5s ease 1.1s both;">
+          <div style="font-size:12px; color:#B03385; font-weight:500; text-align:center;">Try another</div>
+        </div>
+      </div>
+    </div>
+    <div class="dots-row">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot active"></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn primary" onclick="goStep(0)">Replay flow ↺</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var current = 0;
+  function goStep(n) {
+    document.getElementById('step-' + current).classList.remove('active');
+    current = n;
+    document.getElementById('step-' + current).classList.add('active');
+  }
+
+  function animateUpload() {
+    var check = document.getElementById('upload-check');
+    check.style.opacity = '0';
+    check.style.animation = 'none';
+    setTimeout(function() {
+      check.style.animation = 'vto-checkpop 0.5s ease forwards';
+      check.style.opacity = '1';
+      setTimeout(function() { goStep(2); }, 900);
+    }, 50);
+  }
+
+  function animateGenerate() {
+    var btn = document.getElementById('gen-btn');
+    btn.textContent = 'Generating...';
+    btn.style.background = '#8C2668';
+    btn.disabled = true;
+    setTimeout(function() {
+      goStep(4);
+      btn.textContent = 'Generate Try-On';
+      btn.style.background = '#B03385';
+      btn.disabled = false;
+    }, 2200);
+  }
+</script>

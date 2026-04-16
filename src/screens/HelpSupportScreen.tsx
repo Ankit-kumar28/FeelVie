@@ -40,20 +40,20 @@ export default function HelpSupportScreen() {
     {
       title: 'Contact Support',
       icon: 'email-outline',
-      screen: 'ContactSupport', // ← create this screen later if needed
+      screen: 'ContactSupport',
     },
   ];
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-left" size={28} color="#111" />
+          <Icon name="arrow-left" size={26} color="#111111" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Help & Support</Text>
-        <View style={{ width: 28 }} />
+        <View style={{ width: 26 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -69,28 +69,13 @@ export default function HelpSupportScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuLeft}>
-                <Icon name={item.icon} size={26} color="#B03385" />
+                <Icon name={item.icon} size={24} color="#111111" />
                 <Text style={styles.menuText}>{item.title}</Text>
               </View>
-              <Icon name="chevron-right" size={24} color="#c0c4cc" />
+              <Icon name="chevron-right" size={22} color="#AAAAAA" />
             </TouchableOpacity>
           ))}
         </View>
-
-        {/* Optional quick actions / extra help */}
-        {/* <View style={styles.quickHelpContainer}>
-          <Text style={styles.quickHelpTitle}>Still need help?</Text>
-          <TouchableOpacity
-            style={styles.chatButton}
-            onPress={() => {
-              // open chat / email / call
-              console.log('Open live chat or email');
-            }}
-          >
-            <Icon name="message-text-outline" size={20} color="#fff" />
-            <Text style={styles.chatButtonText}>Chat with us</Text>
-          </TouchableOpacity>
-        </View> */}
 
         <View style={{ height: 80 }} />
       </ScrollView>
@@ -101,47 +86,47 @@ export default function HelpSupportScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fc',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 16,
-    paddingTop: Platform.select({ ios: 4, android: 40 }),
-    paddingBottom: 14,
+    paddingTop: Platform.select({ ios: 50, android: 40 }),
+    paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#E8E8E8',
   },
   backButton: {
     padding: 8,
   },
   headerTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#0f172a',
+    fontSize: 20,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    letterSpacing: -0.3,
   },
 
   scrollContent: {
-    // paddingHorizontal: 16,
-    // paddingTop: 16,
+    paddingHorizontal: 16,
+    paddingTop: 24,
     paddingBottom: 40,
   },
 
+  /* Card with Menu Items */
   card: {
-    backgroundColor: '#ffffff',
-    // borderRadius: 16,
-    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
-    // marginBottom: 24,
-    // shadow for iOS / android elevation
-    // shadowColor: '#000',
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.07,
-    // shadowRadius: 8,
-    // elevation: 3,
+    borderColor: '#E8E8E8',
+    overflow: 'hidden',
+    shadowColor: '#e2dcdc',
+    shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 1,
   },
   menuItem: {
     flexDirection: 'row',
@@ -150,7 +135,7 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#E8E8E8',
   },
   menuItemLast: {
     borderBottomWidth: 0,
@@ -162,32 +147,8 @@ const styles = StyleSheet.create({
   },
   menuText: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#1e293b',
+    fontFamily: 'Poppins-Regular',
+    color: '#111111',
     marginLeft: 16,
-  },
-
-  quickHelpContainer: {
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  quickHelpTitle: {
-    fontSize: 15,
-    color: '#64748b',
-    marginBottom: 12,
-  },
-  chatButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#B03385',
-    paddingVertical: 14,
-    paddingHorizontal: 28,
-    borderRadius: 30,
-  },
-  chatButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 10,
   },
 });

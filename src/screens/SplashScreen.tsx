@@ -69,7 +69,7 @@ export default function SplashScreen() {
         ]}
       >
         <Image
-          source={require('../assets/images/splash.jpg')}
+          source={require('../assets/images/feelvie_splash.jpg')}
           style={styles.logo}
           resizeMode="contain"
         />

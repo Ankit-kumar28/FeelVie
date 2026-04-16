@@ -45,6 +45,8 @@ import TryOnResult from '../screens/virtualTry/TryOnResult';
 import VirtualTryOnDetails from '../screens/virtualTry/VirtualTryOnDetails';
 import CheckoutScreen from '../screens/CheckoutScreen';
 import WalletScreen from '../screens/Wallet';
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import VirtualTryOnHistoryScreen from '../screens/virtualTry/VirtualTryOnHistoryScreen';
 
 console.log("SearchScreen imported in AppNavigator:", !!SearchScreen);  
 const Stack = createNativeStackNavigator();
@@ -64,6 +66,7 @@ function AuthStack() {
       <Stack.Screen name="Onboarding2" component={OnboardingScreen2} />
       <Stack.Screen name="SignUp" component={SignUpScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
     </Stack.Navigator>
   );
 }
@@ -109,9 +112,11 @@ function AppStack() {
 <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
 <Stack.Screen name="TryOnResult" component={TryOnResult} />
 <Stack.Screen name="VirtualTryOnDetails" component={VirtualTryOnDetails} />
+<Stack.Screen name="VirtualTryOnHistory" component={VirtualTryOnHistoryScreen} />
 <Stack.Screen name="Checkout" component={CheckoutScreen}/>
 
 <Stack.Screen name="WalletScreen" component={WalletScreen}/>
+
 
 
       {/* You can add more screens here later */}

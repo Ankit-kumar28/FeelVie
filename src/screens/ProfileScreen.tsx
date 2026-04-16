@@ -1,5 +1,5 @@
 // src/screens/ProfileScreen.tsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,29 +14,87 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { BASE_URL } from '../config/env';
+
+// ─── MenuItem ─────────────────────────────────────────────────────────────────
+
+const MenuItem = ({ icon, title, onPress }: { icon: string; title: string; onPress: () => void }) => (
+  <TouchableOpacity style={styles.menuItem} onPress={onPress} activeOpacity={0.7}>
+    <View style={styles.menuLeft}>
+      <Icon name={icon} size={24} color="#111111" />
+      <Text style={styles.menuText}>{title}</Text>
+    </View>
+    <Icon name="chevron-right" size={22} color="#AAAAAA" />
+  </TouchableOpacity>
+);
+
+// ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function ProfileScreen() {
-  const { user, logout, token, isLoading: authLoading } = useAuth();
-  const navigation = useNavigation();
+  const { user, logout, token, isLoading: authLoading, setUser } = useAuth();
+  const navigation = useNavigation<any>();
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const MAIN_COLOR = '#B03385';
+  // ── Fresh profile data fetched from API (not stale context) ──
+  const [profileData, setProfileData] = useState<any>(null);
+  const [fetchingProfile, setFetchingProfile] = useState(true);
 
-  // Simple seed for random avatar (based on user id/email or random)
-  const avatarSeed = useMemo(() => {
-    if (!user) return 'anonymous';
-    return user.username || 'user' + Math.floor(Math.random() * 10000);
-  }, [user]);
+  // ── Fetch on mount AND every time the screen comes back into focus ──
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!token) {
+        setFetchingProfile(false);
+        return;
+      }
 
-  const randomAvatarUrl = `https://api.dicebear.com/9.x/avataaars/png?seed=${avatarSeed}&backgroundColor=b6e3f4`;
+      let cancelled = false;
 
-  if (authLoading) {
+      const fetchProfile = async () => {
+        try {
+          setFetchingProfile(true);
+          const response = await axios.get(`${BASE_URL}/api/auth/me/`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (!cancelled) {
+            const data = response.data;
+            setProfileData(data);
+            // Keep auth context in sync so other screens stay fresh too
+            if (setUser && user) {
+              setUser({
+                ...user,
+                first_name: data.first_name,
+                last_name: data.last_name,
+                email: data.email,
+                phone: data.phone,
+                profile_picture: data.profile_picture || data.avatar || null,
+                avatar: data.profile_picture || data.avatar || null,
+              });
+            }
+          }
+        } catch (err) {
+          console.error('[ProfileScreen] fetchProfile error:', err);
+          // Fall back to whatever is in auth context — don't wipe profileData
+        } finally {
+          if (!cancelled) setFetchingProfile(false);
+        }
+      };
+
+      fetchProfile();
+
+      return () => {
+        cancelled = true; // cleanup if screen leaves focus before fetch finishes
+      };
+    }, [token])
+  );
+
+  if (authLoading || fetchingProfile) {
     return (
-      <SafeAreaView style={[styles.container, { paddingBottom: 65 }]}>
+      <SafeAreaView style={styles.container}>
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={MAIN_COLOR} />
+          <ActivityIndicator size="large" color="#111111" />
           <Text style={styles.loadingText}>Loading profile...</Text>
         </View>
       </SafeAreaView>
@@ -48,17 +106,29 @@ export default function ProfileScreen() {
     return null;
   }
 
+  // Prefer freshly fetched data; fall back to auth context
+  const data = profileData || user;
+
   const fullName =
-    user?.name ||
-    `${user?.first_name || ''} ${user?.last_name || ''}`.trim() ||
-    user?.username ||
-    user?.email?.split('@')[0] ||
+    `${data?.first_name || ''} ${data?.last_name || ''}`.trim() ||
+    data?.name ||
+    data?.username ||
+    data?.email?.split('@')[0] ||
     'User';
 
-  const displayEmail = user?.email || 'Not added yet';
-  const displayPhone = user?.phone && user.phone.trim() && user.phone !== 'string' ? user.phone : 'Not added yet';
-  const isVerified = user?.is_verified === true;
-  const avatarUrl = user?.avatar || user?.profile_picture || null;
+  const displayEmail = data?.email || 'Not added yet';
+  const displayPhone =
+    data?.phone && data.phone.trim() && data.phone !== 'string'
+      ? data.phone
+      : 'Not added yet';
+  const isVerified = data?.is_verified === true;
+
+  const avatarUrl: string | null =
+    profileData?.profile_picture ||
+    profileData?.avatar ||
+    user?.profile_picture ||
+    user?.avatar ||
+    null;
 
   const handleLogout = () => {
     Alert.alert(
@@ -74,7 +144,7 @@ export default function ProfileScreen() {
             try {
               await logout();
               navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-            } catch (err) {
+            } catch {
               Alert.alert('Error', 'Logout failed. Please try again.');
             } finally {
               setLoggingOut(false);
@@ -88,48 +158,65 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-left" size={26} color="#111" />
+          <Icon name="arrow-left" size={26} color="#111111" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Profile</Text>
         <View style={{ width: 26 }} />
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Profile Card */}
         <View style={styles.profileCard}>
+          {/* Edit personal info — navigates to PersonalInfoScreen where photo management lives */}
           <TouchableOpacity
             style={styles.editButton}
             onPress={() => navigation.navigate('PersonalInfoScreen')}
           >
-            <Icon name="pencil" size={20} color={MAIN_COLOR} />
+            <Icon name="pencil-outline" size={20} color="#111111" />
           </TouchableOpacity>
 
           <View style={styles.profileContent}>
-            <View style={styles.avatarWrapper}>
+            {/* Avatar — tapping navigates to PersonalInfoScreen to update/remove */}
+            <TouchableOpacity
+              style={styles.avatarWrapper}
+              onPress={() => navigation.navigate('PersonalInfoScreen')}
+              activeOpacity={0.85}
+            >
               {avatarUrl ? (
-                <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+                <Image
+                  source={{ uri: avatarUrl }}
+                  style={styles.avatarImage}
+                  key={avatarUrl}
+                />
               ) : (
-                <Image source={{ uri: randomAvatarUrl }} style={styles.avatar} />
+                <View style={styles.avatarPlaceholder}>
+                  <Icon name="account-outline" size={44} color="#AAAAAA" />
+                </View>
               )}
-            </View>
+              {/* Camera badge — visual cue that photo is editable */}
+              <View style={styles.cameraBadge}>
+                <Icon name="camera-plus-outline" size={14} color="#FFFFFF" />
+              </View>
+            </TouchableOpacity>
 
             <View style={styles.userInfo}>
               <Text style={styles.userName}>{fullName}</Text>
 
               <View style={styles.infoRow}>
-                <Icon name="email-outline" size={18} color="#666" />
+                <Icon name="email-outline" size={18} color="#AAAAAA" />
                 <Text style={styles.infoText}>{displayEmail}</Text>
-                {isVerified && <Icon name="check-decagram" size={16} color={MAIN_COLOR} style={styles.verifiedIcon} />}
+                {isVerified && (
+                  <Icon name="check-decagram" size={16} color="#111111" style={styles.verifiedIcon} />
+                )}
               </View>
 
               <View style={styles.infoRow}>
-                <Icon name="phone-outline" size={18} color="#666" />
+                <Icon name="phone-outline" size={18} color="#AAAAAA" />
                 <Text style={styles.infoText}>{displayPhone}</Text>
-                {isVerified && <Icon name="check-decagram" size={16} color={MAIN_COLOR} style={styles.verifiedIcon} />}
               </View>
             </View>
           </View>
@@ -137,67 +224,18 @@ export default function ProfileScreen() {
 
         {/* Menu Sections */}
         <View style={styles.sectionsContainer}>
-          {/* SELL & LISTINGS */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Sell & Listings</Text>
-            <MenuItem
-              icon="tag-outline"
-              title="Sell / Rent Product"
-              onPress={() => navigation.navigate('SellProduct')}
-            />
-            <MenuItem
-              icon="package"
-              title="My Listings"
-              onPress={() => navigation.navigate('MyListings')}
-            />
+            <Text style={styles.sectionTitle}>PAYMENT</Text>
+            <MenuItem icon="wallet-outline" title="Wallet & Coins" onPress={() => navigation.navigate('WalletScreen')} />
           </View>
 
-          {/* ORDERS & WISHLIST */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Orders & Wishlist</Text>
-            <MenuItem
-              icon="heart-outline"
-              title="My Wishlist"
-              onPress={() => navigation.navigate('MyWishList')}
-            />
-            <MenuItem
-              icon="package-variant"
-              title="My Orders"
-              onPress={() => navigation.navigate('MyOrders')}
-            />
+            <Text style={styles.sectionTitle}>ADDRESS</Text>
+            <MenuItem icon="map-marker-outline" title="My Addresses" onPress={() => {}} />
           </View>
 
-          {/* PAYMENT */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Payment</Text>
-            <MenuItem
-              icon="credit-card-outline"
-              title="Payment Methods"
-              onPress={() => navigation.navigate('PaymentInfoScreen')}
-            />
-            <MenuItem
-              icon="wallet-outline"
-              title="Wallet & Coins"
-             
-                onPress={() => navigation.navigate('WalletScreen')
-                // Alert.alert('Coming Soon', 'Wallet feature is under development.');
-              }
-            />
-          </View>
-
-          {/* ADDRESS */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Address</Text>
-            <MenuItem
-              icon="map-marker-outline"
-              title="My Addresses"
-              onPress={() => navigation.navigate('AddressScreen')}
-            />
-          </View>
-
-          {/* HELP & SUPPORT */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Help & Support</Text>
+            <Text style={styles.sectionTitle}>HELP & SUPPORT</Text>
             <MenuItem
               icon="headphones"
               title="Help & Support"
@@ -214,10 +252,10 @@ export default function ProfileScreen() {
             disabled={loggingOut}
           >
             {loggingOut ? (
-              <ActivityIndicator size="small" color="#ef4444" />
+              <ActivityIndicator size="small" color="#111111" />
             ) : (
               <>
-                <Icon name="logout" size={22} color="#ef4444" />
+                <Icon name="logout" size={22} color="#111111" />
                 <Text style={styles.logoutText}>Log Out</Text>
               </>
             )}
@@ -230,136 +268,202 @@ export default function ProfileScreen() {
   );
 }
 
-const MenuItem = ({ icon, title, onPress }) => (
-  <TouchableOpacity style={styles.menuItem} onPress={onPress}>
-    <View style={styles.menuLeft}>
-      <Icon name={icon} size={24} color="#B03385" />
-      <Text style={styles.menuText}>{title}</Text>
-    </View>
-    <Icon name="chevron-right" size={22} color="#9ca3af" />
-  </TouchableOpacity>
-);
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9f9fa' },
-
+  container: { 
+    flex: 1, 
+    backgroundColor: '#FFFFFF' 
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingTop: Platform.select({ ios: 50, android: 40 }),
-    paddingBottom: 12,
-    backgroundColor: '#fff',
+    paddingBottom: 16,
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: '#E8E8E8',
   },
-  backButton: { padding: 8 },
-  headerTitle: { fontSize: 22, fontWeight: '700', color: '#B03385' },
+  backButton: { 
+    padding: 8 
+  },
+  headerTitle: { 
+    fontSize: 20, 
+    fontFamily: 'Poppins-SemiBold', 
+    color: '#111111',
+    letterSpacing: -0.3,
+  },
+  center: { 
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  loadingText: { 
+    marginTop: 12, 
+    fontSize: 16, 
+    color: '#AAAAAA',
+    fontFamily: 'Poppins-Regular',
+  },
 
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  loadingText: { marginTop: 12, fontSize: 16, color: '#666' },
+  scrollContent: {
+    paddingBottom: 40,
+  },
 
+  /* Profile Card */
   profileCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     marginHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 10,
-    borderRadius: 16,
-    padding: 16,
+    marginTop: 20,
+    marginBottom: 24,
+    borderRadius: 8,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.06,
     shadowRadius: 8,
-    elevation: .5,
-    position: 'relative',
+    elevation: 3,
   },
   editButton: {
     position: 'absolute',
-    top: 12,
-    right: 12,
-    backgroundColor: '#f9e8f2',
-    borderRadius: 20,
+    top: 16,
+    right: 16,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    borderRadius: 8,
     width: 36,
     height: 36,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
   },
-  profileContent: { flexDirection: 'row', alignItems: 'center' },
-  avatarWrapper: { marginRight: 16 },
-  avatar: { width: 80, height: 80, borderRadius: 40, borderWidth: 3, borderColor: '#f0e4ea' },
-  userInfo: { flex: 1 },
-  userName: { fontSize: 20, fontWeight: '700', color: '#111', marginBottom: 6 },
-  infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
-  infoText: { fontSize: 15, color: '#444', marginLeft: 8, flex: 1 },
-  verifiedIcon: { marginLeft: 6 },
+  profileContent: { 
+    flexDirection: 'row', 
+    alignItems: 'center' 
+  },
 
-  sectionsContainer: {
-    marginHorizontal: 8,
-    marginBottom: 24,
-    // backgroundColor: '#ffffff',
-    // borderRadius: 12,
-    // overflow: 'hidden',
-    // shadowColor: '#000',
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.08,
-    // shadowRadius: 6,
-    // // elevation: 3,
+  avatarWrapper: {
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+    position: 'relative',
+    marginRight: 20,
+    backgroundColor: '#F7F7F7',
+  },
+  avatarImage: {
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+    borderWidth: 2,
+    borderColor: '#E8E8E8',
+  },
+  avatarPlaceholder: {
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+    backgroundColor: '#F7F7F7',
+    borderWidth: 2,
+    borderColor: '#E8E8E8',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cameraBadge: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+    backgroundColor: '#111111',
+    borderRadius: 10,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+
+  userInfo: { flex: 1 },
+  userName: { 
+    fontSize: 22, 
+    fontFamily: 'Poppins-SemiBold', 
+    color: '#111111', 
+    marginBottom: 10 
+  },
+  infoRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    marginBottom: 8 
+  },
+  infoText: { 
+    fontSize: 15, 
+    color: '#111111', 
+    marginLeft: 10, 
+    flex: 1,
+    fontFamily: 'Poppins-Regular',
+  },
+  verifiedIcon: { 
+    marginLeft: 6 
+  },
+
+  /* Menu Sections */
+  sectionsContainer: { 
+    marginHorizontal: 16 
   },
   section: {
-    // borderBottomWidth: 1,
-    // borderBottomColor: '#f0f0f0',
+    marginBottom: 32,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000000b8',
-    paddingHorizontal: 10,
-    paddingTop: 16,
-    paddingBottom: 8,
-    backgroundColor: '#fafafa',
+    fontSize: 13,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    paddingHorizontal: 4,
+    paddingVertical: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
   },
   menuItem: {
     flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  paddingVertical: 15,
-  paddingHorizontal: 20,
-  backgroundColor: '#ffffff',           // ← added
-  borderRadius: 8,  
-  borderLeftColor:"#050505",                   // ← added rounded corners
-  marginHorizontal: 8,                 // ← added spacing from sides
-  marginVertical: 4,                    // ← space between items
-  // elevation: .5,                         // subtle shadow (Android)
-  // shadowColor: '#000',                  // iOS shadow
-  // shadowOffset: { width: 0, height: 1 },
-  // shadowOpacity: 0.08,
-  // shadowRadius: 4,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 18,
+    paddingHorizontal: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8E8E8',
   },
-  menuLeft: { flexDirection: 'row', alignItems: 'center', flex: 1,borderRadius:12, },
-  menuText: { fontSize: 16, color: '#111', marginLeft: 16, fontWeight: '500' },
+  menuLeft: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    flex: 1 
+  },
+  menuText: { 
+    fontSize: 16, 
+    color: '#111111', 
+    marginLeft: 18,
+    fontFamily: 'Poppins-Regular',
+  },
 
-  logoutContainer: {
-    marginHorizontal: 16,
-    marginTop: 20,
-    marginBottom: 140,
+  /* Logout */
+  logoutContainer: { 
+    marginHorizontal: 16, 
+    marginTop: 40, 
+    marginBottom: 100 
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ffffff',
-    paddingVertical: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#fee2e2',
+    backgroundColor: '#111111',
+    paddingVertical: 17,
+    borderRadius: 8,
   },
-  logoutDisabled: { opacity: 0.6 },
-  logoutText: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#ef4444',
-    marginLeft: 12,
+  logoutDisabled: { 
+    opacity: 0.7 
+  },
+  logoutText: { 
+    fontSize: 16, 
+    fontFamily: 'Poppins-SemiBold', 
+    color: '#FFFFFF', 
+    marginLeft: 12 
   },
 });
