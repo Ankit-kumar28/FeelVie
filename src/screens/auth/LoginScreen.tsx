@@ -1,6 +1,6 @@
-// src/features/auth/screens/LoginScreen.tsx
+// src/screens/auth/LoginScreen.tsx
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -16,8 +16,11 @@ import {
   Modal,
   Keyboard,
   Animated,
+  ScrollView,
+  Image,
+  KeyboardEventListener,
+  useWindowDimensions,
 } from 'react-native';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -26,16 +29,13 @@ import { loginUser, saveAuthData } from '../../api/authApi';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BASE_URL } from '../../config/env';
 
-const { width, height } = Dimensions.get('window');
 const isIOS = Platform.OS === 'ios';
 
-// Responsive scaling helpers
-const guidelineBaseWidth = 375;
-const guidelineBaseHeight = 812;
-const scale = (size: number) => (width / guidelineBaseWidth) * size;
-const verticalScale = (size: number) => (height / guidelineBaseHeight) * size;
-const moderateScale = (size: number, factor = 0.5) =>
-  size + (scale(size) - size) * factor;
+// Responsive scaling utility
+const scale = (size: number, baseWidth: number = 375) => {
+  const { width } = Dimensions.get('window');
+  return (width / baseWidth) * size;
+};
 
 type RootStackParamList = {
   Onboarding: undefined;
@@ -48,9 +48,11 @@ type RootStackParamList = {
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function LoginScreen() {
+  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
   const { login: authLogin } = useAuth();
+  const imageHeightAnim = useRef(new Animated.Value(scale(280))).current;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -65,52 +67,28 @@ export default function LoginScreen() {
   const [errorTitle, setErrorTitle] = useState('Oops!');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const [headerY, setHeaderY] = useState(0);
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
-
-  // Animations
-  const headerOpacity = useState(new Animated.Value(1))[0];
-  const headerTranslateY = useState(new Animated.Value(0))[0];
-  const loginTitleOpacity = useState(new Animated.Value(0))[0];
-  const formTranslateY = useState(new Animated.Value(0))[0];
-
-  const keyboardHeightRef = useRef(0);
-
   useEffect(() => {
-    const keyboardShow = Keyboard.addListener(
-      isIOS ? 'keyboardWillShow' : 'keyboardDidShow',
-      (e) => {
-        keyboardHeightRef.current = e.endCoordinates.height;
-        const formShift = isIOS ? -(e.endCoordinates.height * 0.55) : -(e.endCoordinates.height * 0.65);
+    const keyboardShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      Animated.timing(imageHeightAnim, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: false,
+      }).start();
+    });
 
-        setIsKeyboardVisible(true);
-        Animated.parallel([
-          Animated.timing(headerOpacity, { toValue: 0, duration: 220, useNativeDriver: true }),
-          Animated.timing(headerTranslateY, { toValue: -140, duration: 260, useNativeDriver: true }),
-          Animated.timing(loginTitleOpacity, { toValue: 1, duration: 300, delay: 80, useNativeDriver: true }),
-          Animated.timing(formTranslateY, { toValue: formShift, duration: 300, useNativeDriver: true }),
-        ]).start();
-      }
-    );
-
-    const keyboardHide = Keyboard.addListener(
-      isIOS ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => {
-        setIsKeyboardVisible(false);
-        Animated.parallel([
-          Animated.timing(headerOpacity, { toValue: 1, duration: 280, useNativeDriver: true }),
-          Animated.timing(headerTranslateY, { toValue: 0, duration: 300, useNativeDriver: true }),
-          Animated.timing(loginTitleOpacity, { toValue: 0, duration: 180, useNativeDriver: true }),
-          Animated.timing(formTranslateY, { toValue: 0, duration: 300, useNativeDriver: true }),
-        ]).start();
-      }
-    );
+    const keyboardHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      Animated.timing(imageHeightAnim, {
+        toValue: scale(280),
+        duration: 250,
+        useNativeDriver: false,
+      }).start();
+    });
 
     return () => {
-      keyboardShow.remove();
-      keyboardHide.remove();
+      keyboardShowListener.remove();
+      keyboardHideListener.remove();
     };
-  }, []);
+  }, [imageHeightAnim]);
 
   const validateInputs = () => {
     let valid = true;
@@ -212,140 +190,124 @@ export default function LoginScreen() {
     }
   };
 
-  const SvgIllustration = () => (
-    <Svg width={width * 0.55} height={width * 0.45} viewBox="0 0 300 220">
-      <Circle cx="150" cy="100" r="90" fill="#F7F7F7" opacity="0.6" />
-      <Rect x="70" y="20" width="160" height="280" rx="32" fill="#FFFFFF" stroke="#E8E8E8" strokeWidth="6" />
-      <Rect x="85" y="45" width="130" height="210" rx="12" fill="#F7F7F7" />
-      <Circle cx="150" cy="90" r="28" fill="#E8E8E8" />
-      <Rect x="110" y="135" width="80" height="12" rx="6" fill="#E8E8E8" />
-      <Rect x="95" y="155" width="110" height="12" rx="6" fill="#E8E8E8" opacity="0.7" />
-      <Path
-        d="M150 190 L150 210 M130 190 C130 175 170 175 170 190 L170 210 L130 210 Z"
-        fill="none"
-        stroke="#111111"
-        strokeWidth="8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-
-  const loginTitleTop = insets.top + verticalScale(16);
-
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-
+      <StatusBar barStyle="dark-content" backgroundColor="#f6ecef" />
+      
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
-        behavior={isIOS ? 'padding' : undefined}
-        keyboardVerticalOffset={isIOS ? 20 : 0}
-        enabled={isIOS}
+        behavior={isIOS ? 'padding' : 'height'}
+        keyboardVerticalOffset={isIOS ? 0 : 0}
       >
-        <View style={styles.innerContent}>
-          {/* Animated Header */}
-          <Animated.View
-            style={[
-              styles.headerContainer,
-              {
-                opacity: headerOpacity,
-                transform: [{ translateY: headerTranslateY }],
-              },
-            ]}
-          >
-            <View style={styles.illustrationContainer}>
-              <SvgIllustration />
-            </View>
-            <View style={styles.welcomeText}>
-              <Text style={styles.title}>Welcome Back</Text>
-              <Text style={styles.subtitle}>Login to continue your shopping journey</Text>
-            </View>
-          </Animated.View>
+        {/* Image Header - Animated Height */}
+        <Animated.View style={[styles.imageContainer, { height: imageHeightAnim }]}>
+          <Image
+            source={require('../../assets/images/login.png')}
+            style={styles.headerImage}
+            resizeMode="contain"
+          />
+        </Animated.View>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Title Section */}
+          <View style={styles.titleSection}>
+            <Text style={styles.title}>Ready to try new</Text>
+            <Text style={styles.titleHighlight}>dresses?</Text>
+          </View>
 
-          <Animated.View
-            style={[
-              styles.formContainer,
-              { transform: [{ translateY: formTranslateY }] },
-            ]}
-          >
-            <View style={styles.form}>
-              <View style={styles.inputWrapper}>
-                <Text style={styles.inputLabel}>Email</Text>
-                <View style={[styles.inputCard, emailError && styles.inputErrorBorder]}>
-                  <Icon name="email" size={22} color="#AAAAAA" style={styles.leftIcon} />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="hello@example.com"
-                    placeholderTextColor="#AAAAAA"
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    returnKeyType="next"
-                  />
-                </View>
-                {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+          {/* Subtitle */}
+          <Text style={styles.subtitle}>Login into your account</Text>
+
+          {/* Email Input Form */}
+          <View style={styles.formContainer}>
+            <View style={styles.inputWrapper}>
+              <Text style={styles.inputLabel}>Email</Text>
+              <View style={[styles.inputCard, emailError && styles.inputErrorBorder]}>
+                <Icon name="email" size={18} color="#AAAAAA" style={styles.leftIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="hello@example.com"
+                  placeholderTextColor="#AAAAAA"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  returnKeyType="next"
+                />
               </View>
+              {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+            </View>
 
-              <View style={styles.inputWrapper}>
-                <Text style={styles.inputLabel}>Password</Text>
-                <View style={[styles.inputCard, passwordError && styles.inputErrorBorder]}>
-                  <Icon name="lock" size={22} color="#AAAAAA" style={styles.leftIcon} />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="••••••••"
-                    placeholderTextColor="#AAAAAA"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={!showPassword}
-                    autoCapitalize="none"
-                    returnKeyType="done"
-                    onSubmitEditing={handleLogin}
+            <View style={styles.inputWrapper}>
+              <Text style={styles.inputLabel}>Password</Text>
+              <View style={[styles.inputCard, passwordError && styles.inputErrorBorder]}>
+                <Icon name="lock" size={18} color="#AAAAAA" style={styles.leftIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="••••••••"
+                  placeholderTextColor="#AAAAAA"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  returnKeyType="done"
+                  onSubmitEditing={handleLogin}
+                />
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Icon
+                    name={showPassword ? 'visibility' : 'visibility-off'}
+                    size={18}
+                    color="#AAAAAA"
                   />
-                  <TouchableOpacity
-                    style={styles.eyeButton}
-                    onPress={() => setShowPassword(!showPassword)}
-                  >
-                    <Icon
-                      name={showPassword ? 'visibility' : 'visibility-off'}
-                      size={22}
-                      color="#AAAAAA"
-                    />
-                  </TouchableOpacity>
-                </View>
-                {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
-              </View>
-
-              <TouchableOpacity style={styles.forgotLink} onPress={() => navigation.navigate('ForgotPassword')}>
-                <Text style={styles.forgotText}>Forgot Password?</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.loginButton, isLoading && styles.buttonDisabled]}
-                activeOpacity={0.85}
-                onPress={handleLogin}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
-                ) : (
-                  <Text style={styles.buttonText}>Sign In</Text>
-                )}
-              </TouchableOpacity>
-
-              <View style={styles.signupRow}>
-                <Text style={styles.signupText}>Don't have an account? </Text>
-                <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                  <Text style={styles.signupHighlight}>Register</Text>
                 </TouchableOpacity>
               </View>
+              {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
             </View>
 
-            <View style={{ height: isIOS ? 100 : 80 }} />
-          </Animated.View>
-        </View>
+            <TouchableOpacity style={styles.forgotLink} onPress={() => navigation.navigate('ForgotPassword')}>
+              <Text style={styles.forgotText}>Forgot Password?</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.loginButton, isLoading && styles.buttonDisabled]}
+              activeOpacity={0.85}
+              onPress={handleLogin}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Text style={styles.buttonText}>Continue with Email</Text>
+              )}
+            </TouchableOpacity>
+
+            {/* <TouchableOpacity
+              style={styles.guestButton}
+              activeOpacity={0.85}
+              onPress={() => navigation.replace('MainTabs')}
+            >
+              <Text style={styles.guestButtonText}>Continue as Guest</Text>
+            </TouchableOpacity> */}
+          </View>
+
+          {/* Already Have Account */}
+          <View style={styles.loginLinkContainer}>
+            <Text style={styles.loginText}>Don't Have an Account? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+              <Text style={styles.loginHighlight}>Sign Up</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Terms and Conditions */}
+          <TouchableOpacity>
+            <Text style={styles.termsText}>Terms and Conditions</Text>
+          </TouchableOpacity>
+
+          <View style={{ height: 40 }} />
+        </ScrollView>
       </KeyboardAvoidingView>
 
       {/* Success Modal */}
@@ -384,121 +346,167 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  keyboardAvoid: { flex: 1 },
-  innerContent: {
-    flex: 1,
-    paddingHorizontal: 28,
-    justifyContent: 'center',
+  keyboardAvoid: { 
+    flex: 1 
   },
-  headerContainer: {
-    alignItems: 'center',
-    marginBottom: 48,
+  scrollContent: {
+    paddingBottom: scale(40),
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: scale(32),
+    borderTopRightRadius: scale(32),
+    overflow: 'hidden',
   },
-  illustrationContainer: {
-    alignItems: 'center',
-    marginTop: Platform.select({ ios: 60, android: 50 }),
-    marginBottom: 28,
+  imageContainer: {
+    width: '100%',
+    height: scale(280),
+    backgroundColor: '#f6ecef',
+    borderBottomLeftRadius: scale(32),
+    borderBottomRightRadius: scale(32),
   },
-  welcomeText: {
-    alignItems: 'center',
+  headerImage: {
+    width: '100%',
+    height: '100%',
+    borderBottomLeftRadius: scale(32),
+    borderBottomRightRadius: scale(32),
+  },
+  titleSection: {
+    paddingHorizontal: '6.4%',
+    paddingTop: scale(24),
+    marginBottom: scale(12),
   },
   title: {
-    fontSize: moderateScale(36),
-    fontFamily: 'Poppins-SemiBold',
+    fontFamily: 'serif',
+    fontSize: scale(24),
+    fontWeight: '800',
     color: '#111111',
-    letterSpacing: -0.8,
+    lineHeight: scale(36),
+    letterSpacing: -0.5,
+    fontStyle: 'italic',
+  },
+  titleHighlight: {
+    fontFamily: 'serif',
+    fontSize: scale(24),
+    fontWeight: '800',
+    color: '#f8ac1b',
+    lineHeight: scale(36),
+    letterSpacing: -0.5,
+    fontStyle: 'italic',
   },
   subtitle: {
-    fontSize: moderateScale(15),
-    color: '#6c6c6c',
-    marginTop: 8,
-    textAlign: 'center',
-    fontFamily: 'Poppins-Regular',
+    fontFamily: 'serif',
+    fontSize: scale(15),
+    color: '#666666',
+    lineHeight: scale(22),
+    paddingHorizontal: '6.4%',
+    marginBottom: scale(14),
   },
   formContainer: {
-    width: '100%',
+    paddingHorizontal: '6.4%',
   },
-  form: {},
   inputWrapper: {
-    marginBottom: 24,
+    marginBottom: scale(24),
   },
   inputLabel: {
-    fontSize: 14,
+    fontSize: scale(14),
     fontFamily: 'Poppins-SemiBold',
     color: '#111111',
-    marginBottom: 8,
+    marginBottom: scale(6),
     letterSpacing: 0.5,
   },
   inputCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    height: 58,
-    paddingHorizontal: 16,
+    backgroundColor: '#ffffff',
+    borderRadius: scale(8),
+    height: scale(48),
+    paddingHorizontal: scale(16),
     borderWidth: 1,
-    borderColor: '#6f6f6f',
+    borderColor: '#E8E8E8',
   },
   inputErrorBorder: {
     borderColor: '#111111',
   },
   leftIcon: {
-    marginRight: 12,
+    marginRight: scale(12),
   },
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#111111',
     fontFamily: 'Poppins-Regular',
   },
   eyeButton: {
-    padding: 8,
+    padding: scale(8),
   },
   errorText: {
     color: '#111111',
-    fontSize: 13,
-    marginTop: 6,
-    marginLeft: 4,
+    fontSize: scale(13),
+    marginTop: scale(6),
+    marginLeft: scale(4),
     fontFamily: 'Poppins-Regular',
   },
   forgotLink: {
     alignSelf: 'flex-end',
-    marginBottom: 25,
+    marginBottom: scale(25),
   },
   forgotText: {
     color: '#111111',
-    fontSize: 15,
+    fontSize: scale(15),
     fontFamily: 'Poppins-Regular',
   },
   loginButton: {
     backgroundColor: '#111111',
-    height: 58,
-    borderRadius: 8,
+    height: scale(48),
+    borderRadius: scale(8),
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: scale(28),
+  },
+  guestButton: {
+    backgroundColor: '#FFFFFF',
+    height: scale(48),
+    borderRadius: scale(8),
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    marginBottom: scale(28),
   },
   buttonDisabled: {
     opacity: 0.7,
   },
   buttonText: {
     color: '#FFFFFF',
-    fontSize: 17,
+    fontSize: scale(16),
     fontFamily: 'Poppins-SemiBold',
   },
-  signupRow: {
+  guestButtonText: {
+    color: '#111111',
+    fontSize: scale(16),
+    fontFamily: 'Poppins-SemiBold',
+  },
+  loginLinkContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 28,
-    marginBottom: 40,
+    paddingHorizontal: '6.4%',
+    marginBottom: scale(16),
   },
-  signupText: {
-    fontSize: 15,
-    color: '#AAAAAA',
+  loginText: {
+    fontSize: scale(14),
+    color: '#666666',
     fontFamily: 'Poppins-Regular',
   },
-  signupHighlight: {
+  loginHighlight: {
     color: '#111111',
     fontFamily: 'Poppins-SemiBold',
+    fontSize: scale(14),
+  },
+  termsText: {
+    fontSize: scale(13),
+    color: '#999999',
+    textAlign: 'center',
+    fontFamily: 'Poppins-Regular',
+    textDecorationLine: 'underline',
   },
 });
 
@@ -511,39 +519,39 @@ const modalStyles = StyleSheet.create({
   },
   container: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 32,
+    borderRadius: scale(12),
+    padding: scale(32),
     width: '84%',
-    maxWidth: 360,
+    maxWidth: scale(360),
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#aeaeae',
   },
   title: {
-    fontSize: 22,
+    fontSize: scale(22),
     fontFamily: 'Poppins-SemiBold',
     color: '#111111',
-    marginTop: 16,
-    marginBottom: 8,
+    marginTop: scale(16),
+    marginBottom: scale(8),
   },
   message: {
-    fontSize: 15,
+    fontSize: scale(15),
     color: '#AAAAAA',
     textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 22,
+    marginBottom: scale(24),
+    lineHeight: scale(22),
     fontFamily: 'Poppins-Regular',
   },
   closeButton: {
     backgroundColor: '#111111',
-    paddingVertical: 14,
-    paddingHorizontal: 40,
-    borderRadius: 8,
-    marginTop: 8,
+    paddingVertical: scale(14),
+    paddingHorizontal: scale(40),
+    borderRadius: scale(8),
+    marginTop: scale(8),
   },
   closeButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: scale(16),
     fontFamily: 'Poppins-SemiBold',
   },
 });

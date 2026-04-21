@@ -27,6 +27,12 @@ import { BASE_URL } from '../config/env';
 
 const { height } = Dimensions.get('window');
 
+// Responsive scaling utility (matching ProfileScreen)
+const scale = (size: number, baseWidth: number = 375) => {
+  const { width } = Dimensions.get('window');
+  return (width / baseWidth) * size;
+};
+
 // ─── API helpers ──────────────────────────────────────────────────────────────
 
 async function uploadProfilePicture(token: string, uri: string, type: string, name: string) {
@@ -123,50 +129,50 @@ const sheetStyles = StyleSheet.create({
   },
   container: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    paddingHorizontal: 20,
-    paddingBottom: Platform.OS === 'ios' ? 36 : 20,
-    paddingTop: 12,
+    borderTopLeftRadius: scale(16),
+    borderTopRightRadius: scale(16),
+    paddingHorizontal: scale(20),
+    paddingBottom: Platform.OS === 'ios' ? scale(36) : scale(20),
+    paddingTop: scale(12),
   },
   handle: {
-    width: 40,
-    height: 4,
+    width: scale(40),
+    height: scale(4),
     backgroundColor: '#E8E8E8',
-    borderRadius: 2,
+    borderRadius: scale(2),
     alignSelf: 'center',
-    marginBottom: 16,
+    marginBottom: scale(16),
   },
   title: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: 17,
+    fontSize: scale(17),
     color: '#111111',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: scale(20),
   },
   option: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: scale(16),
     borderBottomWidth: 1,
     borderBottomColor: '#E8E8E8',
   },
   optionText: {
     fontFamily: 'Poppins-Regular',
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#111111',
-    marginLeft: 16,
+    marginLeft: scale(16),
   },
   cancelBtn: {
-    marginTop: 16,
-    paddingVertical: 16,
+    marginTop: scale(16),
+    paddingVertical: scale(16),
     alignItems: 'center',
     backgroundColor: '#F7F7F7',
-    borderRadius: 8,
+    borderRadius: scale(8),
   },
   cancelText: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#AAAAAA',
   },
 });
@@ -367,11 +373,11 @@ export default function PersonalInfoScreen({ navigation }: any) {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-left" size={24} color="#111111" />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Icon name="arrow-left" size={scale(26)} color="#111111" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Personal Information</Text>
-        <View style={{ width: 24 }} />
+        <View style={{ width: scale(26) }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -384,10 +390,10 @@ export default function PersonalInfoScreen({ navigation }: any) {
             disabled={uploadingPhoto}
           >
             {avatarUrl ? (
-              <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+              <Image source={{ uri: avatarUrl }} style={styles.avatarImage} key={avatarUrl} />
             ) : (
               <View style={styles.avatarPlaceholder}>
-                <Icon name="account-outline" size={52} color="#AAAAAA" />
+                <Icon name="account-outline" size={scale(44)} color="#AAAAAA" />
               </View>
             )}
 
@@ -395,7 +401,7 @@ export default function PersonalInfoScreen({ navigation }: any) {
               {uploadingPhoto ? (
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
-                <Icon name="camera-outline" size={18} color="#FFFFFF" />
+                <Icon name="camera-plus-outline" size={scale(14)} color="#FFFFFF" />
               )}
             </View>
           </TouchableOpacity>
@@ -523,19 +529,24 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 16,
+    alignItems: 'center',
+    paddingHorizontal: '6.4%',
+    paddingBottom: scale(16),
+    paddingTop: scale(12),
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E8E8E8',
   },
-  headerTitle: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: 18,
+  backButton: { 
+    padding: scale(8),
+    marginLeft: -scale(8),
+  },
+  headerTitle: { 
+    fontSize: scale(20), 
+    fontFamily: 'Poppins-SemiBold', 
     color: '#111111',
+    letterSpacing: -0.3,
   },
   center: { 
     flex: 1, 
@@ -543,171 +554,206 @@ const styles = StyleSheet.create({
     alignItems: 'center' 
   },
   loadingText: { 
-    marginTop: 16, 
+    marginTop: scale(12), 
+    fontSize: scale(16), 
+    color: '#AAAAAA',
     fontFamily: 'Poppins-Regular',
-    fontSize: 16, 
-    color: '#AAAAAA' 
   },
   scrollContent: { 
-    padding: 20, 
-    paddingBottom: 60 
+    paddingHorizontal: '6.4%',
+    paddingVertical: scale(20),
+    paddingBottom: scale(60) 
   },
 
   // Avatar
   avatarSection: {
     alignItems: 'center',
-    paddingVertical: 32,
+    paddingVertical: scale(24),
+    marginBottom: scale(16),
   },
   avatarWrapper: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
+    width: scale(92),
+    height: scale(92),
+    borderRadius: scale(46),
     position: 'relative',
-    marginBottom: 12,
+    marginBottom: scale(12),
     backgroundColor: '#F7F7F7',
   },
   avatarImage: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
+    width: scale(92),
+    height: scale(92),
+    borderRadius: scale(46),
+    borderWidth: 3,
+    borderColor: '#F9F9F9',
   },
   avatarPlaceholder: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    backgroundColor: '#F7F7F7',
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
+    width: scale(92),
+    height: scale(92),
+    borderRadius: scale(46),
+    backgroundColor: '#F9F9F9',
+    borderWidth: 2,
+    borderColor: '#F0F0F0',
     justifyContent: 'center',
     alignItems: 'center',
   },
   cameraBadge: {
     position: 'absolute',
-    bottom: 4,
-    right: 4,
+    bottom: scale(4),
+    right: scale(4),
     backgroundColor: '#111111',
-    borderRadius: 14,
-    width: 30,
-    height: 30,
+    borderRadius: scale(10),
+    width: scale(24),
+    height: scale(24),
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
     borderColor: '#FFFFFF',
   },
   avatarHint: {
-    fontFamily: 'Poppins-Light',
-    fontSize: 13.5,
+    fontFamily: 'Poppins-Regular',
+    fontSize: scale(13),
     color: '#AAAAAA',
+    marginTop: scale(8),
   },
 
   // Form Card
   formCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: scale(12),
+    borderWidth: 0.8,
     borderColor: '#E8E8E8',
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
+    paddingVertical: scale(0),
+    paddingHorizontal: scale(0),
+    overflow: 'hidden',
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
   },
   sectionTitle: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: 15,
+    fontSize: scale(14),
     color: '#111111',
-    marginBottom: 22,
+    paddingVertical: scale(16),
+    paddingHorizontal: scale(16),
     letterSpacing: 1,
     textTransform: 'uppercase',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#F5F5F5',
   },
   label: {
     fontFamily: 'Poppins-Regular',
-    fontSize: 13.5,
-    color: '#111111',
-    marginBottom: 6,
+    fontSize: scale(12),
+    color: '#666666',
+    marginTop: scale(14),
+    marginHorizontal: scale(16),
+    marginBottom: scale(6),
+    fontWeight: '500',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F7F7F7',
+    backgroundColor: '#F9F9F9',
     borderWidth: 1,
     borderColor: '#E8E8E8',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    height: 54,
-    marginBottom: 18,
+    borderRadius: scale(8),
+    paddingHorizontal: scale(12),
+    height: scale(48),
+    marginHorizontal: scale(16),
+    marginBottom: scale(4),
   },
-  inputIcon: { marginRight: 12 },
+  inputIcon: { 
+    marginRight: scale(8),
+    width: scale(22),
+    height: scale(22),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   input: { 
     flex: 1, 
     fontFamily: 'Poppins-Regular',
-    fontSize: 16, 
-    color: '#111111' 
+    fontSize: scale(15), 
+    color: '#111111',
+    paddingVertical: scale(4),
   },
   disabledInput: { 
-    backgroundColor: '#F7F7F7', 
+    backgroundColor: '#F9F9F9', 
     borderColor: '#E8E8E8' 
   },
   saveButton: {
     backgroundColor: '#111111',
-    height: 54,
-    borderRadius: 8,
+    height: scale(48),
+    borderRadius: scale(8),
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: scale(16),
+    marginHorizontal: scale(16),
+    marginBottom: scale(16),
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
   },
   saveButtonDisabled: { opacity: 0.7 },
   saveButtonText: {
     fontFamily: 'Poppins-SemiBold',
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: scale(15),
+    fontWeight: '600',
   },
 
   // Modal
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 32,
-    width: '86%',
+    borderRadius: scale(16),
+    padding: scale(24),
+    width: '85%',
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: 0.8,
     borderColor: '#E8E8E8',
   },
-  modalIcon: { marginBottom: 20 },
+  modalIcon: { 
+    marginBottom: scale(16),
+    width: scale(60),
+    height: scale(60),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   modalTitle: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: 22,
+    fontSize: scale(18),
     color: '#111111',
-    marginBottom: 12,
+    marginBottom: scale(8),
+    fontWeight: '700',
   },
   modalMessage: {
     fontFamily: 'Poppins-Regular',
-    fontSize: 15.5,
+    fontSize: scale(14),
     color: '#666666',
     textAlign: 'center',
-    marginBottom: 32,
-    lineHeight: 24,
+    marginBottom: scale(20),
+    lineHeight: scale(22),
   },
   modalButton: {
     backgroundColor: '#111111',
-    paddingVertical: 14,
-    paddingHorizontal: 60,
-    borderRadius: 8,
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(40),
+    borderRadius: scale(8),
     minWidth: '70%',
     alignItems: 'center',
   },
   modalButtonText: {
     fontFamily: 'Poppins-SemiBold',
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: scale(15),
+    fontWeight: '600',
   },
 });

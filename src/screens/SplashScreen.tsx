@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useAuth } from '../context/AuthContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -27,6 +28,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function SplashScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { token, isLoading } = useAuth();
 
   // Fade animation for logo + text
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -49,15 +51,22 @@ export default function SplashScreen() {
 
     // Auto navigate after delay
     const timer = setTimeout(() => {
-      navigation.replace('Onboarding');
-    }, 2800); // 2.8 seconds – feels premium & not too long
+      // Check if user is logged in
+      if (token) {
+        // User is logged in → navigate to MainTabs
+        navigation.replace('MainTabs');
+      } else {
+        // User is NOT logged in → navigate to Onboarding (Get Started)
+        navigation.replace('Onboarding');
+      }
+    }, 2800); // 2.8 seconds
 
     return () => clearTimeout(timer);
-  }, [navigation]);
+  }, [navigation, token]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#C71585" />
+      <StatusBar barStyle="light-content" backgroundColor="#f5f5f7" />
 
       <Animated.View
         style={[
@@ -69,14 +78,14 @@ export default function SplashScreen() {
         ]}
       >
         <Image
-          source={require('../assets/images/feelvie_splash.jpg')}
+          source={require('../assets/images/feelvie-splash.jpg')}
           style={styles.logo}
           resizeMode="contain"
         />
 
-        <Text style={styles.appName}>FeelVie</Text>
+        {/* <Text style={styles.appName}>FeelVie</Text> */}
 
-        <Text style={styles.tagline}>Beauty. Reimagined.</Text>
+        {/* <Text style={styles.tagline}>Beauty. Reimagined.</Text> */}
       </Animated.View>
 
       {/* Optional: small version / copyright at bottom */}
@@ -88,7 +97,7 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff', // your primary brand color
+    backgroundColor: '#f5f5f7',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -97,9 +106,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: SCREEN_WIDTH * 1.20,     // ~55% of screen width
-    height: SCREEN_WIDTH * 1.20,
-    marginBottom: 20 ,
+    width: SCREEN_WIDTH * 0.90,     
+    height: SCREEN_WIDTH * 0.90,
   },
   appName: {
     fontSize: 54,
@@ -118,8 +126,9 @@ const styles = StyleSheet.create({
   footer: {
     position: 'absolute',
     bottom: 28,
-    color: '#FFFFFF',
+    color: '#000',
     fontSize: 13,
     opacity: 0.6,
+    fontWeight: '400',
   },
 });

@@ -14,8 +14,9 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icons from 'react-native-vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -23,25 +24,38 @@ const USER_IMAGE_KEY = 'VIRTUAL_TRYON_USER_IMAGE';
 const GARMENT_IMAGE_KEY = 'VIRTUAL_TRYON_GARMENT_IMAGE';
 
 const categories = [
-  { label: 'Tops', value: 'tops' },
-  { label: 'Bottoms', value: 'bottoms' },
-  { label: 'One-pieces', value: 'one-pieces' },
+  { label: 'Tops', value: 'top clothes' },
+  { label: 'Bottoms', value: 'bottom clothes' },
+  { label: 'Dress', value: 'dress' },
 ];
 
 export default function VirtualTryOnScreen() {
   console.debug('[Screen 1] VirtualTryOnScreen mounted');
 
   const navigation = useNavigation();
+  const route = useRoute();
 
   const [userImage, setUserImage] = useState<string | null>(null);
   const [garmentImage, setGarmentImage] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showInstructions, setShowInstructions] = useState(false);
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
 
   useEffect(() => {
     console.debug('[Screen 1] Loading stored images from AsyncStorage');
     loadStoredImages();
   }, []);
+
+  useEffect(() => {
+    // Auto-load garment image from route params (when navigating from HomeScreen)
+    if (route.params?.garmentImage) {
+      console.debug('[Screen 1] Auto-loading garment image from HomeScreen');
+      setGarmentImage(route.params.garmentImage);
+      AsyncStorage.setItem(GARMENT_IMAGE_KEY, route.params.garmentImage).catch(err =>
+        console.error('[Screen 1] Failed to save auto-loaded garment:', err)
+      );
+    }
+  }, [route.params?.garmentImage]);
 
   const loadStoredImages = async () => {
     console.debug('[Screen 1] Fetching images from storage');
@@ -83,11 +97,8 @@ export default function VirtualTryOnScreen() {
   };
 
   const toggleCategory = (value: string) => {
-    if (selectedCategory === value) {
-      setSelectedCategory(null);
-    } else {
-      setSelectedCategory(value);
-    }
+    setSelectedCategory(value);
+    setCategoryModalVisible(false);
   };
 
   const clearImages = async () => {
@@ -119,136 +130,162 @@ export default function VirtualTryOnScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Virtual Try-On</Text>
+    <View style={{ flex: 1 }}>
+      {/* <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" /> */}
+      {/* Header */}
+      <View style={[styles.header]}>
+        <Text style={styles.logo}>Virtual Try</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Select Type Section */}
-        <View style={styles.typeSection}>
-          <Text style={styles.typeTitle}>SELECT TYPE</Text>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Garment Type</Text>
+          <TouchableOpacity
+            style={[styles.categoryButton, selectedCategory && styles.categoryButtonActive]}
+            onPress={() => setCategoryModalVisible(true)}
+          >
+            <Icon name="hanger" size={20} color={selectedCategory ? '#f8ac1b' : '#666666'} />
+            <Text style={[styles.categoryButtonText, selectedCategory && styles.categoryButtonTextActive]}>
+              {selectedCategory
+                ? categories.find(c => c.value === selectedCategory)?.label
+                : 'Select a garment type'}
+            </Text>
+            <Icon name="chevron-right" size={20} color={selectedCategory ? '#f8ac1b' : '#AAAAAA'} />
+          </TouchableOpacity>
+        </View>
 
-          <View style={styles.typeBox}>
-            {categories.map(cat => (
-              <TouchableOpacity
-                key={cat.value}
-                style={[
-                  styles.typeOption,
-                  selectedCategory === cat.value && styles.typeOptionActive,
-                ]}
-                onPress={() => toggleCategory(cat.value)}
-              >
-                <Text style={[
-                  styles.typeOptionText,
-                  selectedCategory === cat.value && styles.typeOptionTextActive,
-                ]}>
-                  {cat.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+        {/* Images Preview Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Images</Text>
+            <TouchableOpacity onPress={() => setShowInstructions(true)}>
+              <Icon name="information-outline" size={20} color="#f8ac1b" />
+            </TouchableOpacity>
           </View>
-        </View>
 
-        {/* Instructions Button */}
-   <View style={styles.buttonRowContainer}>
-          <TouchableOpacity
-            style={styles.instructionBtn}
-            onPress={() => setShowInstructions(true)}
-          >
-            <Icon name="information-outline" size={22} color="#111111" />
-            <Text style={styles.instructionText}>Instructions</Text>
-          </TouchableOpacity>
+          {/* Instructions Button */}
+          {/* <View style={styles.buttonRowContainer}>
+            <TouchableOpacity
+              style={styles.instructionBtn}
+              onPress={() => setShowInstructions(true)}
+            >
+              <Icon name="information-outline" size={22} color="#111111" />
+              <Text style={styles.instructionText}>Instructions</Text>
+            </TouchableOpacity>
+          </View> */}
 
-          <TouchableOpacity
-            style={styles.historyBtn}
-            onPress={() => navigation.navigate('VirtualTryOnHistory')}
-          >
-            <Icon name="history" size={22} color="#111111" />
-            <Text style={styles.historyText}>History</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Upload Garment */}
-        <View style={styles.uploadSection}>
-          <Text style={styles.uploadTitle}>Upload Your Garment</Text>
-          <TouchableOpacity style={styles.uploadBox} onPress={() => pickImage(setGarmentImage, GARMENT_IMAGE_KEY, 'Garment')}>
-            {garmentImage ? (
-              <Image source={{ uri: garmentImage }} style={styles.uploadImage} resizeMode="contain" />
-            ) : (
-              <View style={styles.placeholder}>
-                <Icon name="tshirt-crew-outline" size={48} color="#AAAAAA" />
-                <Text style={styles.placeholderText}>Tap to upload garment</Text>
+          {/* One-Below-Another Layout when both images are uploaded */}
+          {garmentImage && userImage ? (
+            <View>
+              {/* Garment Image */}
+              <View>
+                <Text style={styles.imageLabel}>Garment</Text>
+                <View style={[styles.uploadCard, { height: 280, position: 'relative' }]}>
+                  <Image source={{ uri: garmentImage }} style={styles.uploadImageDisplay} resizeMode="cover" />
+                  <TouchableOpacity
+                    style={styles.removeIconButton}
+                    onPress={() => removeImage(GARMENT_IMAGE_KEY, setGarmentImage, 'Garment')}
+                  >
+                    <Icon name="close" size={24} color="#FFFFFF" />
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity
+                  style={[styles.actionBtn, styles.secondaryBtn, { marginTop: 12 }]}
+                  onPress={() => pickImage(setGarmentImage, GARMENT_IMAGE_KEY, 'Garment')}
+                >
+                  <Icon name="pencil" size={18} color="#111111" />
+                  <Text style={styles.actionBtnText}>Change Garment</Text>
+                </TouchableOpacity>
               </View>
-            )}
-          </TouchableOpacity>
 
-          {garmentImage && (
-            <View style={styles.buttonRow}>
-              <TouchableOpacity
-                style={styles.removeBtn}
-                onPress={() => removeImage(GARMENT_IMAGE_KEY, setGarmentImage, 'Garment')}
-              >
-                <Text style={styles.actionText}>Remove</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.changeBtn}
-                onPress={() => pickImage(setGarmentImage, GARMENT_IMAGE_KEY, 'Garment')}
-              >
-                <Text style={styles.actionText}>Change</Text>
-              </TouchableOpacity>
+              {/* User Photo */}
+              <View style={{ marginTop: 24 }}>
+                <Text style={styles.imageLabel}>Your Photo</Text>
+                <View style={[styles.uploadCard, { height: 280, position: 'relative' }]}>
+                  <Image source={{ uri: userImage }} style={styles.uploadImageDisplay} resizeMode="cover" />
+                  <TouchableOpacity
+                    style={styles.removeIconButton}
+                    onPress={() => removeImage(USER_IMAGE_KEY, setUserImage, 'Photo')}
+                  >
+                    <Icon name="close" size={24} color="#FFFFFF" />
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity
+                  style={[styles.actionBtn, styles.secondaryBtn, { marginTop: 12 }]}
+                  onPress={() => pickImage(setUserImage, USER_IMAGE_KEY, 'Photo')}
+                >
+                  <Icon name="pencil" size={18} color="#111111" />
+                  <Text style={styles.actionBtnText}>Change Photo</Text>
+                </TouchableOpacity>
+              </View>
             </View>
+          ) : (
+            <>
+              {/* Single Upload - Garment */}
+              {!garmentImage ? (
+                <TouchableOpacity
+                  style={styles.uploadCard}
+                  onPress={() => pickImage(setGarmentImage, GARMENT_IMAGE_KEY, 'Garment')}
+                >
+                  <View style={styles.uploadPlaceholder}>
+                    <Icon name="hanger" size={56} color="#f8ac1b" />
+                    <Text style={styles.uploadPlaceholderText}>Upload garment</Text>
+                    <Text style={styles.uploadSubtext}>Front view, plain background</Text>
+                  </View>
+                </TouchableOpacity>
+              ) : (
+                <View style={[styles.uploadCard, { position: 'relative' }]}>
+                  <Image source={{ uri: garmentImage }} style={styles.uploadImageDisplay} resizeMode="contain" />
+                  <TouchableOpacity
+                    style={styles.removeIconButton}
+                    onPress={() => removeImage(GARMENT_IMAGE_KEY, setGarmentImage, 'Garment')}
+                  >
+                    <Icon name="close" size={24} color="#FFFFFF" />
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {/* Single Upload - User Photo */}
+              {!userImage ? (
+                <TouchableOpacity
+                  style={[styles.uploadCard, styles.uploadCardMarginTop]}
+                  onPress={() => pickImage(setUserImage, USER_IMAGE_KEY, 'User Photo')}
+                >
+                  <View style={styles.uploadPlaceholder}>
+                    <Icon name="account-box-outline" size={56} color="#f8ac1b" />
+                    <Text style={styles.uploadPlaceholderText}>Upload your photo</Text>
+                    <Text style={styles.uploadSubtext}>Face camera, good lighting</Text>
+                  </View>
+                </TouchableOpacity>
+              ) : (
+                <View style={[styles.uploadCard, styles.uploadCardMarginTop, { position: 'relative' }]}>
+                  <Image source={{ uri: userImage }} style={styles.uploadImageDisplay} resizeMode="contain" />
+                  <TouchableOpacity
+                    style={styles.removeIconButton}
+                    onPress={() => removeImage(USER_IMAGE_KEY, setUserImage, 'Photo')}
+                  >
+                    <Icon name="close" size={24} color="#FFFFFF" />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </>
           )}
         </View>
-
-        {/* Upload Your Photo */}
-        <View style={styles.uploadSection}>
-          <Text style={styles.uploadTitle}>Upload Your Photo</Text>
-          <TouchableOpacity style={styles.uploadBox} onPress={() => pickImage(setUserImage, USER_IMAGE_KEY, 'User Photo')}>
-            {userImage ? (
-              <Image source={{ uri: userImage }} style={styles.uploadImage} resizeMode="contain" />
-            ) : (
-              <View style={styles.placeholder}>
-                <Icon name="account-outline" size={48} color="#AAAAAA" />
-                <Text style={styles.placeholderText}>Tap to upload your photo</Text>
-              </View>
-            )}
+        <View style={{ paddingHorizontal: 20 , paddingBottom: 120 , paddingTop: 12 }}>
+          <TouchableOpacity
+            style={[
+              styles.nextButton,
+              (!userImage || !garmentImage || !selectedCategory) && styles.nextButtonDisabled,
+            ]}
+            onPress={handleNext}
+            disabled={!userImage || !garmentImage || !selectedCategory}
+          >
+            <Text style={styles.nextText}>Try On</Text>
+            <Icons name="auto-awesome" size={22} color="#FFFFFF" style={{ marginLeft: 10 }} />
           </TouchableOpacity>
-
-          {userImage && (
-            <View style={styles.buttonRow}>
-              <TouchableOpacity
-                style={styles.removeBtn}
-                onPress={() => removeImage(USER_IMAGE_KEY, setUserImage, 'Photo')}
-              >
-                <Text style={styles.actionText}>Remove</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.changeBtn}
-                onPress={() => pickImage(setUserImage, USER_IMAGE_KEY, 'User Photo')}
-              >
-                <Text style={styles.actionText}>Change</Text>
-              </TouchableOpacity>
-            </View>
-          )}
         </View>
+
       </ScrollView>
-
-      <View style={styles.bottomBar}>
-        <TouchableOpacity
-          style={[
-            styles.nextButton,
-            (!userImage || !garmentImage || !selectedCategory) && styles.nextButtonDisabled,
-          ]}
-          onPress={handleNext}
-          disabled={!userImage || !garmentImage || !selectedCategory}
-        >
-          <Text style={styles.nextText}>Next</Text>
-          <Icon name="arrow-right" size={20} color="#FFFFFF" style={{ marginLeft: 8 }} />
-        </TouchableOpacity>
-      </View>
 
       {/* Instructions Modal */}
       <Modal visible={showInstructions} animationType="slide" transparent onRequestClose={() => setShowInstructions(false)}>
@@ -261,12 +298,12 @@ export default function VirtualTryOnScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView 
+            <ScrollView
               style={styles.modalScroll}
               contentContainerStyle={styles.modalScrollContent}
             >
               <Text style={styles.stepTitle}>Step 1: Select Type</Text>
-              <Text style={styles.stepDesc}>Choose from Tops, Bottoms, or One-Pieces using the buttons above.</Text>
+              <Text style={styles.stepDesc}>Choose from Tops, Bottoms, or Dress using the buttons above.</Text>
 
               <Text style={styles.stepTitle}>Step 2: Upload Your Photo</Text>
               <Text style={styles.stepDesc}>
@@ -323,155 +360,284 @@ export default function VirtualTryOnScreen() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+
+      {/* Category Selection Modal */}
+      <Modal visible={categoryModalVisible} animationType="fade" transparent onRequestClose={() => setCategoryModalVisible(false)}>
+        <View style={styles.categoryModalOverlay}>
+          <View style={styles.categoryModalContent}>
+            <View style={styles.categoryModalHeader}>
+              <Text style={styles.categoryModalTitle}>Select Garment Type</Text>
+              <TouchableOpacity onPress={() => setCategoryModalVisible(false)}>
+                <Icon name="close" size={28} color="#111111" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.categoryGrid}>
+              {categories.map(cat => (
+                <TouchableOpacity
+                  key={cat.value}
+                  style={[styles.categoryCard, selectedCategory === cat.value && styles.categoryCardActive]}
+                  onPress={() => toggleCategory(cat.value)}
+                >
+                  <Text
+                    style={[
+                      styles.categoryName,
+                      selectedCategory === cat.value && styles.categoryNameActive,
+                    ]}
+                  >
+                    {cat.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { 
-    flex: 1, 
-    backgroundColor: '#FFFFFF' 
+  safeArea: {
+    flex: 1,
+    backgroundColor: 'red',
   },
-  scrollContent: { 
-    paddingBottom: 140 
-  },
-
-  /* Header */
-  header: { 
-    padding: 20, 
-    alignItems: 'center', 
-    borderBottomWidth: 1, 
-    borderBottomColor: '#E8E8E8' 
-  },
-  headerTitle: { 
-    fontSize: 20, 
-    fontFamily: 'Poppins-SemiBold', 
-    color: '#111111',
-    letterSpacing: -0.2,
+  scrollContent: {
+    paddingBottom: 300,
   },
 
-  /* Type Selection */
-  typeSection: { 
-    paddingHorizontal: 20, 
-    paddingVertical: 24 
-  },
-  typeTitle: { 
-    fontSize: 13, 
-    fontFamily: 'Poppins-SemiBold', 
-    color: '#111111', 
-    marginBottom: 12, 
-    textTransform: 'uppercase',
-    letterSpacing: 1.2,
-  },
-  typeBox: {
+  header: {
     flexDirection: 'row',
-    backgroundColor: '#F7F7F7',
-    borderWidth: 1,
+    justifyContent: 'space-between',
+    alignContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 14,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8E8E8',
+  },
+  logo: {
+    fontSize: 24,
+    fontWeight: '800',
+    fontFamily: 'serif',
+    fontStyle: 'italic',
+    color: '#111111',
+    height: 'auto',
+    letterSpacing: -0.5,
+  },
+
+  /* Sections */
+  section: {
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 12,
+    marginVertical: 8,
+    borderRadius: 12,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    fontWeight: '700',
+  },
+  sectionSubtext: {
+    fontSize: 12,
+    fontFamily: 'Poppins-Regular',
+    color: '#AAAAAA',
+  },
+
+  /* Dropdown Picker */
+  dropdownContainer: {
+    marginTop: 12,
+    borderWidth: 1.5,
     borderColor: '#E8E8E8',
-    borderRadius: 8,
+    borderRadius: 10,
+    backgroundColor: '#F9F9F9',
     overflow: 'hidden',
   },
-  typeOption: {
-    flex: 1,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRightWidth: 1,
-    borderRightColor: '#E8E8E8',
+  dropdownPicker: {
+    height: 50,
+    color: '#111111',
   },
-  typeOptionActive: { 
-    backgroundColor: '#111111' 
-  },
-  typeOptionText: { 
-    fontSize: 15, 
-    fontFamily: 'Poppins-Regular', 
-    color: '#111111' 
-  },
-  typeOptionTextActive: { 
-    color: '#FFFFFF',
+
+  /* Image Label */
+  imageLabel: {
+    fontSize: 14,
     fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    fontWeight: '600',
+    marginBottom: 8,
   },
 
-  /* Instructions */
-  instructionBtn: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    marginVertical: 8,
-    paddingVertical: 8,
-  },
-  instructionText: { 
-    color: '#111111', 
-    fontSize: 16, 
-    fontFamily: 'Poppins-Regular', 
-    marginLeft: 8 
-  },
-
-  /* Upload Sections */
-  uploadSection: { 
-    paddingHorizontal: 20, 
-    marginBottom: 32 
-  },
-  uploadTitle: { 
-    fontSize: 16, 
-    fontFamily: 'Poppins-SemiBold', 
-    color: '#111111', 
-    marginBottom: 12 
-  },
-  uploadBox: {
-    height: 280,
-    borderRadius: 8,
+  /* Remove Icon Button */
+  removeIconButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
     borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+
+  /* Type Selection Grid */
+  typeGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  typeCard: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#E8E8E8',
+  },
+  typeCardActive: {
+    backgroundColor: '#FFF8E7',
+    borderColor: '#f8ac1b',
+  },
+  typeIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  typeIconActive: {
+    backgroundColor: 'rgba(248, 172, 27, 0.1)',
+  },
+  typeLabel: {
+    fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#666666',
+    textAlign: 'center',
+  },
+  typeLabelActive: {
+    color: '#f8ac1b',
+    fontWeight: '700',
+  },
+
+  /* Upload Card */
+  uploadCard: {
+    height: 260,
+    borderRadius: 12,
+    borderWidth: 2,
     borderColor: '#E8E8E8',
     borderStyle: 'dashed',
-    backgroundColor: '#F7F7F7',
+    backgroundColor: '#F9F9F9',
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
   },
-  uploadImage: { 
-    width: '100%', 
-    height: '100%', 
-    resizeMode: 'contain' 
+  uploadImageDisplay: {
+    width: '100%',
+    height: '100%',
   },
-  placeholder: { 
-    alignItems: 'center' 
+  uploadPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  placeholderText: { 
-    marginTop: 12, 
-    color: '#AAAAAA', 
-    fontSize: 15,
+  uploadPlaceholderText: {
+    marginTop: 12,
+    color: '#111111',
+    fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
+    fontWeight: '700',
+  },
+  uploadSubtext: {
+    marginTop: 6,
+    color: '#AAAAAA',
+    fontSize: 12,
     fontFamily: 'Poppins-Regular',
   },
 
-  buttonRow: {
+  /* Half-Half Layout */
+  halfHalfContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: 0,
+    marginBottom: 16,
+    height: 320,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#000000',
+  },
+  halfCard: {
+    flex: 1,
+    position: 'relative',
+    borderRightWidth: 1,
+    borderRightColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  halfImage: {
+    width: '100%',
+    height: '100%',
+  },
+  halfLabel: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingVertical: 10,
+    gap: 6,
+  },
+  halfLabelText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontFamily: 'Poppins-SemiBold',
+    fontWeight: '700',
+  },
+
+  uploadCardMarginTop: {
     marginTop: 12,
   },
-  removeBtn: {
- flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginHorizontal: 6,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#111111',
+
+  /* Action Buttons */
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 12,
   },
-  changeBtn: {
+  actionBtn: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
+    flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 6,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#111111',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 10,
+    gap: 8,
   },
-  actionText: { 
-    fontSize: 15, 
+  secondaryBtn: {
+    backgroundColor: '#F5F5F5',
+    borderWidth: 1.5,
+    borderColor: '#E8E8E8',
+  },
+  actionBtnText: {
+    fontSize: 14,
     fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    fontWeight: '600',
   },
 
   /* Bottom Bar */
@@ -480,76 +646,83 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    padding: 20,
-    paddingBottom: Platform.OS === 'ios' ? 100 : 80,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 24,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#E8E8E8',
   },
   nextButton: {
     backgroundColor: '#111111',
-    paddingVertical: 17,
-    borderRadius: 8,
+    paddingVertical: 16,
+    borderRadius: 10,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
+    shadowColor: '#111111',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  nextButtonDisabled: { 
-    backgroundColor: '#AAAAAA',
-    borderColor: '#AAAAAA',
+  nextButtonDisabled: {
+    backgroundColor: '#DCDCDC',
   },
-  nextText: { 
-    color: '#FFFFFF', 
-    fontSize: 17, 
-    fontFamily: 'Poppins-SemiBold' 
+  nextText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontFamily: 'Poppins-SemiBold',
+    fontWeight: '700',
   },
 
   /* Modal */
-  modalOverlay: { 
-    flex: 1, 
-    backgroundColor: 'rgba(0,0,0,0.65)', 
-    justifyContent: 'center' 
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    justifyContent: 'flex-end',
   },
-  modalContent: { 
-    backgroundColor: '#FFFFFF', 
-    marginHorizontal: 20, 
-    marginVertical: 40, 
-    borderRadius: 8, 
-    maxHeight: height * 0.85,
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: height * 0.9,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
   },
-  modalHeader: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    alignItems: 'center', 
-    padding: 20, 
-    borderBottomWidth: 1, 
-    borderBottomColor: '#E8E8E8' 
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8E8E8'
   },
-  modalTitle: { 
-    fontSize: 18, 
-    fontFamily: 'Poppins-SemiBold', 
-    color: '#111111' 
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    fontWeight: '700',
   },
-  modalScroll: { 
-    paddingHorizontal: 20, 
-    paddingTop: 10 
+  modalScroll: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
   },
-  modalScrollContent: { 
-    paddingBottom: 100 
+  modalScrollContent: {
+    paddingBottom: 100
   },
-  stepTitle: { 
-    fontSize: 16, 
-    fontFamily: 'Poppins-SemiBold', 
-    color: '#111111', 
-    marginTop: 28 
+  stepTitle: {
+    fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    marginTop: 20,
+    fontWeight: '700',
   },
-  stepDesc: { 
-    fontSize: 15, 
-    color: '#444444', 
-    marginTop: 8, 
+  stepDesc: {
+    fontSize: 14,
+    color: '#666666',
+    marginTop: 8,
     lineHeight: 24,
     fontFamily: 'Poppins-Regular',
   },
@@ -559,78 +732,140 @@ const styles = StyleSheet.create({
     color: '#111111',
     textAlign: 'center',
     marginVertical: 24,
+    fontWeight: '700',
   },
   fullSampleImage: {
     width: '100%',
-    height: 520,
-    marginVertical: 20,
-    borderRadius: 8,
+    height: 480,
+    marginVertical: 16,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#E8E8E8',
-    backgroundColor: '#F7F7F7',
+    backgroundColor: '#F5F5F5',
   },
-  imageCaption: { 
-    fontSize: 13, 
-    color: '#AAAAAA', 
-    textAlign: 'center', 
-    marginTop: -8, 
-    marginBottom: 24,
+  imageCaption: {
+    fontSize: 13,
+    color: '#AAAAAA',
+    textAlign: 'center',
+    marginTop: 4,
     fontFamily: 'Poppins-Regular',
   },
-  gotItButton: { 
-    backgroundColor: '#111111', 
-    paddingVertical: 17, 
-    margin: 20, 
-    borderRadius: 8, 
-    alignItems: 'center' 
+  gotItButton: {
+    backgroundColor: '#f8ac1b',
+    paddingVertical: 16,
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    shadowColor: '#f8ac1b',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  gotItText: { 
-    color: '#FFFFFF', 
-    fontSize: 16, 
-    fontFamily: 'Poppins-SemiBold' 
+  gotItText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
+    fontWeight: '700',
   },
-    /* Instructions & History Buttons */
-  buttonRowContainer: {
+
+  /* Category Button */
+  categoryButton: {
+    marginTop: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderWidth: 1.5,
+    borderColor: '#E8E8E8',
+    borderRadius: 10,
+    backgroundColor: '#F9F9F9',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  categoryButtonActive: {
+    backgroundColor: '#FFF8E7',
+    borderColor: '#f8ac1b',
+  },
+  categoryButtonText: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 16,
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
+  },
+  categoryButtonTextActive: {
+    color: '#111111',
+    fontWeight: '600',
+  },
+
+  /* Category Selection Modal */
+  categoryModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  categoryModalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    width: '85%',
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    maxHeight: '80%',
+  },
+  categoryModalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    marginVertical: 16,
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  categoryModalTitle: {
+    fontSize: 20,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    fontWeight: '700',
+  },
+  categoryGrid: {
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
     gap: 12,
   },
-  instructionBtn: {
-    flex: 1,
-    flexDirection: 'row',
+  categoryCard: {
+    width: '100%',
+    paddingVertical: 16,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#E8E8E8',
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
   },
-  historyBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+  categoryCardActive: {
+    backgroundColor: '#FFF8E7',
+    borderColor: '#f8ac1b',
+  },
+  categoryIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
     justifyContent: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    marginBottom: 12,
   },
-  instructionText: {
-    fontSize: 15,
-    fontFamily: 'Poppins-Regular',
-    color: '#111111',
-    marginLeft: 8,
+  categoryIconActive: {
+    backgroundColor: 'rgba(248, 172, 27, 0.1)',
   },
-  historyText: {
-    fontSize: 15,
-    fontFamily: 'Poppins-Regular',
-    color: '#111111',
-    marginLeft: 8,
+  categoryName: {
+    fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#666666',
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+  categoryNameActive: {
+    color: '#f8ac1b',
+    fontWeight: '700',
   },
 });

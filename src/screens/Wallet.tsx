@@ -20,6 +20,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import RazorpayCheckout from 'react-native-razorpay';
+import Toast from 'react-native-toast-message';
 
 const { width } = Dimensions.get('window');
 const BASE_URL = 'https://api.feelvie.com';
@@ -107,9 +108,6 @@ export default function WalletScreen() {
 
   // Core wallet data
   const [wallet, setWallet] = useState<WalletData | null>(null);
-  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
-  const [bankDetails, setBankDetails] = useState<BankDetail[]>([]);
-  const [selectedBank, setSelectedBank] = useState<BankDetail | null>(null);
 
   // Credits ecosystem
   const [creditPacks, setCreditPacks] = useState<CreditPack[]>([]);
@@ -119,17 +117,13 @@ export default function WalletScreen() {
   // UI state
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState<'wallet' | 'credits'>('wallet');
 
   // Modal visibility
-  const [withdrawModalVisible, setWithdrawModalVisible] = useState(false);
-  const [bankSelectModalVisible, setBankSelectModalVisible] = useState(false);
   const [creditPacksModalVisible, setCreditPacksModalVisible] = useState(false);
   const [subscriptionModalVisible, setSubscriptionModalVisible] = useState(false);
   const [couponModalVisible, setCouponModalVisible] = useState(false);
 
-  // Input values
-  const [withdrawAmount, setWithdrawAmount] = useState('');
+  // Coupon input
   const [couponCode, setCouponCode] = useState('');
 
   // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -158,11 +152,9 @@ export default function WalletScreen() {
       const headers = { Authorization: `Bearer ${token}` };
       console.log('[fetchAllData] Firing 6 parallel API calls...');
 
-      const [walletRes, withdrawRes, bankRes, packsRes, plansRes, subsRes] =
+      const [walletRes, packsRes, plansRes, subsRes] =
         await Promise.all([
           fetch(`${BASE_URL}/api/wallet/me/`, { headers }),
-          fetch(`${BASE_URL}/api/wallet/withdrawals/`, { headers }),
-          fetch(`${BASE_URL}/api/auth/bank-details/`, { headers }),
           fetch(`${BASE_URL}/api/wallet/credit-packs/`, { headers }),
           fetch(`${BASE_URL}/api/wallet/subscription-plans/`, { headers }),
           fetch(`${BASE_URL}/api/wallet/subscriptions/me/`, { headers }),
@@ -170,8 +162,6 @@ export default function WalletScreen() {
 
       console.log('[fetchAllData] API response statuses:', {
         wallet: walletRes.status,
-        withdrawals: withdrawRes.status,
-        bankDetails: bankRes.status,
         creditPacks: packsRes.status,
         subscriptionPlans: plansRes.status,
         mySubscriptions: subsRes.status,
@@ -188,34 +178,6 @@ export default function WalletScreen() {
         setWallet(walletData);
       } else {
         console.warn('[fetchAllData] ❌ Wallet fetch failed. Status:', walletRes.status);
-      }
-
-      if (withdrawRes.ok) {
-        const wd = await withdrawRes.json();
-        const wdArray = Array.isArray(wd) ? wd : [];
-        console.log('[fetchAllData] ✅ Withdrawals count:', wdArray.length, wdArray);
-        setWithdrawals(wdArray);
-      } else {
-        console.warn('[fetchAllData] ❌ Withdrawals fetch failed. Status:', withdrawRes.status);
-      }
-
-      if (bankRes.ok) {
-        const banks = await bankRes.json();
-        const bankArray = Array.isArray(banks) ? banks : [];
-        console.log('[fetchAllData] ✅ Bank details count:', bankArray.length);
-        bankArray.forEach((b: BankDetail, i: number) =>
-          console.log(`  Bank[${i}]:`, b.id, b.account_holder_name, '****' + b.account_number.slice(-4))
-        );
-        setBankDetails(bankArray);
-        if (bankArray.length === 1) {
-          console.log('[fetchAllData] Single bank auto-selected:', bankArray[0].id);
-          setSelectedBank(bankArray[0]);
-        } else {
-          console.log('[fetchAllData] Multiple or zero banks found → no auto-select');
-          setSelectedBank(null);
-        }
-      } else {
-        console.warn('[fetchAllData] ❌ Bank details fetch failed. Status:', bankRes.status);
       }
 
       if (packsRes.ok) {
@@ -281,10 +243,12 @@ export default function WalletScreen() {
   const openRazorpay = async ({
     token,
     description,
+    amount,
     onSuccess,
   }: {
     token: string;
     description: string;
+    amount: string;
     onSuccess: (
       paymentId: string,
       razorpayOrderId: string,
@@ -294,14 +258,14 @@ export default function WalletScreen() {
     console.log('[openRazorpay] Initiating payment. Description:', description);
 
     // Step 1 — Create Razorpay order
-    console.log('[openRazorpay] Step 1: Creating Razorpay order via /api/secure/make-payment/');
-    const makePaymentRes = await fetch(`${BASE_URL}/api/secure/make-payment/`, {
+    console.log('[openRazorpay] Step 1: Creating Razorpay order via /api/secure/wallet/top-up/');
+    const makePaymentRes = await fetch(`${BASE_URL}/api/secure/wallet/top-up/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ description }),
+      body: JSON.stringify({  amount }),
     });
 
     console.log('[openRazorpay] make-payment response status:', makePaymentRes.status);
@@ -312,6 +276,7 @@ export default function WalletScreen() {
     const paymentData = await makePaymentRes.json();
     console.log('[openRazorpay] Razorpay order created:', {
       razorpay_order_id: paymentData.razorpay_order_id,
+      razorpay_key_id : paymentData.razorpay_key_id,
       amount: paymentData.amount,
       currency: paymentData.currency,
     });
@@ -324,7 +289,7 @@ export default function WalletScreen() {
     const userData = userRes.ok ? await userRes.json() : {};
     const fullName =
       `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || 'Customer';
-    const phone = userData.phone || '9999999999';
+    const phone = userData.phone || '';
     const email = userData.email || '';
     console.log('[openRazorpay] Prefill:', { fullName, phone, email: email || '(empty)' });
 
@@ -402,6 +367,7 @@ export default function WalletScreen() {
       await openRazorpay({
         token,
         description: `Purchase ${pack.name} – ${pack.credits} Credits`,
+        amount: (parseFloat(pack.price_inr)).toString(), 
         onSuccess: async (paymentId) => {
           console.log('[handlePurchasePack] onSuccess called. paymentId:', paymentId);
           console.log('[handlePurchasePack] Posting to /api/wallet/credits/purchase-pack/');
@@ -422,22 +388,22 @@ export default function WalletScreen() {
           if (purchaseRes.ok) {
             const purchaseData = await purchaseRes.json();
             console.log('[handlePurchasePack] ✅ Pack purchased successfully:', purchaseData);
-            Alert.alert('Success', `${pack.credits} credits added to your account!`);
+            Toast.show({ type: 'success', text1: `${pack.credits} credits added!` });
             setCreditPacksModalVisible(false);
             fetchAllData();
           } else {
             const err = await purchaseRes.json().catch(() => ({}));
             console.error('[handlePurchasePack] ❌ Purchase failed:', err);
-            Alert.alert('Failed', err.detail || 'Could not complete purchase');
+            Toast.show({ type: 'error', text1: 'Purchase Failed', text2: err.detail || 'Could not complete purchase' });
           }
         },
       });
     } catch (err: any) {
       console.error('[handlePurchasePack] Error:', err?.code, err?.message);
       if (err.code === 'payment_cancelled') {
-        Alert.alert('Cancelled', 'Payment was cancelled');
+        Toast.show({ type: 'info', text1: 'Payment Cancelled' });
       } else {
-        Alert.alert('Error', err.message || 'Failed to purchase pack');
+        Toast.show({ type: 'error', text1: 'Purchase Error', text2: err.message || 'Failed to purchase pack' });
       }
     }
   };
@@ -453,6 +419,7 @@ export default function WalletScreen() {
 
       await openRazorpay({
         token,
+        amount: (parseFloat(plan.price_inr)).toString(), // amount in paise
         description: `${plan.name} – ${plan.credits_per_month} Credits/month`,
         onSuccess: async (paymentId) => {
           console.log('[handleActivateSubscription] onSuccess called. paymentId:', paymentId);
@@ -477,226 +444,108 @@ export default function WalletScreen() {
           if (activateRes.ok) {
             const activateData = await activateRes.json();
             console.log('[handleActivateSubscription] ✅ Subscription activated:', activateData);
-            Alert.alert('Success', `Subscribed to ${plan.name}!`);
+            Toast.show({ type: 'success', text1: `Subscribed to ${plan.name}!` });
             setSubscriptionModalVisible(false);
             fetchAllData();
           } else {
             const err = await activateRes.json().catch(() => ({}));
             console.error('[handleActivateSubscription] ❌ Activation failed:', err);
-            Alert.alert('Failed', err.detail || 'Could not activate subscription');
+            Toast.show({ type: 'error', text1: 'Subscription Failed', text2: err.detail || 'Could not activate subscription' });
           }
         },
       });
     } catch (err: any) {
       console.error('[handleActivateSubscription] Error:', err?.code, err?.message);
       if (err.code === 'payment_cancelled') {
-        Alert.alert('Cancelled', 'Payment was cancelled');
+        Toast.show({ type: 'info', text1: 'Payment Cancelled' });
       } else {
-        Alert.alert('Error', err.message || 'Failed to activate subscription');
+        Toast.show({ type: 'error', text1: 'Subscription Error', text2: err.message || 'Failed to activate subscription' });
       }
     }
   };
 
-  // ─── Redeem Coupon ──────────────────────────────────────────────────────────
+  // ─── Modal Toggles (logged) ─────────────────────────────────────────────────
+
+  const openCreditPacksModal = () => {
+    console.log('[Modal] Opening Credit Packs modal. Packs available:', creditPacks.length);
+    if (!activeSub) {
+      console.warn('[Modal] No active subscription - credit packs disabled');
+      Toast.show({ type: 'info', text1: 'Subscribe First', text2: 'Subscribe to a plan to buy credit packs' });
+      return;
+    }
+    setCreditPacksModalVisible(true);
+  };
+
+  const openSubscriptionModal = () => {
+    console.log('[MODAL DEBUG] openSubscriptionModal called');
+    console.log('[MODAL DEBUG] Current state before:', { subscriptionModalVisible });
+    setSubscriptionModalVisible(true);
+    console.log('[MODAL DEBUG] State updated, modal should be visible now');
+  };
+
+  const openCouponModal = () => {
+    console.log('[MODAL DEBUG] openCouponModal called');
+    console.log('[MODAL DEBUG] Current state before:', { couponModalVisible });
+    setCouponModalVisible(true);
+    console.log('[MODAL DEBUG] State updated, modal should be visible now');
+  };
 
   const handleRedeemCoupon = async () => {
-    console.log('[handleRedeemCoupon] Attempting to redeem code:', couponCode.trim());
+    console.log('[handleRedeemCoupon] Attempting to redeem coupon:', couponCode);
+    
     if (!couponCode.trim()) {
-      console.warn('[handleRedeemCoupon] Empty coupon code — aborting');
-      Alert.alert('Invalid', 'Please enter a coupon code');
+      Toast.show({ type: 'error', text1: 'Invalid Code', text2: 'Please enter a coupon code' });
       return;
     }
+
     try {
       const token = await AsyncStorage.getItem('access_token');
-      console.log('[handleRedeemCoupon] Token:', token ? '✅' : '❌ missing');
-      if (!token) { navigation.navigate('Login'); return; }
-
-      console.log('[handleRedeemCoupon] Posting to /api/wallet/credits/redeem-coupon/ with code:', couponCode.trim().toUpperCase());
-      const res = await fetch(`${BASE_URL}/api/wallet/credits/redeem-coupon/`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: couponCode.trim().toUpperCase() }),
-      });
-
-      console.log('[handleRedeemCoupon] Response status:', res.status);
-      if (res.ok) {
-        const data = await res.json();
-        console.log('[handleRedeemCoupon] ✅ Coupon redeemed successfully:', data);
-        const credited = data.transactions?.[0]?.amount || '';
-        console.log('[handleRedeemCoupon] Amount credited:', credited || '(not in response)');
-        Alert.alert(
-          'Coupon Redeemed!',
-          credited ? `₹${credited} credited to your wallet.` : 'Coupon applied successfully!'
-        );
-        setCouponModalVisible(false);
-        setCouponCode('');
-        fetchAllData();
-      } else {
-        const err = await res.json().catch(() => ({}));
-        console.error('[handleRedeemCoupon] ❌ Coupon redemption failed:', err);
-        Alert.alert(
-          'Invalid Coupon',
-          err.detail || err.code?.[0] || 'Coupon could not be redeemed'
-        );
+      if (!token) {
+        console.warn('[handleRedeemCoupon] No token found');
+        Toast.show({ type: 'error', text1: 'Error', text2: 'Authentication failed' });
+        return;
       }
-    } catch (error) {
-      console.error('[handleRedeemCoupon] 🔴 Unexpected error:', error);
-      Alert.alert('Error', 'Something went wrong. Please try again.');
-    }
-  };
 
-  // ── Withdraw Flow ─────────────────────────────────────────────────────────
-
-  const initiateWithdraw = () => {
-    console.log('[initiateWithdraw] Withdraw button pressed');
-    console.log('[initiateWithdraw] Bank details available:', bankDetails.length);
-
-    if (bankDetails.length === 0) {
-      console.warn('[initiateWithdraw] No banks linked → showing alert');
-      Alert.alert(
-        'No Bank Account',
-        'Please add your bank details first to withdraw money.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Add Bank',
-            onPress: () => {
-              console.log('[initiateWithdraw] User tapped "Add Bank" → navigating to PaymentInfoScreen');
-              navigation.navigate('PaymentInfoScreen');
-            },
-          },
-        ]
-      );
-      return;
-    }
-
-    if (bankDetails.length === 1) {
-      console.log('[initiateWithdraw] Single bank → auto-selecting:', bankDetails[0].id, bankDetails[0].account_holder_name);
-      setSelectedBank(bankDetails[0]);
-      setWithdrawModalVisible(true);
-    } else {
-      console.log('[initiateWithdraw] Multiple banks (' + bankDetails.length + ') → opening bank selection modal');
-      setBankSelectModalVisible(true);
-    }
-  };
-
-  const selectBank = (bank: BankDetail) => {
-    console.log('[selectBank] User selected bank:', { id: bank.id, name: bank.account_holder_name, last4: bank.account_number.slice(-4) });
-    setSelectedBank(bank);
-    setBankSelectModalVisible(false);
-    setWithdrawModalVisible(true);
-  };
-
-  const handleWithdraw = async () => {
-    console.log('[handleWithdraw] Submit withdrawal. Amount entered:', withdrawAmount, 'Selected bank:', selectedBank?.id);
-    const amt = parseFloat(withdrawAmount);
-
-    if (isNaN(amt) || amt <= 0) {
-      console.warn('[handleWithdraw] Invalid amount:', withdrawAmount);
-      Alert.alert('Invalid Amount', 'Please enter a valid amount');
-      return;
-    }
-
-    if (!selectedBank) {
-      console.warn('[handleWithdraw] No bank selected');
-      Alert.alert('No Bank Selected', 'Please select a bank account');
-      return;
-    }
-
-    const currentBalance = parseFloat(wallet?.balance || '0');
-    console.log('[handleWithdraw] Balance check → requested:', amt, 'available:', currentBalance);
-    if (amt > currentBalance) {
-      console.warn('[handleWithdraw] ❌ Insufficient balance');
-      Alert.alert('Insufficient Balance', `You have only ₹${currentBalance.toFixed(0)} available`);
-      return;
-    }
-
-    try {
-      const token = await AsyncStorage.getItem('access_token');
-      console.log('[handleWithdraw] Token:', token ? '✅' : '❌ missing');
-      console.log('[handleWithdraw] Posting to /api/wallet/withdrawals/ →', { amount: withdrawAmount, bank_details: selectedBank.id });
-
-      const res = await fetch(`${BASE_URL}/api/wallet/withdrawals/`, {
+      console.log('[handleRedeemCoupon] Posting to /api/wallet/credits/redeem-coupon/');
+      const res = await fetch(`${BASE_URL}/api/wallet/credits/redeem-coupon/`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          amount: withdrawAmount,
-          bank_details: selectedBank.id,
-        }),
+        body: JSON.stringify({ code: couponCode.toUpperCase() }),
       });
 
-      console.log('[handleWithdraw] Response status:', res.status);
+      console.log('[handleRedeemCoupon] Response status:', res.status);
+      
       if (res.ok) {
-        const resData = await res.json();
-        console.log('[handleWithdraw] ✅ Withdrawal submitted successfully:', resData);
-        Alert.alert('Success', 'Your withdrawal request has been submitted.');
-        setWithdrawModalVisible(false);
-        setWithdrawAmount('');
-        setBankSelectModalVisible(false);
+        const responseData = await res.json();
+        console.log('[handleRedeemCoupon] ✅ Coupon redeemed successfully:', {
+          credit_balance: responseData.credit_balance,
+          balance: responseData.balance,
+        });
+        
+        // Update wallet with response data
+        setWallet(responseData);
+        
+        Toast.show({ type: 'success', text1: 'Coupon Redeemed!', text2: 'Credits have been added to your account' });
+        setCouponModalVisible(false);
+        setCouponCode('');
+        
+        // Refresh all data to show updated balances
         fetchAllData();
       } else {
         const errData = await res.json().catch(() => ({}));
-        console.error('[handleWithdraw] ❌ Withdrawal API error:', errData);
-        Alert.alert('Failed', errData.detail || 'Could not process withdrawal request');
+        console.error('[handleRedeemCoupon] ❌ Coupon redemption failed:', errData);
+        const errorMsg = errData.detail || errData.message || 'Invalid or already used coupon code';
+        Toast.show({ type: 'error', text1: 'Coupon Failed', text2: errorMsg });
       }
     } catch (err) {
-      console.error('[handleWithdraw] 🔴 Network or unexpected error:', err);
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      console.error('[handleRedeemCoupon] 🔴 Network or unexpected error:', err);
+      Toast.show({ type: 'error', text1: 'Error', text2: 'Something went wrong. Please try again.' });
     }
   };
 
-  // ─── Tab Change ─────────────────────────────────────────────────────────────
-
-  const handleTabChange = (tab: 'wallet' | 'credits') => {
-    console.log('[TabBar] Switching to tab:', tab);
-    setActiveTab(tab);
-  };
-
-  // ─── Modal Toggles (logged) ─────────────────────────────────────────────────
-
-  const openCouponModal = () => {
-    console.log('[Modal] Opening Coupon modal');
-    setCouponModalVisible(true);
-  };
-
-  const openCreditPacksModal = () => {
-    console.log('[Modal] Opening Credit Packs modal. Packs available:', creditPacks.length);
-    setCreditPacksModalVisible(true);
-  };
-
-  const openSubscriptionModal = () => {
-    console.log('[Modal] Opening Subscription Plans modal. Plans available:', subscriptionPlans.length);
-    setSubscriptionModalVisible(true);
-  };
-
-  // ─── Render Helpers ─────────────────────────────────────────────────────────
-
-  const renderTransaction = ({ item }: { item: Transaction }) => {
-    const amt = parseFloat(item.amount);
-    const isCredit = amt >= 0;
-    return (
-      <View style={styles.transactionItem}>
-        <Icon
-          name={isCredit ? 'arrow-down-circle-outline' : 'arrow-up-circle-outline'}
-          size={28}
-          color="#111111"
-          style={{ marginRight: 16 }}
-        />
-        <View style={{ flex: 1 }}>
-          <Text style={styles.transactionDesc}>
-            {item.description || item.source || item.transaction_type}
-          </Text>
-          <Text style={styles.transactionDate}>{formatDate(item.created_at)}</Text>
-        </View>
-        <Text style={[styles.transactionAmount, { color: '#111111' }]}>
-          {isCredit ? '+' : ''}₹{Math.abs(amt).toFixed(0)}
-        </Text>
-      </View>
-    );
-  };
 
   const renderCreditPack = ({ item }: { item: CreditPack }) => (
     <TouchableOpacity style={styles.packCard} onPress={() => handlePurchasePack(item)}>
@@ -773,39 +622,20 @@ export default function WalletScreen() {
 
   const balance = wallet?.balance || '0.00';
   const creditBalance = wallet?.credit_balance ?? 0;
-  console.log('[WalletScreen] Rendering main UI. balance:', balance, 'creditBalance:', creditBalance, 'activeTab:', activeTab);
+  console.log('[WalletScreen] Rendering main UI. balance:', balance, 'creditBalance:', creditBalance,);
 
   // ─── Main Render ─────────────────────────────────────────────────────────────
 
   return (
-    <SafeAreaView style={styles.container}>
+    <>
+      <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity onPress={() => { console.log('[Header] Back button pressed'); navigation.goBack(); }}>
           <Icon name="arrow-left" size={26} color="#111111" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Wallet</Text>
+        <Text style={styles.headerTitle}>Credits</Text>
         <View style={{ width: 26 }} />
-      </View>
-
-      {/* Tab Bar */}
-      <View style={styles.tabBar}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'wallet' && styles.tabActive]}
-          onPress={() => handleTabChange('wallet')}
-        >
-          <Text style={[styles.tabText, activeTab === 'wallet' && styles.tabTextActive]}>
-            Money Wallet
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'credits' && styles.tabActive]}
-          onPress={() => handleTabChange('credits')}
-        >
-          <Text style={[styles.tabText, activeTab === 'credits' && styles.tabTextActive]}>
-            Credits
-          </Text>
-        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -814,98 +644,22 @@ export default function WalletScreen() {
         }
         contentContainerStyle={styles.scrollContent}
       >
-        {/* ── WALLET TAB ── */}
-        {activeTab === 'wallet' && (
-          <>
-            {/* Balance Card */}
-            <View style={styles.balanceCard}>
-              <Text style={styles.balanceLabel}>WALLET BALANCE</Text>
-              <Text style={styles.balanceAmount}>₹ {parseFloat(balance).toFixed(0)}</Text>
+        {/* ── CREDITS ONLY ── */}
+        {/* Credit Balance Card */}
+        <View style={styles.balanceCard}>
+          <Text style={styles.balanceLabel}>CREDIT BALANCE</Text>
+          <Text style={styles.balanceAmount}>{creditBalance}</Text>
+          <Text style={styles.creditSubLabel}>credits available</Text>
 
-              <View style={styles.actionRow}>
-                <TouchableOpacity style={styles.withdrawBtn} onPress={initiateWithdraw}>
-                  <Icon name="bank-transfer" size={22} color="#FFFFFF" />
-                  <Text style={styles.withdrawText}>Withdraw</Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* Coupon Row */}
-              <TouchableOpacity
-                style={styles.couponRow}
-                onPress={openCouponModal}
-              >
-                <Icon name="ticket-percent-outline" size={18} color="#111111" />
-                <Text style={styles.couponRowText}>Redeem a Coupon Code</Text>
-                <Icon name="chevron-right" size={18} color="#AAAAAA" />
-              </TouchableOpacity>
-            </View>
-
-            {/* Recent Transactions */}
-            <Text style={styles.sectionTitle}>RECENT TRANSACTIONS</Text>
-            {wallet?.transactions?.length > 0 ? (
-              <FlatList
-                data={wallet.transactions}
-                renderItem={renderTransaction}
-                keyExtractor={(item) => item.id.toString()}
-                scrollEnabled={false}
-              />
-            ) : (
-              <View style={styles.emptyContainer}>
-                <Icon name="history" size={60} color="#AAAAAA" />
-                <Text style={styles.emptyText}>No transactions yet</Text>
-              </View>
-            )}
-
-            {/* Pending Withdrawals */}
-            {withdrawals.length > 0 && (
-              <>
-                <Text style={[styles.sectionTitle, { marginTop: 32 }]}>PENDING WITHDRAWALS</Text>
-                {withdrawals.map((w) => (
-                  <View key={w.id} style={styles.withdrawalItem}>
-                    <View>
-                      <Text style={styles.withdrawalAmount}>
-                        ₹{parseFloat(w.amount).toFixed(0)}
-                      </Text>
-                      {w.account_holder_name_snapshot && (
-                        <Text style={styles.withdrawalBank}>
-                          {w.account_holder_name_snapshot} ••••
-                          {w.account_number_snapshot?.slice(-4)}
-                        </Text>
-                      )}
-                      <Text style={styles.withdrawalDate}>{formatDate(w.created_at)}</Text>
-                    </View>
-                    <View
-                      style={[
-                        styles.statusBadge,
-                        w.status === 'approved' && styles.statusApproved,
-                        w.status === 'rejected' && styles.statusRejected,
-                      ]}
-                    >
-                      <Text style={styles.statusText}>{w.status.toUpperCase()}</Text>
-                    </View>
-                  </View>
-                ))}
-              </>
-            )}
-          </>
-        )}
-
-        {/* ── CREDITS TAB ── */}
-        {activeTab === 'credits' && (
-          <>
-            {/* Credit Balance Card */}
-            <View style={styles.balanceCard}>
-              <Text style={styles.balanceLabel}>CREDIT BALANCE</Text>
-              <Text style={styles.balanceAmount}>{creditBalance}</Text>
-              <Text style={styles.creditSubLabel}>credits available</Text>
-
+          {activeSub ? (
+            <>
               <View style={styles.actionRow}>
                 <TouchableOpacity
                   style={styles.addMoneyBtn}
                   onPress={openCreditPacksModal}
                 >
                   <Icon name="package-variant" size={22} color="#111111" />
-                  <Text style={styles.actionText}>Buy Credits</Text>
+                  <Text style={styles.actionText}>Top-up Credits</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -913,79 +667,106 @@ export default function WalletScreen() {
                   onPress={openSubscriptionModal}
                 >
                   <Icon name="crown-outline" size={22} color="#FFFFFF" />
-                  <Text style={styles.withdrawText}>Subscribe</Text>
+                  <Text style={styles.withdrawText}>Change Plan</Text>
                 </TouchableOpacity>
               </View>
-            </View>
-
-            {/* Active Subscription Card */}
-            {activeSub && (
-              <>
-                <Text style={styles.sectionTitle}>ACTIVE SUBSCRIPTION</Text>
-                <View style={styles.activeSubCard}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                    <Icon name="crown" size={22} color="#111111" style={{ marginRight: 10 }} />
-                    <Text style={styles.activeSubName}>{activeSub.plan.name}</Text>
-                  </View>
-                  <Text style={styles.activeSubDetail}>
-                    {activeSub.plan.credits_per_month} credits/month
-                  </Text>
-                  <Text style={styles.activeSubDetail}>
-                    Renews: {formatDate(activeSub.current_period_end)}
-                  </Text>
-                  <Text style={styles.activeSubDetail}>
-                    Auto-renew: {activeSub.auto_renew ? 'On' : 'Off'}
-                  </Text>
-                </View>
-              </>
-            )}
-
-            {/* Subscription Plans Preview */}
-            <View style={styles.sectionRow}>
-              <Text style={styles.sectionTitle}>SUBSCRIPTION PLANS</Text>
-              <TouchableOpacity onPress={openSubscriptionModal}>
-                <Text style={styles.seeAll}>See All</Text>
+              <TouchableOpacity
+                style={styles.couponBtn}
+                onPress={openCouponModal}
+              >
+                <Icon name="ticket-percent-outline" size={20} color="#111111" />
+                <Text style={styles.couponBtnText}>Redeem Coupon</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <View style={styles.actionRow}>
+              <TouchableOpacity
+                style={[styles.addMoneyBtn, { flex: 1 }]}
+                onPress={openSubscriptionModal}
+              >
+                <Icon name="crown" size={22} color="#111111" />
+                <Text style={styles.actionText}>Subscribe Now</Text>
               </TouchableOpacity>
             </View>
-            {subscriptionPlans.slice(0, 2).map((plan) => {
-              const isCurrent = activeSub?.plan?.id === plan.id;
-              return (
-                <View key={plan.id} style={[styles.planCard, isCurrent && styles.planCardActive]}>
-                  <View style={{ flex: 1 }}>
-                    <View style={styles.planHeader}>
-                      <Text style={styles.planName}>{plan.name}</Text>
-                      {isCurrent && (
-                        <View style={styles.activeBadge}>
-                          <Text style={styles.activeBadgeText}>ACTIVE</Text>
-                        </View>
-                      )}
-                    </View>
-                    <Text style={styles.planCredits}>{plan.credits_per_month} Credits/month</Text>
-                  </View>
-                  <View style={styles.planPriceCol}>
-                    <Text style={styles.planPrice}>
-                      ₹{parseFloat(plan.price_inr).toFixed(0)}
-                    </Text>
-                    <Text style={styles.planPriceSub}>/mo</Text>
-                    {!isCurrent && (
-                      <TouchableOpacity
-                        style={styles.subscribeBtn}
-                        onPress={() => handleActivateSubscription(plan)}
-                      >
-                        <Text style={styles.subscribeBtnText}>Subscribe</Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                </View>
-              );
-            })}
+          )}
+        </View>
 
-            {/* Credit Packs Preview */}
+        {/* Active Subscription Card */}
+        {activeSub && (
+          <>
+            <Text style={styles.sectionTitle}>ACTIVE SUBSCRIPTION</Text>
+            <View style={styles.activeSubCard}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                <Icon name="crown" size={22} color="#111111" style={{ marginRight: 10 }} />
+                <Text style={styles.activeSubName}>{activeSub.plan.name}</Text>
+              </View>
+              <Text style={styles.activeSubDetail}>
+                {activeSub.plan.credits_per_month} credits/month
+              </Text>
+              <Text style={styles.activeSubDetail}>
+                Renews: {formatDate(activeSub.current_period_end)}
+              </Text>
+              <Text style={styles.activeSubDetail}>
+                Auto-renew: {activeSub.auto_renew ? 'On' : 'Off'}
+              </Text>
+            </View>
+          </>
+        )}
+
+        {/* Subscription Plans */}
+        <View style={styles.sectionRow}>
+          <Text style={styles.sectionTitle}>
+            {activeSub ? 'OTHER SUBSCRIPTION PLANS' : 'SUBSCRIPTION PLANS'}
+          </Text>
+          {subscriptionPlans.length > 2 && (
+            <TouchableOpacity onPress={openSubscriptionModal}>
+              <Text style={styles.seeAll}>See All</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        {subscriptionPlans.map((plan) => {
+          const isCurrent = activeSub?.plan?.id === plan.id;
+          return (
+            <View key={plan.id} style={[styles.planCard, isCurrent && styles.planCardActive]}>
+              <View style={{ flex: 1 }}>
+                <View style={styles.planHeader}>
+                  <Text style={styles.planName}>{plan.name}</Text>
+                  {isCurrent && (
+                    <View style={styles.activeBadge}>
+                      <Text style={styles.activeBadgeText}>ACTIVE</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={styles.planCredits}>{plan.credits_per_month} Credits/month</Text>
+              </View>
+              <View style={styles.planPriceCol}>
+                <Text style={styles.planPrice}>
+                  ₹{parseFloat(plan.price_inr).toFixed(0)}
+                </Text>
+                <Text style={styles.planPriceSub}>/mo</Text>
+                {!isCurrent && (
+                  <TouchableOpacity
+                    style={styles.subscribeBtn}
+                    onPress={() => handleActivateSubscription(plan)}
+                  >
+                    <Text style={styles.subscribeBtnText}>Subscribe</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          );
+        })}
+
+        {/* Credit Packs - Only shown if active subscription */}
+        {activeSub && (
+          <>
             <View style={[styles.sectionRow, { marginTop: 24 }]}>
               <Text style={styles.sectionTitle}>CREDIT PACKS</Text>
-              <TouchableOpacity onPress={openCreditPacksModal}>
-                <Text style={styles.seeAll}>See All</Text>
-              </TouchableOpacity>
+              {creditPacks.length > 3 && (
+                <TouchableOpacity onPress={openCreditPacksModal}>
+                  <Text style={styles.seeAll}>See All</Text>
+                </TouchableOpacity>
+              )}
             </View>
             {creditPacks.slice(0, 3).map((pack) => (
               <TouchableOpacity
@@ -1010,193 +791,94 @@ export default function WalletScreen() {
             ))}
           </>
         )}
+
+        {/* Quick Actions - Always visible */}
+        <View style={styles.quickActionsSection}>
+          <TouchableOpacity
+            style={styles.quickActionBtn}
+            activeOpacity={0.7}
+            onPress={() => {
+              console.log('[QuickAction] Manage Plans pressed → opening subscription modal');
+              openSubscriptionModal();
+            }}
+          >
+            <Icon name="crown" size={20} color="#111111" />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.quickActionTitle}>Manage Plans</Text>
+              <Text style={styles.quickActionDesc}>View all subscription options</Text>
+            </View>
+            <Icon name="chevron-right" size={24} color="#AAAAAA" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.quickActionBtn}
+            activeOpacity={0.7}
+            onPress={() => {
+              console.log('[QuickAction] Redeem Coupon pressed → opening coupon modal');
+              openCouponModal();
+            }}
+          >
+            <Icon name="ticket-percent" size={20} color="#111111" />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.quickActionTitle}>Redeem Coupon</Text>
+              <Text style={styles.quickActionDesc}>Enter coupon code for credits</Text>
+            </View>
+            <Icon name="chevron-right" size={24} color="#AAAAAA" />
+          </TouchableOpacity>
+        </View>
       </ScrollView>
+    </SafeAreaView>
 
-      {/* ─── Modals ─────────────────────────────────────────────────────────── */}
+    {/* ─── Modals ─────────────────────────────────────────────────────────── */}
 
-      {/* Withdraw Amount Modal */}
-      <Modal
-        visible={withdrawModalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => { console.log('[Modal] Withdraw modal closed via back press'); setWithdrawModalVisible(false); }}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Withdraw to Bank</Text>
-            {selectedBank && (
-              <View style={styles.selectedBankPreview}>
-                <Icon name="bank" size={28} color="#111111" />
-                <View style={{ marginLeft: 14, flex: 1 }}>
-                  <Text style={styles.bankName}>{selectedBank.account_holder_name}</Text>
-                  <Text style={styles.bankNumber}>
-                    •••• •••• •••• {selectedBank.account_number.slice(-4)}
-                  </Text>
-                  <Text style={styles.bankIfsc}>IFSC: {selectedBank.ifsc_code}</Text>
-                </View>
-              </View>
-            )}
-            <TextInput
-              style={styles.input}
-              placeholder="Enter amount"
-              placeholderTextColor="#AAAAAA"
-              keyboardType="numeric"
-              value={withdrawAmount}
-              onChangeText={(val) => { console.log('[WithdrawModal] Amount changed:', val); setWithdrawAmount(val); }}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.cancelBtn}
-                onPress={() => { console.log('[WithdrawModal] Cancel pressed'); setWithdrawModalVisible(false); }}
-              >
-                <Text style={styles.cancelText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.confirmBtn} onPress={handleWithdraw}>
-                <Text style={styles.confirmText}>Request Withdrawal</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Bank Selection Modal */}
-      <Modal
-        visible={bankSelectModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => { console.log('[Modal] Bank select modal closed via back press'); setBankSelectModalVisible(false); }}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { maxHeight: width * 0.9 }]}>
-            <Text style={styles.modalTitle}>Select Bank Account</Text>
-            <Text style={styles.modalSubtitle}>Choose the account for withdrawal</Text>
-            <FlatList
-              data={bankDetails}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.bankSelectItem}
-                  onPress={() => selectBank(item)}
-                >
-                  <Icon
-                    name="bank"
-                    size={26}
-                    color="#111111"
-                    style={{ marginRight: 16 }}
-                  />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.bankSelectName}>{item.account_holder_name}</Text>
-                    <Text style={styles.bankSelectNumber}>
-                      •••• •••• •••• {item.account_number.slice(-4)}
-                    </Text>
-                    <Text style={styles.bankSelectIfsc}>IFSC: {item.ifsc_code}</Text>
-                  </View>
-                </TouchableOpacity>
-              )}
-            />
-            <TouchableOpacity
-              style={[styles.cancelBtn, { marginTop: 12 }]}
-              onPress={() => { console.log('[BankSelectModal] Cancel pressed'); setBankSelectModalVisible(false); }}
-            >
-              <Text style={styles.cancelText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.addNewBank}
-              onPress={() => {
-                console.log('[BankSelectModal] "Add New Bank" pressed → navigating to PaymentInfoScreen');
-                setBankSelectModalVisible(false);
-                navigation.navigate('PaymentInfoScreen');
-              }}
-            >
-              <Text style={styles.addNewBankText}>+ Add New Bank Account</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Coupon Modal */}
-      <Modal
-        visible={couponModalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => { console.log('[Modal] Coupon modal closed via back press'); setCouponModalVisible(false); }}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Icon
-              name="ticket-percent-outline"
-              size={40}
-              color="#111111"
-              style={{ alignSelf: 'center', marginBottom: 12 }}
-            />
-            <Text style={styles.modalTitle}>Redeem Coupon</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter coupon code (e.g. WELCOME50)"
-              placeholderTextColor="#AAAAAA"
-              autoCapitalize="characters"
-              value={couponCode}
-              onChangeText={(val) => { console.log('[CouponModal] Code typed:', val); setCouponCode(val); }}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.cancelBtn}
-                onPress={() => { console.log('[CouponModal] Cancel pressed'); setCouponModalVisible(false); setCouponCode(''); }}
-              >
-                <Text style={styles.cancelText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.confirmBtn} onPress={handleRedeemCoupon}>
-                <Text style={styles.confirmText}>Redeem</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Credit Packs Modal */}
+    {/* Credit Packs Modal - Only show if subscription is active */}
+    {activeSub && (
       <Modal
         visible={creditPacksModalVisible}
         transparent
-        animationType="slide"
+        animationType="fade"
+        presentationStyle="overFullScreen"
         onRequestClose={() => { console.log('[Modal] Credit Packs modal closed via back press'); setCreditPacksModalVisible(false); }}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { maxHeight: '85%' }]}>
-            <Text style={styles.modalTitle}>Buy Credit Packs</Text>
-            <Text style={styles.modalSubtitle}>One-time credit top-ups</Text>
-            {creditPacks.length === 0 ? (
-              <View style={styles.emptyContainer}>
-                <Icon name="package-variant" size={50} color="#AAAAAA" />
-                <Text style={styles.emptyText}>No packs available</Text>
-              </View>
-            ) : (
-              <FlatList
-                data={creditPacks}
-                renderItem={renderCreditPack}
-                keyExtractor={(item) => item.id.toString()}
-                scrollEnabled
-              />
-            )}
-            <TouchableOpacity
-              style={styles.closeBtn}
-              onPress={() => { console.log('[CreditPacksModal] Close pressed'); setCreditPacksModalVisible(false); }}
-            >
-              <Text style={styles.cancelText}>Close</Text>
-            </TouchableOpacity>
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, { maxHeight: '85%' }]}>
+              <Text style={styles.modalTitle}>Buy Credit Packs</Text>
+              <Text style={styles.modalSubtitle}>One-time credit top-ups</Text>
+              {creditPacks.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <Icon name="package-variant" size={50} color="#AAAAAA" />
+                  <Text style={styles.emptyText}>No packs available</Text>
+                </View>
+              ) : (
+                <FlatList
+                  data={creditPacks}
+                  renderItem={renderCreditPack}
+                  keyExtractor={(item) => item.id.toString()}
+                  scrollEnabled
+                />
+              )}
+              <TouchableOpacity
+                style={styles.closeBtn}
+                onPress={() => { console.log('[CreditPacksModal] Close pressed'); setCreditPacksModalVisible(false); }}
+              >
+                <Text style={styles.cancelText}>Close</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      )}
 
-      {/* Subscription Plans Modal */}
-      <Modal
-        visible={subscriptionModalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => { console.log('[Modal] Subscription modal closed via back press'); setSubscriptionModalVisible(false); }}
+    {/* Subscription Plans Modal */}
+    <Modal
+      visible={subscriptionModalVisible}
+      transparent
+      animationType="fade"
+      presentationStyle="overFullScreen"
+      onRequestClose={() => { console.log('[Modal] Subscription modal closed via back press'); setSubscriptionModalVisible(false); }}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { maxHeight: '85%' }]}>
-            <Text style={styles.modalTitle}>Subscription Plans</Text>
+      <View style={styles.modalOverlay}>
+        <View style={[styles.modalContent, { maxHeight: '85%' }]}>
+          <Text style={styles.modalTitle}>Subscription Plans</Text>
             <Text style={styles.modalSubtitle}>Monthly credit allocation</Text>
             {subscriptionPlans.length === 0 ? (
               <View style={styles.emptyContainer}>
@@ -1220,7 +902,48 @@ export default function WalletScreen() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+
+    {/* Coupon Redemption Modal */}
+    <Modal
+      visible={couponModalVisible}
+      transparent
+      animationType="fade"
+      presentationStyle="overFullScreen"
+      onRequestClose={() => { console.log('[Modal] Coupon modal closed via back press'); setCouponModalVisible(false); }}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <Icon
+            name="ticket-percent-outline"
+            size={40}
+            color="#111111"
+            style={{ alignSelf: 'center', marginBottom: 12 }}
+          />
+          <Text style={styles.modalTitle}>Redeem Coupon</Text>
+          <Text style={styles.modalSubtitle}>Enter your coupon code to claim credits</Text>
+          <TextInput
+            style={styles.couponInput}
+            placeholder="e.g., WELCOME50"
+            placeholderTextColor="#AAAAAA"
+            autoCapitalize="characters"
+            value={couponCode}
+            onChangeText={(val) => { console.log('[CouponModal] Code typed:', val); setCouponCode(val); }}
+          />
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              style={styles.cancelBtn}
+              onPress={() => { console.log('[CouponModal] Cancel pressed'); setCouponModalVisible(false); setCouponCode(''); }}
+            >
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.confirmBtn} onPress={handleRedeemCoupon}>
+              <Text style={styles.confirmText}>Redeem</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+    </>
   );
 }
 
@@ -1550,4 +1273,58 @@ const styles = StyleSheet.create({
 
   addNewBank: { marginTop: 16, alignItems: 'center', paddingVertical: 8 },
   addNewBankText: { fontSize: 15, fontFamily: 'Poppins-SemiBold', color: '#111111' },
+
+  couponBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+    paddingVertical: 14,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#111111',
+    gap: 8,
+  },
+  couponBtnText: { fontSize: 15, fontFamily: 'Poppins-SemiBold', color: '#111111' },
+  couponInput: {
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    borderRadius: 8,
+    padding: 16,
+    fontSize: 17,
+    marginBottom: 24,
+    marginTop: 12,
+    fontFamily: 'Poppins-Regular',
+    color: '#111111',
+  },
+
+  quickActionsSection: {
+    marginTop: 32,
+    marginBottom: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E8E8E8',
+    paddingTop: 16,
+  },
+  quickActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    gap: 12,
+  },
+  quickActionTitle: {
+    fontSize: 15,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    marginBottom: 2,
+  },
+  quickActionDesc: {
+    fontSize: 13,
+    fontFamily: 'Poppins-Regular',
+    color: '#AAAAAA',
+  },
 });

@@ -16,23 +16,22 @@ import {
   Modal,
   Keyboard,
   Animated,
+  ScrollView,
+  Image,
+  useWindowDimensions,
 } from 'react-native';
-import Svg, { Path, Circle, Rect, Line } from 'react-native-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const { width, height } = Dimensions.get('window');
 const isIOS = Platform.OS === 'ios';
 
-// Responsive scaling helpers (same as LoginScreen)
-const guidelineBaseWidth = 375;
-const guidelineBaseHeight = 812;
-const scale = (size: number) => (width / guidelineBaseWidth) * size;
-const verticalScale = (size: number) => (height / guidelineBaseHeight) * size;
-const moderateScale = (size: number, factor = 0.5) =>
-  size + (scale(size) - size) * factor;
+// Responsive scaling utility
+const scale = (size: number, baseWidth: number = 375) => {
+  const { width } = Dimensions.get('window');
+  return (width / baseWidth) * size;
+};
 
 type RootStackParamList = {
   Login: undefined;
@@ -42,8 +41,10 @@ type RootStackParamList = {
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function ForgotPasswordScreen() {
+  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
+  const imageHeightAnim = useRef(new Animated.Value(scale(280))).current;
 
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -54,67 +55,28 @@ export default function ForgotPasswordScreen() {
   const [errorTitle, setErrorTitle] = useState('Oops!');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Animations
-  const headerOpacity = useRef(new Animated.Value(1)).current;
-  const headerTranslateY = useRef(new Animated.Value(0)).current;
-  const formTranslateY = useRef(new Animated.Value(0)).current;
-
   useEffect(() => {
-    const keyboardShow = Keyboard.addListener(
-      isIOS ? 'keyboardWillShow' : 'keyboardDidShow',
-      (e) => {
-        const formShift = isIOS
-          ? -(e.endCoordinates.height * 0.45)
-          : -(e.endCoordinates.height * 0.55);
+    const keyboardShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      Animated.timing(imageHeightAnim, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: false,
+      }).start();
+    });
 
-        Animated.parallel([
-          Animated.timing(headerOpacity, {
-            toValue: 0,
-            duration: 220,
-            useNativeDriver: true,
-          }),
-          Animated.timing(headerTranslateY, {
-            toValue: -140,
-            duration: 260,
-            useNativeDriver: true,
-          }),
-          Animated.timing(formTranslateY, {
-            toValue: formShift,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      }
-    );
-
-    const keyboardHide = Keyboard.addListener(
-      isIOS ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => {
-        Animated.parallel([
-          Animated.timing(headerOpacity, {
-            toValue: 1,
-            duration: 280,
-            useNativeDriver: true,
-          }),
-          Animated.timing(headerTranslateY, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          Animated.timing(formTranslateY, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      }
-    );
+    const keyboardHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      Animated.timing(imageHeightAnim, {
+        toValue: scale(280),
+        duration: 250,
+        useNativeDriver: false,
+      }).start();
+    });
 
     return () => {
-      keyboardShow.remove();
-      keyboardHide.remove();
+      keyboardShowListener.remove();
+      keyboardHideListener.remove();
     };
-  }, []);
+  }, [imageHeightAnim]);
 
   const validateEmail = (): boolean => {
     setEmailError('');
@@ -124,7 +86,7 @@ export default function ForgotPasswordScreen() {
       return false;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setEmailError('That email does not look right');
+      setEmailError('That email doesn\'t look right');
       return false;
     }
     return true;
@@ -194,141 +156,85 @@ export default function ForgotPasswordScreen() {
     }
   };
 
-  const SvgIllustration = () => (
-    <Svg width={width * 0.55} height={width * 0.45} viewBox="0 0 300 220">
-      {/* Background glow */}
-      <Circle cx="150" cy="110" r="90" fill="#F3E8FF" opacity="0.4" />
-
-      {/* Envelope body */}
-      <Rect x="55" y="75" width="190" height="130" rx="18" fill="#FFFFFF" stroke="#E0BBFF" strokeWidth="5" />
-
-      {/* Envelope flap */}
-      <Path
-        d="M55 93 L150 155 L245 93"
-        fill="none"
-        stroke="#D8BFD8"
-        strokeWidth="5"
-        strokeLinejoin="round"
-      />
-
-      {/* Lock icon on envelope */}
-      <Circle cx="150" cy="140" r="22" fill="#F3E8FF" />
-      <Path
-        d="M141 138 L141 132 C141 127 159 127 159 132 L159 138"
-        fill="none"
-        stroke="#bf5299"
-        strokeWidth="4"
-        strokeLinecap="round"
-      />
-      <Rect x="138" y="137" width="24" height="17" rx="5" fill="#bf5299" />
-      <Circle cx="150" cy="146" r="3" fill="#FFFFFF" />
-
-      {/* Sparkles */}
-      <Line x1="65" y1="55" x2="65" y2="65" stroke="#E0BBFF" strokeWidth="3" strokeLinecap="round" />
-      <Line x1="60" y1="60" x2="70" y2="60" stroke="#E0BBFF" strokeWidth="3" strokeLinecap="round" />
-      <Line x1="235" y1="48" x2="235" y2="56" stroke="#D8BFD8" strokeWidth="2.5" strokeLinecap="round" />
-      <Line x1="231" y1="52" x2="239" y2="52" stroke="#D8BFD8" strokeWidth="2.5" strokeLinecap="round" />
-    </Svg>
-  );
+  const SvgIllustration = () => null; // Removed - using image header instead
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F9F5FF" />
-
-      {/* Back Button */}
-      <TouchableOpacity
-        style={[styles.backButton, { top: insets.top + verticalScale(12) }]}
-        onPress={() => navigation.goBack()}
-        activeOpacity={0.7}
-      >
-        <Icon name="arrow-back-ios" size={20} color="#374151" />
-      </TouchableOpacity>
+      <StatusBar barStyle="dark-content" backgroundColor="#f6ecef" />
 
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
-        behavior={isIOS ? 'padding' : undefined}
-        keyboardVerticalOffset={isIOS ? 20 : 0}
-        enabled={isIOS}
+        behavior={isIOS ? 'padding' : 'height'}
+        keyboardVerticalOffset={isIOS ? 0 : 0}
       >
-        <View style={styles.innerContent}>
-          {/* Animated Header */}
-          <Animated.View
-            style={[
-              styles.headerContainer,
-              {
-                opacity: headerOpacity,
-                transform: [{ translateY: headerTranslateY }],
-              },
-            ]}
-          >
-            <View style={styles.illustrationContainer}>
-              <SvgIllustration />
-            </View>
-            <View style={styles.welcomeText}>
-              <Text style={styles.title}>Forgot Password?</Text>
-              <Text style={styles.subtitle}>
-                Enter your email and we will send you a reset link.
-              </Text>
-            </View>
-          </Animated.View>
+        {/* Image Header - Animated Height */}
+        <Animated.View style={[styles.imageContainer, { height: imageHeightAnim }]}>
+          <Image
+            source={require('../assets/images/login.png')}
+            style={styles.headerImage}
+            resizeMode="contain"
+          />
+        </Animated.View>
 
-          {/* Animated Form */}
-          <Animated.View
-            style={[
-              styles.formContainer,
-              {
-                transform: [{ translateY: formTranslateY }],
-              },
-            ]}
-          >
-            <View style={styles.form}>
-              <View style={styles.inputWrapper}>
-                <Text style={styles.inputLabel}>Email Address</Text>
-                <View style={[styles.inputCard, emailError ? styles.inputErrorBorder : null]}>
-                  <Icon name="email" size={22} color="#777" style={styles.leftIcon} />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="hello@example.com"
-                    placeholderTextColor="#A0A0C0"
-                    value={email}
-                    onChangeText={(text) => {
-                      setEmail(text);
-                      if (emailError) setEmailError('');
-                    }}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    returnKeyType="done"
-                    onSubmitEditing={handleForgotPassword}
-                  />
-                </View>
-                {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Title Section */}
+          <View style={styles.titleSection}>
+            <Text style={styles.title}>Forgot Your</Text>
+            <Text style={styles.titleHighlight}>Password?</Text>
+          </View>
+
+          {/* Subtitle */}
+          <Text style={styles.subtitle}>Enter your email and we will send you a reset link.</Text>
+
+          {/* Email Input Form */}
+          <View style={styles.formContainer}>
+            <View style={styles.inputWrapper}>
+              <Text style={styles.inputLabel}>Email</Text>
+              <View style={[styles.inputCard, emailError && styles.inputErrorBorder]}>
+                <Icon name="email" size={18} color="#AAAAAA" style={styles.leftIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="hello@example.com"
+                  placeholderTextColor="#AAAAAA"
+                  value={email}
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    if (emailError) setEmailError('');
+                  }}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  returnKeyType="done"
+                  onSubmitEditing={handleForgotPassword}
+                />
               </View>
+              {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+            </View>
 
-              <TouchableOpacity
-                style={[styles.submitButton, isLoading && styles.buttonDisabled]}
-                activeOpacity={0.85}
-                onPress={handleForgotPassword}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <ActivityIndicator color="#fff" size="small" />
-                ) : (
-                  <Text style={styles.buttonText}>Send Reset Link</Text>
-                )}
+            <TouchableOpacity
+              style={[styles.submitButton, isLoading && styles.buttonDisabled]}
+              activeOpacity={0.85}
+              onPress={handleForgotPassword}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Text style={styles.buttonText}>Send Reset Link</Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Back to Login */}
+            <View style={styles.backToLoginContainer}>
+              <Text style={styles.backToLoginText}>Remember your password? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                <Text style={styles.backToLoginHighlight}>Login</Text>
               </TouchableOpacity>
-
-              <View style={styles.backToLoginRow}>
-                <Icon name="arrow-back" size={16} color="#B03385" style={{ marginRight: 4 }} />
-                <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                  <Text style={styles.backToLoginText}>Back to Login</Text>
-                </TouchableOpacity>
-              </View>
             </View>
+          </View>
 
-            <View style={{ height: isIOS ? 100 : 80 }} />
-          </Animated.View>
-        </View>
+          <View style={{ height: scale(40) }} />
+        </ScrollView>
       </KeyboardAvoidingView>
 
       {/* Success Modal */}
@@ -377,190 +283,182 @@ export default function ForgotPasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9F5FF',
-    paddingTop: 80,
-  },
-  backButton: {
-    position: 'absolute',
-    left: 20,
-    zIndex: 10,
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: '#E0D4FF',
-    shadowColor: '#993c89',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
   },
-  keyboardAvoid: {
-    flex: 1,
+  keyboardAvoid: { 
+    flex: 1 
   },
-  innerContent: {
-    flex: 1,
-    paddingHorizontal: 28,
-    justifyContent: 'center',
+  scrollContent: {
+    paddingBottom: scale(40),
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: scale(32),
+    borderTopRightRadius: scale(32),
+    overflow: 'hidden',
   },
-  headerContainer: {
-    alignItems: 'center',
-    marginBottom: 48,
+  imageContainer: {
+    width: '100%',
+    backgroundColor: '#f6ecef',
+    borderBottomLeftRadius: scale(32),
+    borderBottomRightRadius: scale(32),
   },
-  illustrationContainer: {
-    alignItems: 'center',
-    marginTop: Platform.select({ ios: 60, android: 50 }),
-    marginBottom: 28,
+  headerImage: {
+    width: '100%',
+    height: '100%',
+    borderBottomLeftRadius: scale(32),
+    borderBottomRightRadius: scale(32),
   },
-  welcomeText: {
-    alignItems: 'center',
+  titleSection: {
+    paddingHorizontal: '6.4%',
+    paddingTop: scale(24),
+    marginBottom: scale(12),
   },
   title: {
-    fontSize: moderateScale(34),
+    fontFamily: 'serif',
+    fontSize: scale(24),
     fontWeight: '800',
-    color: '#1A1A2E',
+    color: '#111111',
+    lineHeight: scale(36),
     letterSpacing: -0.5,
-    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  titleHighlight: {
+    fontFamily: 'serif',
+    fontSize: scale(24),
+    fontWeight: '800',
+    color: '#f8ac1b',
+    lineHeight: scale(36),
+    letterSpacing: -0.5,
+    fontStyle: 'italic',
   },
   subtitle: {
-    fontSize: moderateScale(15),
-    color: '#6B7280',
-    marginTop: 8,
-    textAlign: 'center',
-    lineHeight: 22,
-    paddingHorizontal: 8,
+    fontFamily: 'serif',
+    fontSize: scale(15),
+    color: '#666666',
+    lineHeight: scale(22),
+    paddingHorizontal: '6.4%',
+    marginBottom: scale(14),
   },
   formContainer: {
-    width: '100%',
+    paddingHorizontal: '6.4%',
   },
-  form: {},
   inputWrapper: {
-    marginBottom: 24,
+    marginBottom: scale(24),
   },
   inputLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 6,
+    fontSize: scale(14),
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    marginBottom: scale(6),
+    letterSpacing: 0.5,
   },
   inputCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    height: 58,
-    paddingHorizontal: 16,
-    borderWidth: 1.5,
-    borderColor: '#E0D4FF',
-    shadowColor: '#993c89',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    backgroundColor: '#ffffff',
+    borderRadius: scale(8),
+    height: scale(48),
+    paddingHorizontal: scale(16),
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
   },
   inputErrorBorder: {
-    borderColor: '#EF4444',
+    borderColor: '#111111',
   },
   leftIcon: {
-    marginRight: 12,
+    marginRight: scale(12),
   },
   input: {
     flex: 1,
-    fontSize: 16,
-    color: '#111827',
+    fontSize: scale(16),
+    color: '#111111',
+    fontFamily: 'Poppins-Regular',
   },
   errorText: {
-    color: '#EF4444',
-    fontSize: 13,
-    marginTop: 6,
-    marginLeft: 4,
+    color: '#111111',
+    fontSize: scale(13),
+    marginTop: scale(6),
+    marginLeft: scale(4),
+    fontFamily: 'Poppins-Regular',
   },
   submitButton: {
-    backgroundColor: '#b03384de',
-    height: 58,
-    borderRadius: 16,
+    backgroundColor: '#111111',
+    height: scale(48),
+    borderRadius: scale(8),
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#B03385',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 6,
-    marginBottom: 28,
+    marginBottom: scale(28),
   },
   buttonDisabled: {
-    opacity: 0.6,
+    opacity: 0.7,
   },
   buttonText: {
     color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: scale(16),
+    fontFamily: 'Poppins-SemiBold',
   },
-  backToLoginRow: {
+  backToLoginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 40,
+    paddingHorizontal: '6.4%',
   },
   backToLoginText: {
-    color: '#B03385',
-    fontWeight: '700',
-    fontSize: 15,
+    fontSize: scale(14),
+    color: '#666666',
+    fontFamily: 'Poppins-Regular',
+  },
+  backToLoginHighlight: {
+    color: '#111111',
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: scale(14),
   },
 });
 
 const modalStyles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.60)',
+    backgroundColor: 'rgba(0,0,0,0.65)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   container: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    padding: 32,
+    borderRadius: scale(12),
+    padding: scale(32),
     width: '84%',
-    maxWidth: 360,
+    maxWidth: scale(360),
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 15,
+    borderWidth: 1,
+    borderColor: '#aeaeae',
   },
   title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
-    marginTop: 16,
-    marginBottom: 8,
-    textAlign: 'center',
+    fontSize: scale(22),
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    marginTop: scale(16),
+    marginBottom: scale(8),
   },
   message: {
-    fontSize: 15,
-    color: '#6B7280',
+    fontSize: scale(15),
+    color: '#AAAAAA',
     textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 22,
+    marginBottom: scale(24),
+    lineHeight: scale(22),
+    fontFamily: 'Poppins-Regular',
   },
   emailHighlight: {
-    color: '#B03385',
-    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
   },
   closeButton: {
-    backgroundColor: '#b03384de',
-    paddingVertical: 14,
-    paddingHorizontal: 40,
-    borderRadius: 14,
-    marginTop: 8,
+    backgroundColor: '#111111',
+    paddingVertical: scale(14),
+    paddingHorizontal: scale(40),
+    borderRadius: scale(8),
+    marginTop: scale(8),
   },
   closeButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: scale(16),
+    fontFamily: 'Poppins-SemiBold',
   },
 });

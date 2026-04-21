@@ -1,6 +1,6 @@
 // src/features/auth/screens/SignUpScreen.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -13,12 +13,24 @@ import {
   Platform,
   ActivityIndicator,
   Modal,
+  ScrollView,
+  Image,
+  Keyboard,
+  Dimensions,
+  useWindowDimensions,
+  Animated,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
 import { registerUser } from '../../api/authApi';
+
+// Responsive scaling utility
+const scale = (size: number, baseWidth: number = 375) => {
+  const { width } = Dimensions.get('window');
+  return (width / baseWidth) * size;
+};
 
 type RootStackParamList = {
   Onboarding: undefined;
@@ -30,7 +42,9 @@ type RootStackParamList = {
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function SignUpScreen() {
+  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
   const navigation = useNavigation<NavigationProp>();
+  const imageHeightAnim = useRef(new Animated.Value(scale(280))).current;
 
   const selectedRole = 'customer';
 
@@ -43,6 +57,29 @@ export default function SignUpScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
+
+  useEffect(() => {
+    const keyboardShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      Animated.timing(imageHeightAnim, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: false,
+      }).start();
+    });
+
+    const keyboardHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      Animated.timing(imageHeightAnim, {
+        toValue: scale(280),
+        duration: 250,
+        useNativeDriver: false,
+      }).start();
+    });
+
+    return () => {
+      keyboardShowListener.remove();
+      keyboardHideListener.remove();
+    };
+  }, [imageHeightAnim]);
 
   const showToast = (type: 'success' | 'error', title: string, msg: string) => {
     Toast.show({ type, text1: title, text2: msg, position: 'top', visibilityTime: 3000, topOffset: 60 });
@@ -104,116 +141,164 @@ export default function SignUpScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-
+      <StatusBar barStyle="dark-content" backgroundColor="#f6ecef" />
+      
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 20}
+        style={styles.keyboardAvoid}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
-        <View style={styles.content}>
-          <Text style={styles.title}>Create Account</Text>
+        {/* Image Header - Animated Height */}
+        <Animated.View style={[styles.imageContainer, { height: imageHeightAnim }]}>
+          <Image
+            source={require('../../assets/images/login.png')}
+            style={styles.headerImage}
+            resizeMode="contain"
+          />
+        </Animated.View>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Title Section */}
+          <View style={styles.titleSection}>
+            <Text style={styles.title}>Create Your</Text>
+            <Text style={styles.titleHighlight}>Account</Text>
+          </View>
 
+          {/* Subtitle */}
+          <Text style={styles.subtitle}>Start building your personalized virtual wardrobe today.</Text>
+
+          {/* Error Message */}
           {apiError && (
             <View style={styles.apiErrorContainer}>
               <Text style={styles.apiErrorText}>{apiError}</Text>
             </View>
           )}
 
-          <View style={styles.form}>
-            <View style={styles.inputCard}>
-              <Icon name="person-outline" size={22} color="#AAAAAA" />
-              <TextInput
-                style={styles.input}
-                placeholder="First Name"
-                placeholderTextColor="#AAAAAA"
-                value={firstName}
-                onChangeText={setFirstName}
-                autoCapitalize="words"
-              />
-            </View>
-
-            <View style={styles.inputCard}>
-              <Icon name="person-outline" size={22} color="#AAAAAA" />
-              <TextInput
-                style={styles.input}
-                placeholder="Last Name"
-                placeholderTextColor="#AAAAAA"
-                value={lastName}
-                onChangeText={setLastName}
-                autoCapitalize="words"
-              />
-            </View>
-
-            <View style={styles.inputCard}>
-              <Icon name="email" size={22} color="#AAAAAA" />
-              <TextInput
-                style={styles.input}
-                placeholder="Email"
-                placeholderTextColor="#AAAAAA"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-            </View>
-
-            <View style={styles.inputCard}>
-              <Icon name="lock" size={22} color="#AAAAAA" />
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                placeholderTextColor="#AAAAAA"
-                secureTextEntry={!showPassword}
-                value={password}
-                onChangeText={setPassword}
-                autoCapitalize="none"
-              />
-              <TouchableOpacity style={{ padding: 8 }} onPress={() => setShowPassword(!showPassword)}>
-                <Icon 
-                  name={showPassword ? 'visibility' : 'visibility-off'} 
-                  size={22} 
-                  color="#AAAAAA" 
+          {/* Form */}
+          <View style={styles.formContainer}>
+            <View style={styles.inputWrapper}>
+              <Text style={styles.inputLabel}>First Name</Text>
+              <View style={styles.inputCard}>
+                <Icon name="person-outline" size={18} color="#AAAAAA" />
+                <TextInput
+                  style={styles.input}
+                  placeholder="First Name"
+                  placeholderTextColor="#AAAAAA"
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  autoCapitalize="words"
                 />
-              </TouchableOpacity>
+              </View>
             </View>
 
-            <View style={styles.inputCard}>
-              <Icon name="phone" size={22} color="#AAAAAA" />
-              <TextInput
-                style={styles.input}
-                placeholder="Phone Number (10 digits)"
-                placeholderTextColor="#AAAAAA"
-                keyboardType="phone-pad"
-                maxLength={10}
-                value={phone}
-                onChangeText={setPhone}
-              />
+            <View style={styles.inputWrapper}>
+              <Text style={styles.inputLabel}>Last Name</Text>
+              <View style={styles.inputCard}>
+                <Icon name="person-outline" size={18} color="#AAAAAA" />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Last Name"
+                  placeholderTextColor="#AAAAAA"
+                  value={lastName}
+                  onChangeText={setLastName}
+                  autoCapitalize="words"
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <Text style={styles.inputLabel}>Email</Text>
+              <View style={styles.inputCard}>
+                <Icon name="email" size={18} color="#AAAAAA" />
+                <TextInput
+                  style={styles.input}
+                  placeholder="hello@example.com"
+                  placeholderTextColor="#AAAAAA"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <Text style={styles.inputLabel}>Password</Text>
+              <View style={styles.inputCard}>
+                <Icon name="lock" size={18} color="#AAAAAA" />
+                <TextInput
+                  style={styles.input}
+                  placeholder="••••••••"
+                  placeholderTextColor="#AAAAAA"
+                  secureTextEntry={!showPassword}
+                  value={password}
+                  onChangeText={setPassword}
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity style={{ padding: 8 }} onPress={() => setShowPassword(!showPassword)}>
+                  <Icon 
+                    name={showPassword ? 'visibility' : 'visibility-off'} 
+                    size={18} 
+                    color="#AAAAAA" 
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <Text style={styles.inputLabel}>Phone Number</Text>
+              <View style={styles.inputCard}>
+                <Icon name="phone" size={18} color="#AAAAAA" />
+                <TextInput
+                  style={styles.input}
+                  placeholder="10 digit number"
+                  placeholderTextColor="#AAAAAA"
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                  value={phone}
+                  onChangeText={setPhone}
+                />
+              </View>
             </View>
           </View>
 
-          <TouchableOpacity
-            style={[styles.button, isLoading && styles.buttonDisabled]}
-            onPress={handleSignUp}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#FFFFFF" size="small" />
-            ) : (
-              <Text style={styles.buttonText}>Create Account</Text>
-            )}
+          {/* Buttons */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.signupButton, isLoading && styles.buttonDisabled]}
+              onPress={handleSignUp}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Text style={styles.buttonText}>Create Account</Text>
+              )}
+            </TouchableOpacity>
+
+            {/* <TouchableOpacity
+              style={styles.guestButton}
+              onPress={() => navigation.replace('MainTabs')}
+            >
+              <Text style={styles.guestButtonText}>Continue as Guest</Text>
+            </TouchableOpacity> */}
+          </View>
+
+          {/* Already Have Account */}
+          <View style={styles.loginLinkContainer}>
+            <Text style={styles.loginText}>Already have an account? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+              <Text style={styles.loginHighlight}>Login</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Terms and Conditions */}
+          <TouchableOpacity>
+            <Text style={styles.termsText}>Terms and Conditions</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.loginLink}
-            onPress={() => navigation.navigate('Login')}
-          >
-            <Text style={styles.loginText}>
-              Already have an account? <Text style={styles.loginHighlight}>Login</Text>
-            </Text>
-          </TouchableOpacity>
-        </View>
+          <View style={{ height: 40 }} />
+        </ScrollView>
       </KeyboardAvoidingView>
 
       {/* Success Modal */}
@@ -243,75 +328,152 @@ const styles = StyleSheet.create({
     flex: 1, 
     backgroundColor: '#FFFFFF' 
   },
-  content: { 
-    flex: 1, 
-    paddingHorizontal: 28, 
-    paddingTop: 80, 
-    paddingBottom: 40 
+  scrollContent: {
+    paddingBottom: scale(40),
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: scale(32),
+    borderTopRightRadius: scale(32),
+    overflow: 'hidden',
   },
-  title: { 
-    fontSize: 32, 
-    fontFamily: 'Poppins-SemiBold', 
-    color: '#111111', 
-    marginBottom: 40, 
-    textAlign: 'center',
-    letterSpacing: -0.6,
+  imageContainer: {
+    width: '100%',
+    height: scale(280),
+    backgroundColor: '#f6ecef',
+    borderBottomLeftRadius: scale(32),
+    borderBottomRightRadius: scale(32),
   },
-  form: { 
-    marginBottom: 32 
+  headerImage: {
+    width: '100%',
+    height: '100%',
+    borderBottomLeftRadius: scale(32),
+    borderBottomRightRadius: scale(32),
+    resizeMode: 'contain',
+  },
+  titleSection: {
+    paddingHorizontal: '6.4%',
+    paddingTop: scale(24),
+    marginBottom: scale(12),
+  },
+  title: {
+    fontFamily: 'serif',
+    fontSize: scale(28),
+    fontWeight: '800',
+    color: '#111111',
+    lineHeight: scale(36),
+    letterSpacing: -0.5,
+    fontStyle: 'italic',
+  },
+  titleHighlight: {
+    fontFamily: 'serif',
+    fontSize: scale(28),
+    fontWeight: '800',
+    color: '#f8ac1b',
+    lineHeight: scale(36),
+    letterSpacing: -0.5,
+    fontStyle: 'italic',
+  },
+  subtitle: {
+    fontFamily: 'serif',
+    fontSize: scale(15),
+    color: '#666666',
+    lineHeight: scale(22),
+    paddingHorizontal: '6.4%',
+    marginBottom: scale(28),
+  },
+  formContainer: {
+    paddingHorizontal: '6.4%',
+    marginBottom: scale(28),
+  },
+  inputWrapper: {
+    marginBottom: scale(8),
+  },
+  inputLabel: {
+    fontSize: scale(14),
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    marginBottom: scale(8),
+    letterSpacing: 0.5,
   },
   inputCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    height: 58,
-    marginBottom: 16,
+    borderRadius: scale(8),
+    paddingHorizontal: scale(16),
+    height: scale(48),
     borderWidth: 1,
-    borderColor: '#a1a1a1',
+    borderColor: '#E8E8E8',
   },
   input: { 
     flex: 1, 
-    fontSize: 16, 
+    fontSize: scale(16), 
     color: '#111111', 
-    marginLeft: 12,
+    marginLeft: scale(12),
     fontFamily: 'Poppins-Regular',
   },
-  button: {
+  buttonContainer: {
+    paddingHorizontal: '6.4%',
+    marginBottom: scale(14),
+  },
+  signupButton: {
     backgroundColor: '#111111',
-    height: 58,
-    borderRadius: 8,
+    height: scale(48),
+    borderRadius: scale(8),
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 8,
+    marginBottom: scale(14),
+  },
+  guestButton: {
+    backgroundColor: '#FFFFFF',
+    height: scale(48),
+    borderRadius: scale(8),
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
   },
   buttonDisabled: { 
     opacity: 0.7 
   },
   buttonText: { 
     color: '#FFFFFF', 
-    fontSize: 17, 
+    fontSize: scale(16), 
     fontFamily: 'Poppins-SemiBold' 
   },
-  loginLink: { 
-    alignItems: 'center', 
-    marginTop: 32 
+  guestButtonText: {
+    color: '#111111',
+    fontSize: scale(16),
+    fontFamily: 'Poppins-SemiBold',
+  },
+  loginLinkContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingHorizontal: '6.4%',
+    marginBottom: scale(16),
   },
   loginText: { 
-    fontSize: 15, 
-    color: '#AAAAAA',
+    fontSize: scale(14), 
+    color: '#666666',
     fontFamily: 'Poppins-Regular',
   },
   loginHighlight: { 
     color: '#111111', 
-    fontFamily: 'Poppins-SemiBold' 
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: scale(14),
+  },
+  termsText: {
+    fontSize: scale(13),
+    color: '#999999',
+    textAlign: 'center',
+    fontFamily: 'Poppins-Regular',
+    textDecorationLine: 'underline',
   },
   apiErrorContainer: { 
     backgroundColor: '#F7F7F7', 
-    padding: 14, 
-    borderRadius: 8, 
-    marginBottom: 24,
+    padding: scale(14), 
+    borderRadius: scale(8), 
+    marginBottom: scale(24),
+    marginHorizontal: '6.4%',
     borderWidth: 1,
     borderColor: '#E8E8E8',
   },
@@ -331,40 +493,35 @@ const modalStyles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 32,
+    borderRadius: scale(12),
+    padding: scale(32),
     alignItems: 'center',
     width: '80%',
-    maxWidth: 320,
+    maxWidth: scale(320),
     borderWidth: 1,
     borderColor: '#969696',
   },
   modalTitle: { 
-    fontSize: 24, 
+    fontSize: scale(24), 
     fontFamily: 'Poppins-SemiBold', 
     color: '#111111', 
-    marginTop: 20, 
-    marginBottom: 8 
+    marginTop: scale(20), 
+    marginBottom: scale(8) 
   },
   modalMessage: { 
-    fontSize: 16, 
+    fontSize: scale(16), 
     color: '#111111', 
     textAlign: 'center', 
-    marginBottom: 4,
+    marginBottom: scale(4),
     fontFamily: 'Poppins-Regular',
   },
   modalSubMessage: { 
-    fontSize: 14, 
+    fontSize: scale(14), 
     color: '#AAAAAA', 
     textAlign: 'center',
     fontFamily: 'Poppins-Regular',
   },
 });
-
-
-
-
-
 
 
 

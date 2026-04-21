@@ -7,9 +7,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-// import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
+import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import VirtualTryOnScreen from '../screens/virtualTry/VirtualTryOnScreen';
 
@@ -25,7 +24,7 @@ const INDICATOR_COLOR = '#111111'; // active top indicator dot/line
 export default function MainTabNavigator() {
   return (
     <Tab.Navigator
-      initialRouteName="TryOn"
+      initialRouteName="Home"
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
@@ -34,11 +33,12 @@ export default function MainTabNavigator() {
       tabBar={(props) => <CustomTabBar {...props} />}
     >
       {/* ── DEMO MODE: Only 2 tabs active ── */}
+      <Tab.Screen name="Home"        component={HomeScreen} />
       <Tab.Screen name="TryOn"   component={VirtualTryOnScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
 
       {/* ── Restore these for full app ──
-      <Tab.Screen name="Home"        component={HomeScreen} />
+      
       <Tab.Screen name="Marketplace" component={MarketplaceScreen} />
       <Tab.Screen name="Cart"        component={CartScreen} />
       */}
@@ -78,12 +78,12 @@ function CustomTabBar({ state, descriptors, navigation }) {
               style={styles.tabItem}
             >
               {/* Active top indicator bar */}
-              {/* <View
+              <View
                 style={[
                   styles.activeIndicator,
                   { backgroundColor: isFocused ? INDICATOR_COLOR : 'transparent' },
                 ]}
-              /> */}
+              />
 
               {/* Icon */}
               <Ionicons
@@ -115,7 +115,7 @@ function getIconName(name: string) {
   switch (name) {
     case 'TryOn':   return 'shirt-outline';
     case 'Profile': return 'person-outline';
-    // case 'Home':        return 'home-outline';
+    case 'Home':        return 'home-outline';
     // case 'Marketplace': return 'tag-outline';
     // case 'Cart':        return 'shopping-bag-outline';
     default: return 'circle-outline';

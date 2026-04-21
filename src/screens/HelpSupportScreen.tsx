@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 16,
-    paddingTop: Platform.select({ ios: 50, android: 40 }),
+    // paddingTop: Platform.select({ ios: 50, android: 40 }),
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#E8E8E8',

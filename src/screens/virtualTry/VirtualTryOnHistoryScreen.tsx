@@ -9,15 +9,17 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
-  Modal,
   Dimensions,
   Platform,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+// @ts-ignore - react-native-vector-icons module types
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icons from 'react-native-vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BASE_URL } from '../../config/env';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -58,23 +60,30 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // ── API ───────────────────────────────────────────────────────────────────────
 
-const API_BASE = 'https://api.feelvie.com'; // ← replace with your base URL
-
 const fetchHistory = async (): Promise<HistoryItem[]> => {
-  const response = await fetch(`${API_BASE}/api/secure/vton/history/`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      // Add auth header here if needed:
-      // 'Authorization': `Bearer ${token}`,
-    },
-  });
+  try {
+    const token = await AsyncStorage.getItem('access_token');
+    if (!token) {
+      throw new Error('Authentication token not found. Please login again.');
+    }
 
-  if (!response.ok) {
-    throw new Error(`Server error: ${response.status}`);
+    const response = await fetch(`${BASE_URL}/api/secure/vton/history/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
+
+    return response.json();
+  } catch (err) {
+    console.error('[HistoryScreen] fetchHistory error:', err);
+    throw err;
   }
-
-  return response.json();
 };
 
 // ── Category badge colour map ─────────────────────────────────────────────────
@@ -85,8 +94,10 @@ const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
   'one-pieces': { bg: '#777777', text: '#FFFFFF' },
 };
 
-const categoryColor = (cat: string) =>
-  CATEGORY_COLORS[cat.toLowerCase()] ?? { bg: '#DDDDDD', text: '#111111' };
+const categoryColor = (cat: string | null | undefined) => {
+  if (!cat) return { bg: '#DDDDDD', text: '#111111' };
+  return CATEGORY_COLORS[cat.toLowerCase()] ?? { bg: '#DDDDDD', text: '#111111' };
+};
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -96,63 +107,30 @@ interface HistoryCardProps {
 }
 
 const HistoryCard = React.memo(({ item, onPress }: HistoryCardProps) => {
-  const { bg, text } = categoryColor(item.category);
-
-  // Parse request_meta JSON if possible
-  let meta: Record<string, string> = {};
-  try {
-    meta = JSON.parse(item.request_meta);
-  } catch {
-    // keep empty
-  }
-
   return (
-    <TouchableOpacity
-      style={styles.card}
-      activeOpacity={0.85}
-      onPress={() => onPress(item)}
-    >
-      {/* Result image */}
-      <View style={styles.cardImageWrapper}>
+    <View style={styles.card}>
+      <TouchableOpacity
+        style={styles.cardImageContainer}
+        activeOpacity={0.85}
+        onPress={() => onPress(item)}
+      >
         <Image
           source={{ uri: toImageUri(item.output_image_base64) }}
           style={styles.cardImage}
           resizeMode="cover"
         />
 
-        {/* Category badge */}
-        <View style={[styles.categoryBadge, { backgroundColor: bg }]}>
-          <Text style={[styles.categoryBadgeText, { color: text }]}>
-            {cap(item.category)}
-          </Text>
-        </View>
-      </View>
-
-      {/* Card info */}
-      <View style={styles.cardInfo}>
-        <Text style={styles.cardDate}>{formatDate(item.created_at)}</Text>
-
-        {/* Meta pills (garment size, body size, etc. if present) */}
-        {Object.keys(meta).length > 0 && (
-          <View style={styles.metaRow}>
-            {Object.entries(meta)
-              .slice(0, 3)
-              .map(([k, v]) => (
-                <View key={k} style={styles.metaPill}>
-                  <Text style={styles.metaPillText}>
-                    {cap(k)}: {v}
-                  </Text>
-                </View>
-              ))}
-          </View>
-        )}
-
-        <View style={styles.cardFooter}>
-          <Text style={styles.viewDetail}>View result</Text>
-          <Icon name="arrow-right" size={15} color="#111111" />
-        </View>
-      </View>
-    </TouchableOpacity>
+        {/* Floating Action Button */}
+        <TouchableOpacity
+          style={styles.cardButton}
+          activeOpacity={0.8}
+          onPress={() => onPress(item)}
+        >
+          <Text style={styles.cardButtonText}>View</Text>
+          <Icons name="auto-awesome" size={16} color="#111111" />
+        </TouchableOpacity>
+      </TouchableOpacity>
+    </View>
   );
 });
 
@@ -173,81 +151,7 @@ const EmptyState = ({ onRetry }: { onRetry: () => void }) => (
 
 // ── Detail Modal ──────────────────────────────────────────────────────────────
 
-interface DetailModalProps {
-  item: HistoryItem | null;
-  onClose: () => void;
-}
-
-const DetailModal = ({ item, onClose }: DetailModalProps) => {
-  if (!item) return null;
-
-  let meta: Record<string, string> = {};
-  try {
-    meta = JSON.parse(item.request_meta);
-  } catch {}
-
-  return (
-    <Modal
-      visible={!!item}
-      animationType="slide"
-      transparent
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          {/* Header */}
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Try-On Result</Text>
-            <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Icon name="close" size={26} color="#111111" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Full result image */}
-          <Image
-            source={{ uri: toImageUri(item.output_image_base64) }}
-            style={styles.modalImage}
-            resizeMode="contain"
-          />
-
-          {/* Details */}
-          <View style={styles.modalDetails}>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Category</Text>
-              <Text style={styles.detailValue}>{cap(item.category)}</Text>
-            </View>
-
-            <View style={styles.detailDivider} />
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Generated</Text>
-              <Text style={styles.detailValue}>{formatDate(item.created_at)}</Text>
-            </View>
-
-            {Object.keys(meta).length > 0 && (
-              <>
-                <View style={styles.detailDivider} />
-                {Object.entries(meta).map(([k, v]) => (
-                  <React.Fragment key={k}>
-                    <View style={styles.detailRow}>
-                      <Text style={styles.detailLabel}>{cap(k)}</Text>
-                      <Text style={styles.detailValue}>{v}</Text>
-                    </View>
-                    <View style={styles.detailDivider} />
-                  </React.Fragment>
-                ))}
-              </>
-            )}
-          </View>
-
-          <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-            <Text style={styles.closeBtnText}>Close</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
+// (Navigation to TryOnResult replaces modal)
 
 // ── Main Screen ───────────────────────────────────────────────────────────────
 
@@ -260,7 +164,6 @@ export default function VirtualTryOnHistoryScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
 
   const loadHistory = useCallback(async (isRefresh = false) => {
     console.debug(`[HistoryScreen] loadHistory called (refresh=${isRefresh})`);
@@ -292,19 +195,23 @@ export default function VirtualTryOnHistoryScreen() {
   }, [loadHistory]);
 
   const handleCardPress = (item: HistoryItem) => {
-    setSelectedItem(item);
+    // Navigate to TryOnResult with base64 image and metadata
+    (navigation as any).navigate('TryOnResult', {
+      resultBase64: toImageUri(item.output_image_base64),
+      category: item.category,
+      timestamp: item.created_at,
+      metadata: item.request_meta,
+    });
   };
 
   const renderItem = ({ item }: { item: HistoryItem }) => (
     <HistoryCard item={item} onPress={handleCardPress} />
   );
 
-  const renderSeparator = () => <View style={styles.separator} />;
-
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.safeArea}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -320,14 +227,7 @@ export default function VirtualTryOnHistoryScreen() {
         <View style={{ width: 24 }} />
       </View>
 
-      {/* Count subtitle */}
-      {!loading && !error && items.length > 0 && (
-        <View style={styles.subHeader}>
-          <Text style={styles.subHeaderText}>
-            {items.length} result{items.length !== 1 ? 's' : ''}
-          </Text>
-        </View>
-      )}
+      
 
       {/* Loading */}
       {loading && (
@@ -355,7 +255,8 @@ export default function VirtualTryOnHistoryScreen() {
           data={items}
           keyExtractor={(item) => String(item.id)}
           renderItem={renderItem}
-          ItemSeparatorComponent={renderSeparator}
+          numColumns={2}
+          columnWrapperStyle={styles.columnWrapper}
           contentContainerStyle={
             items.length === 0 ? styles.emptyList : styles.listContent
           }
@@ -371,17 +272,11 @@ export default function VirtualTryOnHistoryScreen() {
           showsVerticalScrollIndicator={false}
         />
       )}
-
-      {/* Detail Modal */}
-      <DetailModal item={selectedItem} onClose={() => setSelectedItem(null)} />
-    </SafeAreaView>
+    </View>
   );
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-
-// Portrait ratio matching a full-body try-on result (similar to TryOnResult screen)
-const CARD_IMAGE_HEIGHT = width * 1.15;
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -421,38 +316,74 @@ const styles = StyleSheet.create({
 
   /* List */
   listContent: {
-    paddingTop: 20,
+    paddingHorizontal: 10,
+    paddingTop: 10,
     paddingBottom: 40,
   },
   emptyList: {
     flex: 1,
   },
   separator: {
-    height: 1,
-    backgroundColor: '#E8E8E8',
-    marginHorizontal: 20,
-    marginVertical: 8,
+    height: 0,
+  },
+  columnWrapper: {
+    flex: 1,
   },
 
-  /* Card */
+  /* Card - Grid layout */
   card: {
-    marginHorizontal: 20,
-    borderRadius: 8,
+    flex: 1,
+    margin: 10,
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E8E8E8',
-    backgroundColor: '#FFFFFF',
-    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
   },
-  cardImageWrapper: {
+  cardImageContainer: {
     width: '100%',
-    height: CARD_IMAGE_HEIGHT,
-    backgroundColor: '#FFFFFF',
+    height: 260,
+    overflow: 'hidden',
     position: 'relative',
   },
   cardImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'contain',
+  },
+  cardButton: {
+    position: 'absolute',
+    left: 12,
+    right: 12,
+    bottom: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 999,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  cardButtonText: {
+    color: '#111111',
+    fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
+    letterSpacing: 0.3,
+  },
+  cardImageWrapper: {
+    width: '100%',
+    height: 280,
+    backgroundColor: '#FFFFFF',
+    position: 'relative',
   },
   categoryBadge: {
     position: 'absolute',
@@ -476,25 +407,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     color: '#777777',
     marginBottom: 8,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginBottom: 12,
-  },
-  metaPill: {
-    backgroundColor: '#F7F7F7',
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  metaPillText: {
-    fontSize: 12,
-    fontFamily: 'Poppins-Regular',
-    color: '#444444',
   },
   cardFooter: {
     flexDirection: 'row',
@@ -582,79 +494,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'Poppins-SemiBold',
     color: '#111111',
-  },
-
-  /* Detail Modal */
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.65)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    maxHeight: height * 0.90,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E8E8E8',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontFamily: 'Poppins-SemiBold',
-    color: '#111111',
-  },
-  modalImage: {
-    width: '100%',
-    height: height * 0.50,
-    backgroundColor: '#FFFFFF',
-    resizeMode: 'contain',
-  },
-  modalDetails: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  detailLabel: {
-    fontSize: 14,
-    fontFamily: 'Poppins-Regular',
-    color: '#AAAAAA',
-  },
-  detailValue: {
-    fontSize: 14,
-    fontFamily: 'Poppins-SemiBold',
-    color: '#111111',
-    flexShrink: 1,
-    textAlign: 'right',
-    marginLeft: 16,
-  },
-  detailDivider: {
-    height: 1,
-    backgroundColor: '#E8E8E8',
-  },
-  closeBtn: {
-    backgroundColor: '#111111',
-    margin: 20,
-    paddingVertical: 17,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  closeBtnText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontFamily: 'Poppins-SemiBold',
   },
 });

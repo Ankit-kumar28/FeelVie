@@ -12,6 +12,8 @@ import {
   ActivityIndicator,
   Platform,
   Alert,
+  Dimensions,
+  useWindowDimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';
@@ -19,21 +21,30 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { BASE_URL } from '../config/env';
 
+// Responsive scaling utility
+const scale = (size: number, baseWidth: number = 375) => {
+  const { width } = Dimensions.get('window');
+  return (width / baseWidth) * size;
+};
+
 // ─── MenuItem ─────────────────────────────────────────────────────────────────
 
 const MenuItem = ({ icon, title, onPress }: { icon: string; title: string; onPress: () => void }) => (
   <TouchableOpacity style={styles.menuItem} onPress={onPress} activeOpacity={0.7}>
     <View style={styles.menuLeft}>
-      <Icon name={icon} size={24} color="#111111" />
+      <View style={styles.menuIconBox}>
+        <Icon name={icon} size={scale(20)} color="#111111" />
+      </View>
       <Text style={styles.menuText}>{title}</Text>
     </View>
-    <Icon name="chevron-right" size={22} color="#AAAAAA" />
+    <Icon name="chevron-right" size={scale(20)} color="#AAAAAA" />
   </TouchableOpacity>
 );
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function ProfileScreen() {
+  const { width: SCREEN_WIDTH } = useWindowDimensions();
   const { user, logout, token, isLoading: authLoading, setUser } = useAuth();
   const navigation = useNavigation<any>();
   const [loggingOut, setLoggingOut] = useState(false);
@@ -119,7 +130,7 @@ export default function ProfileScreen() {
   const displayEmail = data?.email || 'Not added yet';
   const displayPhone =
     data?.phone && data.phone.trim() && data.phone !== 'string'
-      ? data.phone
+      ? `+91 ${data.phone.replace(/^\+?91\s?/, '')}`
       : 'Not added yet';
   const isVerified = data?.is_verified === true;
 
@@ -162,10 +173,10 @@ export default function ProfileScreen() {
 
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-left" size={26} color="#111111" />
+          <Icon name="arrow-left" size={scale(26)} color="#111111" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Profile</Text>
-        <View style={{ width: 26 }} />
+        <View style={{ width: scale(26) }} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
@@ -194,12 +205,12 @@ export default function ProfileScreen() {
                 />
               ) : (
                 <View style={styles.avatarPlaceholder}>
-                  <Icon name="account-outline" size={44} color="#AAAAAA" />
+                  <Icon name="account-outline" size={scale(44)} color="#AAAAAA" />
                 </View>
               )}
               {/* Camera badge — visual cue that photo is editable */}
               <View style={styles.cameraBadge}>
-                <Icon name="camera-plus-outline" size={14} color="#FFFFFF" />
+                <Icon name="camera-plus-outline" size={scale(14)} color="#FFFFFF" />
               </View>
             </TouchableOpacity>
 
@@ -207,40 +218,57 @@ export default function ProfileScreen() {
               <Text style={styles.userName}>{fullName}</Text>
 
               <View style={styles.infoRow}>
-                <Icon name="email-outline" size={18} color="#AAAAAA" />
+                <Icon name="email-outline" size={scale(16)} color="#AAAAAA" />
                 <Text style={styles.infoText}>{displayEmail}</Text>
                 {isVerified && (
-                  <Icon name="check-decagram" size={16} color="#111111" style={styles.verifiedIcon} />
+                  <Icon name="check-decagram" size={scale(14)} color="#2ECC71" style={styles.verifiedIcon} />
                 )}
               </View>
 
               <View style={styles.infoRow}>
-                <Icon name="phone-outline" size={18} color="#AAAAAA" />
+                <Icon name="phone-outline" size={scale(16)} color="#AAAAAA" />
                 <Text style={styles.infoText}>{displayPhone}</Text>
               </View>
             </View>
           </View>
+
+          <View style={styles.profileDivider} />
+
+          <TouchableOpacity
+            style={styles.editProfileButton}
+            onPress={() => navigation.navigate('PersonalInfoScreen')}
+          >
+            <Icon name="account-edit-outline" size={scale(18)} color="#111111" />
+            <Text style={styles.editProfileText}>Edit Profile</Text>
+            <Icon name="chevron-right" size={scale(20)} color="#AAAAAA" />
+          </TouchableOpacity>
         </View>
 
         {/* Menu Sections */}
         <View style={styles.sectionsContainer}>
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>PAYMENT</Text>
-            <MenuItem icon="wallet-outline" title="Wallet & Coins" onPress={() => navigation.navigate('WalletScreen')} />
+            <View style={styles.menuGroupCard}>
+              <MenuItem icon="wallet-outline" title="Wallet & Coins" onPress={() => navigation.navigate('WalletScreen')} />
+            </View>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>ADDRESS</Text>
-            <MenuItem icon="map-marker-outline" title="My Addresses" onPress={() => {}} />
+            <Text style={styles.sectionTitle}>History</Text>
+            <View style={styles.menuGroupCard}>
+              <MenuItem icon="history" title="Try On History" onPress={() => { navigation.navigate('VirtualTryOnHistory') }} />
+            </View>
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>HELP & SUPPORT</Text>
-            <MenuItem
-              icon="headphones"
-              title="Help & Support"
-              onPress={() => navigation.navigate('HelpSupport')}
-            />
+            <View style={styles.menuGroupCard}>
+              <MenuItem
+                icon="headphones"
+                title="Help & Support"
+                onPress={() => navigation.navigate('HelpSupport')}
+              />
+            </View>
           </View>
         </View>
 
@@ -252,17 +280,17 @@ export default function ProfileScreen() {
             disabled={loggingOut}
           >
             {loggingOut ? (
-              <ActivityIndicator size="small" color="#111111" />
+              <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
               <>
-                <Icon name="logout" size={22} color="#111111" />
+                <Icon name="logout" size={scale(20)} color="#FFFFFF" />
                 <Text style={styles.logoutText}>Log Out</Text>
               </>
             )}
           </TouchableOpacity>
         </View>
 
-        <View style={{ height: 80 }} />
+        <View style={{ height: scale(80) }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -277,18 +305,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: Platform.select({ ios: 50, android: 40 }),
-    paddingBottom: 16,
+    paddingHorizontal: '6.4%',
+    paddingBottom: scale(16),
+    paddingTop: scale(12),
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E8E8E8',
   },
   backButton: { 
-    padding: 8 
+    padding: scale(8),
+    marginLeft: -scale(8),
   },
   headerTitle: { 
-    fontSize: 20, 
+    fontSize: scale(20), 
     fontFamily: 'Poppins-SemiBold', 
     color: '#111111',
     letterSpacing: -0.3,
@@ -299,171 +328,227 @@ const styles = StyleSheet.create({
     alignItems: 'center' 
   },
   loadingText: { 
-    marginTop: 12, 
-    fontSize: 16, 
+    marginTop: scale(12), 
+    fontSize: scale(16), 
     color: '#AAAAAA',
     fontFamily: 'Poppins-Regular',
   },
 
   scrollContent: {
-    paddingBottom: 40,
+    paddingBottom: scale(40),
   },
 
   /* Profile Card */
   profileCard: {
     backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    marginTop: 20,
-    marginBottom: 24,
-    borderRadius: 8,
-    padding: 20,
-    borderWidth: 1,
+    marginHorizontal: '6.4%',
+    marginTop: scale(20),
+    marginBottom: scale(20),
+    borderRadius: scale(12),
+    paddingVertical: scale(0),
+    paddingHorizontal: scale(0),
+    borderWidth: 0.8,
     borderColor: '#E8E8E8',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
+    overflow: 'hidden',
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
+  },
+  profileDivider: {
+    height: 0.5,
+    backgroundColor: '#F0F0F0',
   },
   editButton: {
     position: 'absolute',
-    top: 16,
-    right: 16,
+    top: scale(16),
+    right: scale(16),
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
-    borderRadius: 8,
-    width: 36,
-    height: 36,
+    borderWidth: 0,
+    borderRadius: scale(10),
+    width: scale(40),
+    height: scale(40),
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
+    display: 'none',
   },
   profileContent: { 
     flexDirection: 'row', 
-    alignItems: 'center' 
+    alignItems: 'center',
+    paddingVertical: scale(14),
+    paddingHorizontal: scale(8),
   },
 
   avatarWrapper: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
+    width: scale(92),
+    height: scale(92),
+    borderRadius: scale(46),
     position: 'relative',
-    marginRight: 20,
+    marginRight: scale(20),
     backgroundColor: '#F7F7F7',
   },
   avatarImage: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
-    borderWidth: 2,
-    borderColor: '#E8E8E8',
+    width: scale(92),
+    height: scale(92),
+    borderRadius: scale(46),
+    borderWidth: 3,
+    borderColor: '#F9F9F9',
   },
   avatarPlaceholder: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
-    backgroundColor: '#F7F7F7',
+    width: scale(92),
+    height: scale(92),
+    borderRadius: scale(46),
+    backgroundColor: '#F9F9F9',
     borderWidth: 2,
-    borderColor: '#E8E8E8',
+    borderColor: '#F0F0F0',
     justifyContent: 'center',
     alignItems: 'center',
   },
   cameraBadge: {
     position: 'absolute',
-    bottom: 4,
-    right: 4,
+    bottom: scale(4),
+    right: scale(4),
     backgroundColor: '#111111',
-    borderRadius: 10,
-    width: 24,
-    height: 24,
+    borderRadius: scale(10),
+    width: scale(24),
+    height: scale(24),
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
     borderColor: '#FFFFFF',
   },
 
-  userInfo: { flex: 1 },
+  userInfo: { flex: 1, paddingLeft: scale(8) },
   userName: { 
-    fontSize: 22, 
-    fontFamily: 'Poppins-SemiBold', 
+    fontSize: scale(18), 
+    fontFamily: 'Poppins-Bold', 
     color: '#111111', 
-    marginBottom: 10 
+    marginBottom: scale(8),
+    fontWeight: '700',
   },
   infoRow: { 
     flexDirection: 'row', 
     alignItems: 'center', 
-    marginBottom: 8 
+    marginBottom: scale(6) 
   },
   infoText: { 
-    fontSize: 15, 
-    color: '#111111', 
-    marginLeft: 10, 
+    fontSize: scale(13), 
+    color: '#555555', 
+    marginLeft: scale(8), 
     flex: 1,
     fontFamily: 'Poppins-Regular',
+    fontWeight: '500',
   },
   verifiedIcon: { 
-    marginLeft: 6 
+    marginLeft: scale(6) 
+  },
+  editProfileButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: scale(10),
+    paddingHorizontal: scale(12),
+    justifyContent: 'space-between',
+  },
+  editProfileText: {
+    fontSize: scale(15),
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    marginLeft: scale(10),
+    flex: 1,
+    fontWeight: '600',
   },
 
   /* Menu Sections */
   sectionsContainer: { 
-    marginHorizontal: 16 
+    marginHorizontal: '6.4%'
   },
   section: {
-    marginBottom: 32,
+    marginBottom: scale(18),
   },
   sectionTitle: {
-    fontSize: 13,
-    fontFamily: 'Poppins-SemiBold',
-    color: '#111111',
-    paddingHorizontal: 4,
-    paddingVertical: 12,
+    fontSize: scale(10),
+    fontFamily: 'Poppins-Bold',
+    color: '#BBBBBB',
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(10),
     textTransform: 'uppercase',
-    letterSpacing: 1.2,
+    letterSpacing: 1.8,
+    fontWeight: '700',
   },
   menuItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 18,
-    paddingHorizontal: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E8E8E8',
+    paddingVertical: scale(6),
+    paddingHorizontal: scale(8),
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#F5F5F5',
+  },
+  menuGroupCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: scale(10),
+    borderWidth: 0.8,
+    borderColor: '#E8E8E8',
+    overflow: 'hidden',
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
   },
   menuLeft: { 
     flexDirection: 'row', 
     alignItems: 'center', 
     flex: 1 
   },
+  menuIconBox: {
+    width: scale(40),
+    height: scale(40),
+    borderRadius: scale(10),
+    backgroundColor: '#F9F9F9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 0,
+    marginRight: scale(2),
+  },
   menuText: { 
-    fontSize: 16, 
-    color: '#111111', 
-    marginLeft: 18,
-    fontFamily: 'Poppins-Regular',
+    fontSize: scale(14), 
+    color: '#222222', 
+    marginLeft: scale(8),
+    fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    flex: 1,
   },
 
   /* Logout */
   logoutContainer: { 
-    marginHorizontal: 16, 
-    marginTop: 40, 
-    marginBottom: 100 
+    marginHorizontal: '6.4%', 
+    marginTop: scale(32), 
+    marginBottom: scale(80) 
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#111111',
-    paddingVertical: 17,
-    borderRadius: 8,
+    paddingVertical: scale(12),
+    borderRadius: scale(10),
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
   },
   logoutDisabled: { 
     opacity: 0.7 
   },
   logoutText: { 
-    fontSize: 16, 
-    fontFamily: 'Poppins-SemiBold', 
+    fontSize: scale(15), 
+    fontFamily: 'Poppins-Bold', 
     color: '#FFFFFF', 
-    marginLeft: 12 
+    marginLeft: scale(8),
+    fontWeight: '700',
   },
 });
