@@ -21,6 +21,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import RazorpayCheckout from 'react-native-razorpay';
 import Toast from 'react-native-toast-message';
+import { act } from 'react-test-renderer';
 
 const { width } = Dimensions.get('window');
 const BASE_URL = 'https://api.feelvie.com';
@@ -243,40 +244,37 @@ export default function WalletScreen() {
   const openRazorpay = async ({
     token,
     description,
-    amount,
+    initializePayment,
     onSuccess,
   }: {
     token: string;
     description: string;
-    amount: string;
-    onSuccess: (
-      paymentId: string,
-      razorpayOrderId: string,
-      signature: string
-    ) => Promise<void>;
+    initializePayment: () => Promise<{
+      purchase_type?: string;
+      purchase_id?: number;
+      payment_mode?: string;
+      razorpay_order_id: string;
+      razorpay_key_id: string;
+      amount: number;
+      currency: string;
+    }>;
+    onSuccess: (paymentData: {
+      paymentId: string;
+      razorpayOrderId: string;
+      signature: string;
+      purchaseType?: string;
+      purchaseId?: number;
+    }) => Promise<void>;
   }) => {
     console.log('[openRazorpay] Initiating payment. Description:', description);
 
-    // Step 1 — Create Razorpay order
-    console.log('[openRazorpay] Step 1: Creating Razorpay order via /api/secure/wallet/top-up/');
-    const makePaymentRes = await fetch(`${BASE_URL}/api/secure/wallet/top-up/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({  amount }),
-    });
-
-    console.log('[openRazorpay] make-payment response status:', makePaymentRes.status);
-    if (!makePaymentRes.ok) {
-      console.error('[openRazorpay] ❌ Failed to create Razorpay order');
-      throw new Error('Failed to initialize payment');
-    }
-    const paymentData = await makePaymentRes.json();
+    // Step 1 — Create a purchase-specific Razorpay order
+    const paymentData = await initializePayment();
     console.log('[openRazorpay] Razorpay order created:', {
+      purchase_type: paymentData.purchase_type,
+      purchase_id: paymentData.purchase_id,
       razorpay_order_id: paymentData.razorpay_order_id,
-      razorpay_key_id : paymentData.razorpay_key_id,
+      razorpay_key_id: paymentData.razorpay_key_id,
       amount: paymentData.amount,
       currency: paymentData.currency,
     });
@@ -313,46 +311,15 @@ export default function WalletScreen() {
       signature: razorpayResponse.razorpay_signature ? '(present)' : '(missing)',
     });
 
-    // Step 3 — Verify payment
-    console.log('[openRazorpay] Step 3: Verifying payment via /api/secure/verify-payment/');
-    const verifyRes = await fetch(`${BASE_URL}/api/secure/verify-payment/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        razorpay_order_id: razorpayResponse.razorpay_order_id,
-        razorpay_payment_id: razorpayResponse.razorpay_payment_id,
-        razorpay_signature: razorpayResponse.razorpay_signature,
-      }),
+    // Step 3 — Treat a successful checkout as success and refresh local state
+    console.log('[openRazorpay] Step 3: Calling onSuccess callback');
+    await onSuccess({
+      paymentId: razorpayResponse.razorpay_payment_id,
+      razorpayOrderId: razorpayResponse.razorpay_order_id,
+      signature: razorpayResponse.razorpay_signature,
+      purchaseType: paymentData.purchase_type,
+      purchaseId: paymentData.purchase_id,
     });
-
-    console.log('[openRazorpay] verify-payment response status:', verifyRes.status);
-    if (!verifyRes.ok) {
-      console.error('[openRazorpay] ❌ Payment verification request failed');
-      throw new Error('Payment verification failed');
-    }
-    const verifyData = await verifyRes.json();
-    console.log('[openRazorpay] Verification response:', verifyData);
-
-    const isSuccess = ['paid', 'captured', 'success'].includes(
-      verifyData.payment_status?.toLowerCase()
-    );
-    console.log('[openRazorpay] Payment status:', verifyData.payment_status, '→ isSuccess:', isSuccess);
-
-    if (!isSuccess) {
-      console.error('[openRazorpay] ❌ Payment not marked as successful');
-      throw new Error('Payment not successful: ' + (verifyData.payment_status || 'unknown'));
-    }
-
-    // Step 4 — Call success callback
-    console.log('[openRazorpay] Step 4: Calling onSuccess callback');
-    await onSuccess(
-      razorpayResponse.razorpay_payment_id,
-      razorpayResponse.razorpay_order_id,
-      razorpayResponse.razorpay_signature,
-    );
   };
 
   // ─── Purchase Credit Pack ───────────────────────────────────────────────────
@@ -367,9 +334,7 @@ export default function WalletScreen() {
       await openRazorpay({
         token,
         description: `Purchase ${pack.name} – ${pack.credits} Credits`,
-        amount: (parseFloat(pack.price_inr)).toString(), 
-        onSuccess: async (paymentId) => {
-          console.log('[handlePurchasePack] onSuccess called. paymentId:', paymentId);
+        initializePayment: async () => {
           console.log('[handlePurchasePack] Posting to /api/wallet/credits/purchase-pack/');
           const purchaseRes = await fetch(`${BASE_URL}/api/wallet/credits/purchase-pack/`, {
             method: 'POST',
@@ -379,23 +344,23 @@ export default function WalletScreen() {
             },
             body: JSON.stringify({
               pack_id: pack.id,
-              payment_successful: true,
-              payment_reference: paymentId,
             }),
           });
 
           console.log('[handlePurchasePack] purchase-pack response status:', purchaseRes.status);
-          if (purchaseRes.ok) {
-            const purchaseData = await purchaseRes.json();
-            console.log('[handlePurchasePack] ✅ Pack purchased successfully:', purchaseData);
-            Toast.show({ type: 'success', text1: `${pack.credits} credits added!` });
-            setCreditPacksModalVisible(false);
-            fetchAllData();
-          } else {
+          if (!purchaseRes.ok) {
             const err = await purchaseRes.json().catch(() => ({}));
-            console.error('[handlePurchasePack] ❌ Purchase failed:', err);
-            Toast.show({ type: 'error', text1: 'Purchase Failed', text2: err.detail || 'Could not complete purchase' });
+            console.error('[handlePurchasePack] ❌ Purchase init failed:', err);
+            throw new Error(err.detail || 'Could not initialize pack purchase');
           }
+
+          return purchaseRes.json();
+        },
+        onSuccess: async () => {
+          console.log('[handlePurchasePack] ✅ Razorpay payment completed successfully');
+          Toast.show({ type: 'success', text1: `${pack.credits} credits added!` });
+          setCreditPacksModalVisible(false);
+          fetchAllData();
         },
       });
     } catch (err: any) {
@@ -419,10 +384,8 @@ export default function WalletScreen() {
 
       await openRazorpay({
         token,
-        amount: (parseFloat(plan.price_inr)).toString(), // amount in paise
         description: `${plan.name} – ${plan.credits_per_month} Credits/month`,
-        onSuccess: async (paymentId) => {
-          console.log('[handleActivateSubscription] onSuccess called. paymentId:', paymentId);
+        initializePayment: async () => {
           console.log('[handleActivateSubscription] Posting to /api/wallet/credits/activate-subscription/');
           const activateRes = await fetch(
             `${BASE_URL}/api/wallet/credits/activate-subscription/`,
@@ -434,24 +397,24 @@ export default function WalletScreen() {
               },
               body: JSON.stringify({
                 plan_id: plan.id,
-                payment_successful: true,
-                payment_reference: paymentId,
               }),
             }
           );
 
           console.log('[handleActivateSubscription] activate-subscription response status:', activateRes.status);
-          if (activateRes.ok) {
-            const activateData = await activateRes.json();
-            console.log('[handleActivateSubscription] ✅ Subscription activated:', activateData);
-            Toast.show({ type: 'success', text1: `Subscribed to ${plan.name}!` });
-            setSubscriptionModalVisible(false);
-            fetchAllData();
-          } else {
+          if (!activateRes.ok) {
             const err = await activateRes.json().catch(() => ({}));
-            console.error('[handleActivateSubscription] ❌ Activation failed:', err);
-            Toast.show({ type: 'error', text1: 'Subscription Failed', text2: err.detail || 'Could not activate subscription' });
+            console.error('[handleActivateSubscription] ❌ Activation init failed:', err);
+            throw new Error(err.detail || 'Could not initialize subscription');
           }
+
+          return activateRes.json();
+        },
+        onSuccess: async () => {
+          console.log('[handleActivateSubscription] ✅ Razorpay payment completed successfully');
+          Toast.show({ type: 'success', text1: `Subscribed to ${plan.name}!` });
+          setSubscriptionModalVisible(false);
+          fetchAllData();
         },
       });
     } catch (err: any) {
@@ -492,7 +455,7 @@ export default function WalletScreen() {
 
   const handleRedeemCoupon = async () => {
     console.log('[handleRedeemCoupon] Attempting to redeem coupon:', couponCode);
-    
+
     if (!couponCode.trim()) {
       Toast.show({ type: 'error', text1: 'Invalid Code', text2: 'Please enter a coupon code' });
       return;
@@ -517,21 +480,21 @@ export default function WalletScreen() {
       });
 
       console.log('[handleRedeemCoupon] Response status:', res.status);
-      
+
       if (res.ok) {
         const responseData = await res.json();
         console.log('[handleRedeemCoupon] ✅ Coupon redeemed successfully:', {
           credit_balance: responseData.credit_balance,
           balance: responseData.balance,
         });
-        
+
         // Update wallet with response data
         setWallet(responseData);
-        
+
         Toast.show({ type: 'success', text1: 'Coupon Redeemed!', text2: 'Credits have been added to your account' });
         setCouponModalVisible(false);
         setCouponCode('');
-        
+
         // Refresh all data to show updated balances
         fetchAllData();
       } else {
@@ -629,217 +592,206 @@ export default function WalletScreen() {
   return (
     <>
       <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity onPress={() => { console.log('[Header] Back button pressed'); navigation.goBack(); }}>
-          <Icon name="arrow-left" size={26} color="#111111" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Credits</Text>
-        <View style={{ width: 26 }} />
-      </View>
+        {/* Header */}
+        <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+          <TouchableOpacity onPress={() => { console.log('[Header] Back button pressed'); navigation.goBack(); }}>
+            <Icon name="arrow-left" size={26} color="#111111" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Credits</Text>
+          <View style={{ width: 26 }} />
+        </View>
 
-      <ScrollView
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#111111']} />
-        }
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* ── CREDITS ONLY ── */}
-        {/* Credit Balance Card */}
-        <View style={styles.balanceCard}>
-          <Text style={styles.balanceLabel}>CREDIT BALANCE</Text>
-          <Text style={styles.balanceAmount}>{creditBalance}</Text>
-          <Text style={styles.creditSubLabel}>credits available</Text>
+        <ScrollView
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#111111']} />
+          }
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* ── CREDITS ONLY ── */}
+          {/* Credit Balance Card */}
+          <View style={styles.balanceCard}>
+            <Text style={styles.balanceLabel}>CREDIT BALANCE</Text>
+            <Text style={styles.balanceAmount}>{creditBalance}</Text>
+            <Text style={styles.creditSubLabel}>credits available</Text>
 
-          {activeSub ? (
-            <>
+            {activeSub ? (
+              <>
+                <View style={styles.actionRow}>
+                  <TouchableOpacity
+                    style={styles.addMoneyBtn}
+                    onPress={openCreditPacksModal}
+                  >
+                    <Icon name="package-variant" size={22} color="#111111" />
+                    <Text style={styles.actionText}>Top-up Credits</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
               <View style={styles.actionRow}>
                 <TouchableOpacity
-                  style={styles.addMoneyBtn}
-                  onPress={openCreditPacksModal}
-                >
-                  <Icon name="package-variant" size={22} color="#111111" />
-                  <Text style={styles.actionText}>Top-up Credits</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.withdrawBtn}
+                  style={[styles.addMoneyBtn, { flex: 1 }]}
                   onPress={openSubscriptionModal}
                 >
-                  <Icon name="crown-outline" size={22} color="#FFFFFF" />
-                  <Text style={styles.withdrawText}>Change Plan</Text>
+                  <Icon name="crown" size={22} color="#111111" />
+                  <Text style={styles.actionText}>Subscribe Now</Text>
                 </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                style={styles.couponBtn}
-                onPress={openCouponModal}
-              >
-                <Icon name="ticket-percent-outline" size={20} color="#111111" />
-                <Text style={styles.couponBtnText}>Redeem Coupon</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <View style={styles.actionRow}>
-              <TouchableOpacity
-                style={[styles.addMoneyBtn, { flex: 1 }]}
-                onPress={openSubscriptionModal}
-              >
-                <Icon name="crown" size={22} color="#111111" />
-                <Text style={styles.actionText}>Subscribe Now</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
+            )}
+          </View>
 
-        {/* Active Subscription Card */}
-        {activeSub && (
-          <>
-            <Text style={styles.sectionTitle}>ACTIVE SUBSCRIPTION</Text>
-            <View style={styles.activeSubCard}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                <Icon name="crown" size={22} color="#111111" style={{ marginRight: 10 }} />
-                <Text style={styles.activeSubName}>{activeSub.plan.name}</Text>
-              </View>
-              <Text style={styles.activeSubDetail}>
-                {activeSub.plan.credits_per_month} credits/month
-              </Text>
-              <Text style={styles.activeSubDetail}>
-                Renews: {formatDate(activeSub.current_period_end)}
-              </Text>
-              <Text style={styles.activeSubDetail}>
-                Auto-renew: {activeSub.auto_renew ? 'On' : 'Off'}
-              </Text>
-            </View>
-          </>
-        )}
-
-        {/* Subscription Plans */}
-        <View style={styles.sectionRow}>
-          <Text style={styles.sectionTitle}>
-            {activeSub ? 'OTHER SUBSCRIPTION PLANS' : 'SUBSCRIPTION PLANS'}
-          </Text>
-          {subscriptionPlans.length > 2 && (
-            <TouchableOpacity onPress={openSubscriptionModal}>
-              <Text style={styles.seeAll}>See All</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-        {subscriptionPlans.map((plan) => {
-          const isCurrent = activeSub?.plan?.id === plan.id;
-          return (
-            <View key={plan.id} style={[styles.planCard, isCurrent && styles.planCardActive]}>
-              <View style={{ flex: 1 }}>
-                <View style={styles.planHeader}>
-                  <Text style={styles.planName}>{plan.name}</Text>
-                  {isCurrent && (
-                    <View style={styles.activeBadge}>
-                      <Text style={styles.activeBadgeText}>ACTIVE</Text>
-                    </View>
-                  )}
+          {/* Active Subscription Card */}
+          {activeSub && (
+            <>
+              <Text style={styles.sectionTitle}>ACTIVE SUBSCRIPTION</Text>
+              <View style={styles.activeSubCard}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                  <Icon name="crown" size={22} color="#111111" style={{ marginRight: 10 }} />
+                  <Text style={styles.activeSubName}>{activeSub.plan.name}</Text>
                 </View>
-                <Text style={styles.planCredits}>{plan.credits_per_month} Credits/month</Text>
-              </View>
-              <View style={styles.planPriceCol}>
-                <Text style={styles.planPrice}>
-                  ₹{parseFloat(plan.price_inr).toFixed(0)}
+                <Text style={styles.activeSubDetail}>
+                  {activeSub.plan.credits_per_month} credits/month
                 </Text>
-                <Text style={styles.planPriceSub}>/mo</Text>
-                {!isCurrent && (
-                  <TouchableOpacity
-                    style={styles.subscribeBtn}
-                    onPress={() => handleActivateSubscription(plan)}
-                  >
-                    <Text style={styles.subscribeBtnText}>Subscribe</Text>
+                <Text style={styles.activeSubDetail}>
+                  Renews: {formatDate(activeSub.current_period_end)}
+                </Text>
+                <Text style={styles.activeSubDetail}>
+                  Auto-renew: {activeSub.auto_renew ? 'On' : 'Off'}
+                </Text>
+              </View>
+            </>
+          )}
+
+          {/* Subscription Plans */}
+          {
+            !activeSub && (
+              <View style={styles.sectionRow}>
+                <Text style={styles.sectionTitle}>
+                  {activeSub ? 'OTHER SUBSCRIPTION PLANS' : 'SUBSCRIPTION PLANS'}
+                </Text>
+                {subscriptionPlans.length > 2 && (
+                  <TouchableOpacity onPress={openSubscriptionModal}>
+                    <Text style={styles.seeAll}>See All</Text>
                   </TouchableOpacity>
                 )}
               </View>
-            </View>
-          );
-        })}
-
-        {/* Credit Packs - Only shown if active subscription */}
-        {activeSub && (
-          <>
-            <View style={[styles.sectionRow, { marginTop: 24 }]}>
-              <Text style={styles.sectionTitle}>CREDIT PACKS</Text>
-              {creditPacks.length > 3 && (
-                <TouchableOpacity onPress={openCreditPacksModal}>
-                  <Text style={styles.seeAll}>See All</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-            {creditPacks.slice(0, 3).map((pack) => (
-              <TouchableOpacity
-                key={pack.id}
-                style={styles.packCard}
-                onPress={() => handlePurchasePack(pack)}
-              >
+            )
+          }
+          {!activeSub && subscriptionPlans.map((plan) => {
+            const isCurrent = activeSub?.plan?.id === plan.id;
+            return (
+              <View key={plan.id} style={[styles.planCard, isCurrent && styles.planCardActive]}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.packName}>{pack.name}</Text>
-                  <Text style={styles.packCredits}>{pack.credits} Credits</Text>
-                  <Text style={styles.packRate}>@ ₹{pack.effective_rate}/credit</Text>
-                </View>
-                <View style={styles.packPriceCol}>
-                  <Text style={styles.packPrice}>
-                    ₹{parseFloat(pack.price_inr).toFixed(0)}
-                  </Text>
-                  <View style={styles.buyBtn}>
-                    <Text style={styles.buyBtnText}>Buy</Text>
+                  <View style={styles.planHeader}>
+                    <Text style={styles.planName}>{plan.name}</Text>
+                    {isCurrent && (
+                      <View style={styles.activeBadge}>
+                        <Text style={styles.activeBadgeText}>ACTIVE</Text>
+                      </View>
+                    )}
                   </View>
+                  <Text style={styles.planCredits}>{plan.credits_per_month} Credits/month</Text>
                 </View>
-              </TouchableOpacity>
-            ))}
-          </>
-        )}
+                <View style={styles.planPriceCol}>
+                  <Text style={styles.planPrice}>
+                    ₹{parseFloat(plan.price_inr).toFixed(0)}
+                  </Text>
+                  <Text style={styles.planPriceSub}>/mo</Text>
+                  {!isCurrent && (
+                    <TouchableOpacity
+                      style={styles.subscribeBtn}
+                      onPress={() => handleActivateSubscription(plan)}
+                    >
+                      <Text style={styles.subscribeBtnText}>Subscribe</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            );
+          })}
 
-        {/* Quick Actions - Always visible */}
-        <View style={styles.quickActionsSection}>
-          <TouchableOpacity
-            style={styles.quickActionBtn}
-            activeOpacity={0.7}
-            onPress={() => {
-              console.log('[QuickAction] Manage Plans pressed → opening subscription modal');
-              openSubscriptionModal();
-            }}
-          >
-            <Icon name="crown" size={20} color="#111111" />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.quickActionTitle}>Manage Plans</Text>
-              <Text style={styles.quickActionDesc}>View all subscription options</Text>
-            </View>
-            <Icon name="chevron-right" size={24} color="#AAAAAA" />
-          </TouchableOpacity>
+          {/* Credit Packs - Only shown if active subscription */}
+          {activeSub && (
+            <>
+              <View style={[styles.sectionRow, { marginTop: 24 }]}>
+                <Text style={styles.sectionTitle}>CREDIT PACKS</Text>
+                {creditPacks.length > 3 && (
+                  <TouchableOpacity onPress={openCreditPacksModal}>
+                    <Text style={styles.seeAll}>See All</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              {creditPacks.slice(0, 3).map((pack) => (
+                <TouchableOpacity
+                  key={pack.id}
+                  style={styles.packCard}
+                  onPress={() => handlePurchasePack(pack)}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.packName}>{pack.name}</Text>
+                    <Text style={styles.packCredits}>{pack.credits} Credits</Text>
+                    <Text style={styles.packRate}>@ ₹{pack.effective_rate}/credit</Text>
+                  </View>
+                  <View style={styles.packPriceCol}>
+                    <Text style={styles.packPrice}>
+                      ₹{parseFloat(pack.price_inr).toFixed(0)}
+                    </Text>
+                    <View style={styles.buyBtn}>
+                      <Text style={styles.buyBtnText}>Buy</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </>
+          )}
 
-          <TouchableOpacity
-            style={styles.quickActionBtn}
-            activeOpacity={0.7}
-            onPress={() => {
-              console.log('[QuickAction] Redeem Coupon pressed → opening coupon modal');
-              openCouponModal();
-            }}
-          >
-            <Icon name="ticket-percent" size={20} color="#111111" />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.quickActionTitle}>Redeem Coupon</Text>
-              <Text style={styles.quickActionDesc}>Enter coupon code for credits</Text>
-            </View>
-            <Icon name="chevron-right" size={24} color="#AAAAAA" />
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+          {/* Quick Actions - Always visible */}
+          <View style={styles.quickActionsSection}>
+            {/* <TouchableOpacity
+              style={styles.quickActionBtn}
+              activeOpacity={0.7}
+              onPress={() => {
+                console.log('[QuickAction] Manage Plans pressed → opening subscription modal');
+                openSubscriptionModal();
+              }}
+            >
+              <Icon name="crown" size={20} color="#111111" />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.quickActionTitle}>Manage Plans</Text>
+                <Text style={styles.quickActionDesc}>View all subscription options</Text>
+              </View>
+              <Icon name="chevron-right" size={24} color="#AAAAAA" />
+            </TouchableOpacity> */}
 
-    {/* ─── Modals ─────────────────────────────────────────────────────────── */}
+            <TouchableOpacity
+              style={styles.quickActionBtn}
+              activeOpacity={0.7}
+              onPress={() => {
+                console.log('[QuickAction] Redeem Coupon pressed → opening coupon modal');
+                openCouponModal();
+              }}
+            >
+              <Icon name="ticket-percent" size={20} color="#111111" />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.quickActionTitle}>Redeem Coupon</Text>
+                <Text style={styles.quickActionDesc}>Enter coupon code for credits</Text>
+              </View>
+              <Icon name="chevron-right" size={24} color="#AAAAAA" />
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
 
-    {/* Credit Packs Modal - Only show if subscription is active */}
-    {activeSub && (
-      <Modal
-        visible={creditPacksModalVisible}
-        transparent
-        animationType="fade"
-        presentationStyle="overFullScreen"
-        onRequestClose={() => { console.log('[Modal] Credit Packs modal closed via back press'); setCreditPacksModalVisible(false); }}
-      >
+      {/* ─── Modals ─────────────────────────────────────────────────────────── */}
+
+      {/* Credit Packs Modal - Only show if subscription is active */}
+      {activeSub && (
+        <Modal
+          visible={creditPacksModalVisible}
+          transparent
+          animationType="fade"
+          presentationStyle="overFullScreen"
+          onRequestClose={() => { console.log('[Modal] Credit Packs modal closed via back press'); setCreditPacksModalVisible(false); }}
+        >
           <View style={styles.modalOverlay}>
             <View style={[styles.modalContent, { maxHeight: '85%' }]}>
               <Text style={styles.modalTitle}>Buy Credit Packs</Text>
@@ -868,17 +820,17 @@ export default function WalletScreen() {
         </Modal>
       )}
 
-    {/* Subscription Plans Modal */}
-    <Modal
-      visible={subscriptionModalVisible}
-      transparent
-      animationType="fade"
-      presentationStyle="overFullScreen"
-      onRequestClose={() => { console.log('[Modal] Subscription modal closed via back press'); setSubscriptionModalVisible(false); }}
+      {/* Subscription Plans Modal */}
+      <Modal
+        visible={subscriptionModalVisible}
+        transparent
+        animationType="fade"
+        presentationStyle="overFullScreen"
+        onRequestClose={() => { console.log('[Modal] Subscription modal closed via back press'); setSubscriptionModalVisible(false); }}
       >
-      <View style={styles.modalOverlay}>
-        <View style={[styles.modalContent, { maxHeight: '85%' }]}>
-          <Text style={styles.modalTitle}>Subscription Plans</Text>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxHeight: '85%' }]}>
+            <Text style={styles.modalTitle}>Subscription Plans</Text>
             <Text style={styles.modalSubtitle}>Monthly credit allocation</Text>
             {subscriptionPlans.length === 0 ? (
               <View style={styles.emptyContainer}>
@@ -903,46 +855,46 @@ export default function WalletScreen() {
         </View>
       </Modal>
 
-    {/* Coupon Redemption Modal */}
-    <Modal
-      visible={couponModalVisible}
-      transparent
-      animationType="fade"
-      presentationStyle="overFullScreen"
-      onRequestClose={() => { console.log('[Modal] Coupon modal closed via back press'); setCouponModalVisible(false); }}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <Icon
-            name="ticket-percent-outline"
-            size={40}
-            color="#111111"
-            style={{ alignSelf: 'center', marginBottom: 12 }}
-          />
-          <Text style={styles.modalTitle}>Redeem Coupon</Text>
-          <Text style={styles.modalSubtitle}>Enter your coupon code to claim credits</Text>
-          <TextInput
-            style={styles.couponInput}
-            placeholder="e.g., WELCOME50"
-            placeholderTextColor="#AAAAAA"
-            autoCapitalize="characters"
-            value={couponCode}
-            onChangeText={(val) => { console.log('[CouponModal] Code typed:', val); setCouponCode(val); }}
-          />
-          <View style={styles.modalButtons}>
-            <TouchableOpacity
-              style={styles.cancelBtn}
-              onPress={() => { console.log('[CouponModal] Cancel pressed'); setCouponModalVisible(false); setCouponCode(''); }}
-            >
-              <Text style={styles.cancelText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.confirmBtn} onPress={handleRedeemCoupon}>
-              <Text style={styles.confirmText}>Redeem</Text>
-            </TouchableOpacity>
+      {/* Coupon Redemption Modal */}
+      <Modal
+        visible={couponModalVisible}
+        transparent
+        animationType="fade"
+        presentationStyle="overFullScreen"
+        onRequestClose={() => { console.log('[Modal] Coupon modal closed via back press'); setCouponModalVisible(false); }}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Icon
+              name="ticket-percent-outline"
+              size={40}
+              color="#111111"
+              style={{ alignSelf: 'center', marginBottom: 12 }}
+            />
+            <Text style={styles.modalTitle}>Redeem Coupon</Text>
+            <Text style={styles.modalSubtitle}>Enter your coupon code to claim credits</Text>
+            <TextInput
+              style={styles.couponInput}
+              placeholder="e.g., WELCOME50"
+              placeholderTextColor="#AAAAAA"
+              autoCapitalize="characters"
+              value={couponCode}
+              onChangeText={(val) => { console.log('[CouponModal] Code typed:', val); setCouponCode(val); }}
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.cancelBtn}
+                onPress={() => { console.log('[CouponModal] Cancel pressed'); setCouponModalVisible(false); setCouponCode(''); }}
+              >
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.confirmBtn} onPress={handleRedeemCoupon}>
+                <Text style={styles.confirmText}>Redeem</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
-    </Modal>
+      </Modal>
     </>
   );
 }
@@ -1036,15 +988,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   closeBtn: {
-  marginTop: 12,
-  paddingVertical: 15,
-  backgroundColor: '#FFFFFF',
-  borderWidth: 1,
-  borderColor: '#111111',
-  borderRadius: 8,
-  alignItems: 'center',
-  width: '100%',  // full width, no flex: 1
-},
+    marginTop: 12,
+    paddingVertical: 15,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#111111',
+    borderRadius: 8,
+    alignItems: 'center',
+    width: '100%',  // full width, no flex: 1
+  },
   actionText: { fontSize: 15, fontFamily: 'Poppins-SemiBold', color: '#111111' },
   withdrawText: { fontSize: 15, fontFamily: 'Poppins-SemiBold', color: '#FFFFFF' },
 

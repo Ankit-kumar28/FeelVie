@@ -59,13 +59,35 @@ interface Product {
   condition: string;
 }
 
+interface SectionProduct {
+  id: number;
+  product: Product;
+  order: number;
+}
+
+interface Section {
+  id: number;
+  name: string;
+  description: string;
+  section_type: string;
+  is_active: boolean;
+  order: number;
+  products: SectionProduct[];
+}
+
 const BASE_URL = 'https://api.feelvie.com';
+
+const categories = [
+  { name: 'Women', icon: require('../assets/icons/females.png'), slug: 'womens' },
+  { name: 'Male', icon: require('../assets/icons/male.png'), slug: 'mens' },
+  { name: 'Kids', icon: require('../assets/icons/kids.png'), slug: 'kids' },
+];
 
 export default function HomeScreen() {
   const navigation = useNavigation<any>();
 
   const [carousels, setCarousels] = useState<CarouselItem[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [wishlistMap, setWishlistMap] = useState<Record<number, boolean>>({});
@@ -88,7 +110,7 @@ export default function HomeScreen() {
   };
 
   const CAROUSEL_API = `${BASE_URL}/api/common/carousels?type=app`;
-  const PRODUCTS_API = `${BASE_URL}/api/catalog/products/`;
+  const SECTIONS_API = `${BASE_URL}/api/common/sections/`;
   const WALLET_API = `${BASE_URL}/api/wallet/me/`;
 
   const fetchHomeData = useCallback(async () => {
@@ -116,12 +138,15 @@ export default function HomeScreen() {
         );
       }
 
-      // Products
-      const prodRes = await fetch(PRODUCTS_API, { headers });
-      if (prodRes.ok) {
-        const data = await prodRes.json();
-        const prods = Array.isArray(data) ? data : data.results || [];
-        setProducts(prods.filter((p: Product) => p.images && p.images.length > 0));
+      // Sections
+      const sectRes = await fetch(SECTIONS_API, { headers });
+      if (sectRes.ok) {
+        const data = await sectRes.json();
+        const sectionData = Array.isArray(data) ? data : data.results || [];
+        const filteredSections = sectionData
+          .filter((s: Section) => s.is_active && s.products && s.products.length > 0)
+          .sort((a: Section, b: Section) => a.order - b.order);
+        setSections(filteredSections);
       }
     } catch (err) {
       console.log('Home fetch error:', err);
@@ -140,13 +165,14 @@ export default function HomeScreen() {
     fetchHomeData();
   };
 
-  const getProductImage = (p: Product) =>
-    p.images?.[0]?.image_url || p.images?.[0]?.image || 'https://via.placeholder.com/400';
+  const getProductImage = (p: Product) => p.images?.[0]?.image_url || p.images?.[0]?.image || 'https://via.placeholder.com/400';
+
+  
 
   const renderCarousel = (item: CarouselItem, index: number) => (
     <Image
       key={index}
-      style={{ width: BannerWidth, height: BannerHeight , objectFit : "fill", borderRadius: 16}}
+      style={{ width: BannerWidth, height: BannerHeight, objectFit: "fill", borderRadius: 16 }}
       source={{ uri: item.image }}
     />
   );
@@ -155,10 +181,10 @@ export default function HomeScreen() {
     const inWishlist = wishlistMap[item.id] || false;
 
     return (
-      <TouchableOpacity
+      <View
         style={styles.productCard}
-        activeOpacity={0.92}
-        onPress={() => handleVirtualTryOn(item)}
+        // activeOpacity={0.92}
+        // onPress={() => navigation.navigate('Product', { product: item })}
       >
         {/* Heart Icon - Wishlist */}
         <TouchableOpacity
@@ -193,7 +219,7 @@ export default function HomeScreen() {
           style={styles.productImage}
           resizeMode="cover"
         />
-      </TouchableOpacity>
+      </View>
     );
   };
 
@@ -277,17 +303,82 @@ export default function HomeScreen() {
           )}
         </View>
 
-        {/* Products Grid */}
-        <Text style={styles.productsTitle}>Try Virtual</Text>
-        <FlatList
-          scrollEnabled={false}
-          data={products}
-          renderItem={renderProduct}
-          keyExtractor={item => String(item.id)}
-          numColumns={2}
-          columnWrapperStyle={styles.columnWrapper}
-          contentContainerStyle={styles.gridContent}
-        />
+        {/* Categories */}
+        <View style={styles.categoriesContainer}>
+          {categories.map((category, index) => (
+            <TouchableOpacity 
+              key={index} 
+              style={styles.categoryItem}
+              onPress={() => navigation.navigate('SearchResults', { query: category.name, category: category.slug })}
+            >
+              <View style={styles.categoryIconBox}>
+                <Image source={category.icon} style={styles.categoryIcon} />
+              </View>
+              <Text style={styles.categoryText}>{category.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Sections with Products */}
+        {sections.map((section) => (
+          <View key={section.id}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.productsTitle}>{section.name}</Text>
+              {section.products.length > 4 && (
+                <TouchableOpacity onPress={() => navigation.navigate('SearchResults', { query: section.name, sectionId: section.id })}>
+                  <Text style={styles.viewAllButton}>View All</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            <FlatList
+              scrollEnabled={false}
+              data={section.products.slice(0, 4)}
+              renderItem={({ item }) => (
+                <TouchableOpacity 
+                  style={styles.productCard}
+                  onPress={() => navigation.navigate('Product', { product: item.product })}
+                >
+                  {/* Heart Icon - Wishlist */}
+                  <TouchableOpacity
+                    style={styles.heartContainer}
+                    onPress={() => toggleWishlist(item.product.id)}
+                  >
+                    <Icon
+                      name={wishlistMap[item.product.id] ? 'favorite' : 'favorite-border'}
+                      size={18}
+                      color={wishlistMap[item.product.id] ? '#ef4444' : '#ffffff'}
+                      style={styles.heartShadow}
+                    />
+                  </TouchableOpacity>
+
+                  {/* AI Virtual Try-On Icon */}
+                  <TouchableOpacity
+                    style={styles.aiContainer}
+                    onPress={() => handleVirtualTryOn(item.product)}
+                  >
+                    <Text style={{ color: '#000', fontSize: 14, fontWeight: '600' }}>Try on yourself</Text>
+                    <Icon
+                      name="auto-awesome"
+                      size={16}
+                      color="#000"
+                      style={styles.aiShadow}
+                    />
+                  </TouchableOpacity>
+
+                  <Image
+                    source={{ uri: getProductImage(item.product) }}
+                    style={styles.productImage}
+                    resizeMode="cover"
+                  />
+                </TouchableOpacity>
+              )}
+              keyExtractor={item => String(item.id)}
+              numColumns={2}
+              columnWrapperStyle={styles.columnWrapper}
+              contentContainerStyle={styles.gridContent}
+            />
+          </View>
+        ))}
 
         <View style={{ height: 60 }} />
       </ScrollView>
@@ -329,7 +420,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    paddingInline : 10,
+    paddingInline: 10,
     gap: 6,
   },
   creditText: {
@@ -352,6 +443,38 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
   carouselPlaceholder: { height: BannerHeight, backgroundColor: '#F5F5F5' },
+
+  categoriesContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    paddingHorizontal: 12,
+    marginTop: 24,
+    gap: 24,
+    paddingLeft: 14,
+  },
+  categoryItem: {
+    alignItems: 'center',
+  },
+  categoryIconBox: {
+    padding: 12,
+    borderRadius: "100%",
+    backgroundColor: 'rgba(245, 245, 245, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+  },
+  categoryIcon: {
+    width: 30,
+    height: 30,
+  },
+  categoryText: {
+    fontSize: 12,
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+  },
 
   skeletonCarousel: {
     height: BannerHeight,
@@ -452,6 +575,23 @@ const styles = StyleSheet.create({
     width: '100%',
     height: PRODUCT_IMG_HEIGHT,
     backgroundColor: '#F5F5F5',
+  },
+
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingRight: 20,
+  },
+
+  viewAllButton: {
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
+    fontStyle: 'italic',
+    color: '#f8ac1b',
+    marginTop: 24,
+    marginBottom: 12,
   },
 
   infoContainer: { padding: 12 },

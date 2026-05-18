@@ -68,66 +68,74 @@ const ProductCard = memo(({
   const discount = item.discount || 0;
   const imageUri = item.images?.[0]?.image_url || item.images?.[0]?.image || 'https://via.placeholder.com/400';
 
+  const navigation = useNavigation<any>();
+
+  const handleVirtualTryOn = (product: Product) => {
+    navigation.navigate('VirtualTryOn', {
+      garment: product,
+      garmentImage: product.images?.[0]?.image_url || product.images?.[0]?.image || 'https://via.placeholder.com/400',
+      garmentName: product.name
+    });
+  };
+
   return (
-    <TouchableOpacity 
-      activeOpacity={0.88}
+    <View 
+      // activeOpacity={0.92}
       style={styles.productCard} 
-      onPress={onPress}
+      // onPress={onPres/s}
     >
-      <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: imageUri }}
-          style={styles.productImage}
-          resizeMode="cover"
+      {/* Heart Icon - Wishlist */}
+      <TouchableOpacity
+        style={styles.heartContainer}
+        onPress={() => onToggleWishlist(item)}
+        disabled={wishlistStatus.isToggling}
+        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+      >
+        {wishlistStatus.isToggling ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Icon
+            name={wishlistStatus.inWishlist ? 'favorite' : 'favorite-border'}
+            size={18}
+            color={wishlistStatus.inWishlist ? '#ef4444' : '#ffffff'}
+            style={styles.heartShadow}
+          />
+        )}
+      </TouchableOpacity>
+
+      {/* AI Virtual Try-On Icon */}
+      <TouchableOpacity
+        style={styles.aiContainer}
+        onPress={() => handleVirtualTryOn(item)}
+      >
+        <Text style={{ color: '#000', fontSize: 13, fontWeight: '600' }}>Try on</Text>
+        <Icon
+          name="auto-awesome"
+          size={14}
+          color="#000"
+          style={styles.aiShadow}
         />
+      </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.heartContainer}
-          onPress={() => onToggleWishlist(item)}
-          disabled={wishlistStatus.isToggling}
-          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-        >
-          {wishlistStatus.isToggling ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Icon
-              name={wishlistStatus.inWishlist ? 'favorite' : 'favorite-border'}
-              size={24}
-              color={wishlistStatus.inWishlist ? '#ef4444' : '#ffffff'}
-              style={styles.heartShadow}
-            />
-          )}
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.info}>
-        <Text style={styles.name} numberOfLines={2} ellipsizeMode="tail">
-          {item.name}
-        </Text>
-
-        <View style={styles.priceRow}>
-          <Text style={styles.sellingPrice}>
-            ₹{Number(item.selling_price || 0).toLocaleString('en-IN')}
-          </Text>
-
-          {discount > 0 && item.original_price && (
-            <>
-              <Text style={styles.originalPrice}>
-                ₹{Number(item.original_price).toLocaleString('en-IN')}
-              </Text>
-              <Text style={styles.discountBadge}>{discount}% OFF</Text>
-            </>
-          )}
-        </View>
-      </View>
-    </TouchableOpacity>
+      <Image
+        source={{ uri: imageUri }}
+        style={styles.productImage}
+        resizeMode="cover"
+      />
+    </View>
   );
 });
 
 export default function SearchResults() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { query, filters = {}, title } = route.params || {};
+  const { query, filters: initialFilters = {}, title, category, sectionId } = route.params || {};
+
+  const filters = {
+    ...initialFilters,
+    ...(category ? { category } : {}),
+    ...(sectionId ? { sectionId } : {}),
+  };
 
   const insets = useSafeAreaInsets();
 
@@ -169,21 +177,22 @@ export default function SearchResults() {
   const colors = ['Red', 'Blue', 'Black', 'White', 'Green', 'Pink', 'Orange', 'Yellow', 'Purple', 'Grey'];
   const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
-  const BASE_URL = 'https://feelvie.yaytech.in';
+  const BASE_URL = 'https://api.feelvie.com';
   const WISHLIST_ENDPOINT = `${BASE_URL}/api/wishlist/items/`;
 
   const buildUrl = useCallback(() => {
-    if (filters?.section) {
-      return `${BASE_URL}/api/common/sections/${filters.section}/`;
+    // If it's a category filter from home screen, we fetch all sections and filter in frontend
+    if (filters?.category) {
+      return `${BASE_URL}/api/common/sections/`;
+    }
+
+    if (filters?.sectionId || filters?.section) {
+      return `${BASE_URL}/api/common/sections/${filters.sectionId || filters.section}/`;
     }
 
     const params = new URLSearchParams();
 
-    if (filters?.category) {
-      params.append('category', String(filters.category));
-    }
-
-    if (query) {
+    if (query && !filters?.category) {
       params.append('search', query);
     }
 
@@ -224,8 +233,26 @@ export default function SearchResults() {
 
       let fetched: any[] = [];
 
-      if (filters?.section && data.products) {
-        fetched = data.products.map((sp: any) => sp.product || sp);
+      if (filters?.category) {
+        // Data is an array of sections, we filter sections that match the category name
+        const categoryMatch = filters.category.toLowerCase();
+        const allSections = Array.isArray(data) ? data : data.results || [];
+        
+        // Filter sections by section_type matching the category slug
+        const matchingSections = allSections.filter((s: any) => 
+          (s.section_type || "").toLowerCase() === categoryMatch
+        );
+        
+        matchingSections.forEach((s: any) => {
+          if (s.products) {
+            fetched.push(...s.products.map((p: any) => p.product || p));
+          }
+        });
+        
+        // Remove duplicates if any
+        fetched = Array.from(new Map(fetched.map(item => [item.id, item])).values());
+      } else if (filters?.sectionId || filters?.section) {
+        fetched = (data.products || []).map((sp: any) => sp.product || sp);
       } else {
         fetched = data.results || data || [];
       }
@@ -259,7 +286,7 @@ export default function SearchResults() {
       if (isRefresh) setRefreshing(false);
       setLoadingMore(false);
     }
-  }, [buildUrl, filters?.section]);
+  }, [buildUrl, filters?.sectionId, filters?.section, filters?.category, query]);
 
   const fetchWishlistStatus = async (token: string, productIds: number[]) => {
     try {
@@ -466,18 +493,18 @@ export default function SearchResults() {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top }]}>
+      <View style={[styles.header]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
           <Icon name="arrow-back" size={26} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title} numberOfLines={1}>
           {title || query || 'Products'}
         </Text>
-        <View style={styles.rightIcons}>
+        {/* <View style={styles.rightIcons}>
           <TouchableOpacity onPress={() => navigation.navigate('Search')} style={styles.iconButton}>
             <Icon name="search" size={24} color="#000" />
           </TouchableOpacity>
@@ -487,7 +514,7 @@ export default function SearchResults() {
           <TouchableOpacity onPress={() => navigation.navigate('CartScreen')} style={styles.iconButton}>
             <Icon name="shopping-cart" size={24} color="#000" />
           </TouchableOpacity>
-        </View>
+        </View> */}
       </View>
 
       {loading && !refreshing ? (
@@ -533,7 +560,7 @@ export default function SearchResults() {
       )}
 
       {/* Bottom Bar */}
-      <View style={styles.bottomBar}>
+      {/* <View style={styles.bottomBar}>
         <TouchableOpacity style={styles.bottomBtn} onPress={openSort}>
           <Icon name="sort" size={22} color="#000" />
           <Text style={styles.bottomBtnText}>Sort By</Text>
@@ -543,7 +570,7 @@ export default function SearchResults() {
           <Icon name="filter-list" size={22} color="#000" />
           <Text style={styles.bottomBtnText}>Filter</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       {/* Sort Bottom Sheet */}
       <Modal transparent visible={sortVisible} animationType="none">
@@ -704,7 +731,7 @@ export default function SearchResults() {
           </Animated.View>
         </TouchableOpacity>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -739,13 +766,14 @@ const styles = StyleSheet.create({
   row: { justifyContent: 'space-between' },
   productCard: {
     width: itemWidth,
+    height: 280,
     marginBottom: 16,
     marginHorizontal: 4,
     borderRadius: 10,
     backgroundColor: '#ffffff',
     overflow: 'hidden',
-    borderWidth: 0.5,
-    borderColor: '#e4e3e3',
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -759,37 +787,54 @@ const styles = StyleSheet.create({
     }),
   },
 
-  imageContainer: {
-    position: 'relative',
-    width: '100%',
-    aspectRatio: 1.1,
-    backgroundColor: '#f3f4f6',
-  },
-
   productImage: {
-    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#F5F5F5',
   },
 
   heartContainer: {
     position: 'absolute',
     top: 8,
     right: 8,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: 'rgba(0,0,0,0.50)',
     borderRadius: 20,
     padding: 6,
     zIndex: 10,
   },
 
+  aiContainer: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    backgroundColor: '#fff',
+    paddingVertical: 4,
+    width: '90%',
+    height: 32,
+    borderRadius: 20,
+    padding: 6,
+    zIndex: 10,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+
   heartShadow: {
-    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowColor: 'rgba(188, 187, 187, 0.8)',
+    textShadowRadius: 3,
+    textShadowOffset: { width: 0, height: 1 },
+  },
+
+  aiShadow: {
+    textShadowColor: 'rgba(248, 172, 27, 0.6)',
     textShadowRadius: 3,
     textShadowOffset: { width: 0, height: 1 },
   },
 
   info: {
-    paddingHorizontal: 10,
-    paddingTop: 8,
-    paddingBottom: 10,
+    display: 'none',
   },
 
   name: {

@@ -126,7 +126,7 @@ export default function ForgotPasswordScreen() {
 
     try {
       const response = await fetch(
-        'https://feelvie.yaytech.in/api/auth/forgot-password/',
+        'https://api.feelvie.com/api/auth/forgot-password/',
         {
           method: 'POST',
           headers: {

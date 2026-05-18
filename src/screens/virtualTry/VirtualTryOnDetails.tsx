@@ -23,19 +23,24 @@ const { width, height } = Dimensions.get('window');
 export default function VirtualTryOnDetails({ route, navigation }) {
   console.debug('[Screen 2] VirtualTryOnDetails mounted');
 
-  const { userImage, garmentImage, selectedCategory, onSuccess } = route.params;
+  const { userImage, garmentImage, selectedCategory, onSuccess, imageScore, userDetails } = route.params;
 
   console.debug('[Screen 2] Received from Screen 1:', {
     userImageExists: !!userImage,
     garmentImageExists: !!garmentImage,
     selectedCategory,
+    imageScore: imageScore?.total_score,
+    userDetails,
   });
 
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
-    console.log("Starting generation with category:", selectedCategory);
+    console.log("Starting generation with new API:", {
+      userImage: !!userImage,
+      garmentImage: !!garmentImage,
+    });
 
     try {
       const token = await AsyncStorage.getItem('access_token');
@@ -46,13 +51,24 @@ export default function VirtualTryOnDetails({ route, navigation }) {
       }
 
       const formData = new FormData();
-      formData.append('person_image', { uri: userImage, type: 'image/jpg', name: 'person.jpg' } as any);
-      formData.append('garment_image', { uri: garmentImage, type: 'image/jpg', name: 'garment.jpg' } as any);
-      formData.append('category', selectedCategory);
+      formData.append('personImage', {
+        uri: userImage,
+        name: 'person.jpg',
+        type: 'image/jpeg',
+      } as any);
 
-      const response = await fetch(`${BASE_URL}/api/secure/vton/try-on/`, {
+      formData.append('garmentImage', {
+        uri: garmentImage,
+        name: 'garment.jpg',
+        type: 'image/jpeg',
+      } as any);
+
+      const response = await fetch('https://api.feelvie.com/api/secure/vton/try-on/generate/', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
       });
 
@@ -66,10 +82,10 @@ export default function VirtualTryOnDetails({ route, navigation }) {
       if (onSuccess) onSuccess();
 
       navigation.navigate('TryOnResult', {
-        resultBase64: data.output_image,
+        resultBase64: data.output_image_url,
+        isUrl: true,
         userImage,
         garmentImage,
-        selectedCategory,
       });
 
       Toast.show({ type: 'success', text1: 'Success', text2: 'Try-on generated' });
@@ -106,7 +122,7 @@ export default function VirtualTryOnDetails({ route, navigation }) {
 
         <View style={styles.infoSection}>
           <Text style={styles.infoTitle}>Ready to Generate?</Text>
-          <Text style={styles.infoText}>Your virtual try-on will be generated using the selected garment type: <Text style={styles.categoryBold}>{selectedCategory}</Text></Text>
+          <Text style={styles.infoText}>Your virtual try-on will be generated using the images you provided. This process may take a few seconds.</Text>
         </View>
       </ScrollView>
 
@@ -226,6 +242,42 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   categoryBold: {
+    fontWeight: '600',
+    color: '#111111',
+  },
+  detailsBox: {
+    marginTop: 16,
+    backgroundColor: 'rgba(248, 172, 27, 0.08)',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: '#f8ac1b',
+  },
+  detailsTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#f8ac1b',
+    marginBottom: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(248, 172, 27, 0.2)',
+  },
+  detailLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#666666',
+  },
+  detailValue: {
+    fontSize: 12,
     fontWeight: '600',
     color: '#111111',
   },

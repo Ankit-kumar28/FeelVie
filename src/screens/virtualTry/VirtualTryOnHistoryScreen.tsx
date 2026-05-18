@@ -26,7 +26,7 @@ import { BASE_URL } from '../../config/env';
 interface HistoryItem {
   id: number;
   category: string;
-  output_image_base64: string;
+  output_image_url: string;
   request_meta: string;
   created_at: string;
 }
@@ -51,9 +51,12 @@ const formatDate = (iso: string): string => {
   }
 };
 
-/** Match TryOnResult: always use data:image/png;base64 */
-const toImageUri = (base64: string): string =>
-  `data:image/png;base64,${base64.replace(/^data:image\/\w+;base64,/, '')}`;
+/** Match TryOnResult: check if URL, otherwise apply base64 prefix */
+const toImageUri = (value: string): string => {
+  if (!value) return '';
+  if (value.startsWith('http')) return value;
+  return `data:image/png;base64,${value.replace(/^data:image\/\w+;base64,/, '')}`;
+};
 
 /** Capitalise first letter */
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -115,7 +118,7 @@ const HistoryCard = React.memo(({ item, onPress }: HistoryCardProps) => {
         onPress={() => onPress(item)}
       >
         <Image
-          source={{ uri: toImageUri(item.output_image_base64) }}
+          source={{ uri: toImageUri(item.output_image_url) }}
           style={styles.cardImage}
           resizeMode="cover"
         />
@@ -195,9 +198,10 @@ export default function VirtualTryOnHistoryScreen() {
   }, [loadHistory]);
 
   const handleCardPress = (item: HistoryItem) => {
-    // Navigate to TryOnResult with base64 image and metadata
+    // Navigate to TryOnResult with the image URL and metadata
     (navigation as any).navigate('TryOnResult', {
-      resultBase64: toImageUri(item.output_image_base64),
+      resultBase64: item.output_image_url,
+      isUrl: true,
       category: item.category,
       timestamp: item.created_at,
       metadata: item.request_meta,

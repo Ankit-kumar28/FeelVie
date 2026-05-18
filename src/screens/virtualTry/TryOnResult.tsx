@@ -26,7 +26,9 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const normalizeImageUri = (value?: string) => {
   if (!value) return '';
-  if (value.startsWith('data:')) return value;
+  if (value.startsWith('http') || value.startsWith('file') || value.startsWith('data:')) {
+    return value;
+  }
   return `data:image/png;base64,${value.replace(/^data:image\/\w+;base64,/, '')}`;
 };
 
@@ -34,9 +36,10 @@ export default function TryOnResult({ route, navigation }) {
   console.debug('[TryOnResult] Screen mounted');
   const insets = useSafeAreaInsets();
 
-  const { resultBase64, category, timestamp, metadata } = route.params ?? {};
-  console.debug('[TryOnResult] Received resultBase64 length:', resultBase64?.length || 'missing');
-  const resultImageUri = normalizeImageUri(resultBase64);
+  const { resultBase64, isUrl, category, timestamp, metadata } = route.params ?? {};
+  console.debug('[TryOnResult] Received result:', isUrl ? 'URL' : 'Base64 length ' + (resultBase64?.length || 'missing'));
+  
+  const resultImageUri = isUrl ? resultBase64 : normalizeImageUri(resultBase64);
   const saveShotRef = useRef<ViewShot | null>(null);
   const shareShotRef = useRef<ViewShot | null>(null);
 
@@ -151,32 +154,6 @@ export default function TryOnResult({ route, navigation }) {
           </Text>
         </View>
 
-        {(category || timestamp || metadata) && (
-          <View style={styles.resultMetaCard}>
-            {category ? (
-              <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Category</Text>
-                <Text style={styles.metaValue}>{String(category)}</Text>
-              </View>
-            ) : null}
-
-            {timestamp ? (
-              <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Generated</Text>
-                <Text style={styles.metaValue}>{new Date(timestamp).toLocaleString()}</Text>
-              </View>
-            ) : null}
-
-            {metadata ? (
-              <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Source</Text>
-                <Text style={styles.metaValue} numberOfLines={1}>
-                  History
-                </Text>
-              </View>
-            ) : null}
-          </View>
-        )}
 
         {/* Result Image Container */}
         {resultImageUri ? (
@@ -214,8 +191,14 @@ export default function TryOnResult({ route, navigation }) {
                 resizeMode="contain"
               />
               <Image
-                source={require('../../assets/images/watermark.png')}
-                style={styles.watermark}
+                source={require('../../assets/images/bottom.png')}
+                style={styles.bottomBanner}
+                resizeMode="contain"
+              />
+
+              <Image
+                source={require('../../assets/images/qr.png')}
+                style={styles.orLogo}
                 resizeMode="contain"
               />
             </ViewShot>
@@ -232,49 +215,17 @@ export default function TryOnResult({ route, navigation }) {
                 resizeMode="contain"
               />
               <Image
-                source={require('../../assets/images/watermark.png')}
-                style={styles.watermark}
+                source={require('../../assets/images/bottom.png')}
+                style={styles.bottomBanner}
                 resizeMode="contain"
               />
+
               <Image
                 source={require('../../assets/images/qr.png')}
                 style={styles.orLogo}
                 resizeMode="contain"
               />
             </ViewShot>
-
-            {/* Shape Options
-            <View style={styles.shapeOptions}>
-              <TouchableOpacity
-                style={[styles.shapeBtn, shapeStyle === 'rounded' && styles.shapeBtnActive]}
-                onPress={() => setShapeStyle('rounded')}
-              >
-                <Icon name="rounded-square" size={24} color={shapeStyle === 'rounded' ? '#f8ac1b' : '#AAAAAA'} />
-                <Text style={[styles.shapeBtnText, shapeStyle === 'rounded' && styles.shapeBtnTextActive]}>
-                  Rounded
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.shapeBtn, shapeStyle === 'square' && styles.shapeBtnActive]}
-                onPress={() => setShapeStyle('square')}
-              >
-                <Icon name="square" size={24} color={shapeStyle === 'square' ? '#f8ac1b' : '#AAAAAA'} />
-                <Text style={[styles.shapeBtnText, shapeStyle === 'square' && styles.shapeBtnTextActive]}>
-                  Square
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.shapeBtn, shapeStyle === 'circle' && styles.shapeBtnActive]}
-                onPress={() => setShapeStyle('circle')}
-              >
-                <Icon name="circle" size={24} color={shapeStyle === 'circle' ? '#f8ac1b' : '#AAAAAA'} />
-                <Text style={[styles.shapeBtnText, shapeStyle === 'circle' && styles.shapeBtnTextActive]}>
-                  Circle
-                </Text>
-              </TouchableOpacity>
-            </View> */}
           </View>
         ) : (
           <Text style={styles.noResultText}>No result available</Text>
@@ -337,7 +288,7 @@ function getShapeStyle(shape) {
     case 'rounded':
     default:
       return {
-        borderRadius: 20,
+        borderRadius: 12,
         overflow: 'hidden',
       };
   }
@@ -403,7 +354,6 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: '100%',
     aspectRatio: 3 / 4,
-    borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: '#F5F5F5',
     alignItems: 'center',
@@ -436,7 +386,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E8E8E8',
-    borderRadius: 12,
+    // borderRadius: 12,
     padding: 14,
     marginBottom: 20,
     shadowColor: '#000',
@@ -465,6 +415,13 @@ const styles = StyleSheet.create({
   },
 
   /* Watermark */
+  bottomBanner: {
+    position: 'absolute',
+    top: "100%",
+    transform: [{ translateY: "-65%" }],
+    width: '100%',
+    objectFit: "contain", 
+  },
   watermark: {
     position: 'absolute',
     bottom: 0,
@@ -476,10 +433,12 @@ const styles = StyleSheet.create({
   orLogo: {
     position: 'absolute',
     bottom: 0,
-    left: 0,
-    width: 80,
-    height: 80,
+    transform: [{ translateY: "-30%" }],
+    right: 0,
+    width: 90,
+    height: 90,
     opacity: 0.95,
+    borderTopLeftRadius: 12,
   },
 
   /* Shape Options */

@@ -9,6 +9,7 @@ import {
   ScrollView,
   Modal,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -23,23 +24,18 @@ const { width, height } = Dimensions.get('window');
 const USER_IMAGE_KEY = 'VIRTUAL_TRYON_USER_IMAGE';
 const GARMENT_IMAGE_KEY = 'VIRTUAL_TRYON_GARMENT_IMAGE';
 
-const categories = [
-  { label: 'Tops', value: 'top clothes' },
-  { label: 'Bottoms', value: 'bottom clothes' },
-  { label: 'Dress', value: 'dress' },
-];
-
 export default function VirtualTryOnScreen() {
   console.debug('[Screen 1] VirtualTryOnScreen mounted');
 
-  const navigation = useNavigation();
-  const route = useRoute();
+  const navigation = useNavigation<any>();
+  const route = useRoute<any>();
 
   const [userImage, setUserImage] = useState<string | null>(null);
   const [garmentImage, setGarmentImage] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showInstructions, setShowInstructions] = useState(false);
-  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [userImageLoading, setUserImageLoading] = useState(false);
+  const [garmentImageLoading, setGarmentImageLoading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     console.debug('[Screen 1] Loading stored images from AsyncStorage');
@@ -71,7 +67,8 @@ export default function VirtualTryOnScreen() {
 
   const pickImage = (setter: any, key: string, type: string) => {
     console.debug(`[Screen 1] Opening picker for ${type}`);
-    launchImageLibrary({ mediaType: 'photo', quality: 0.9 }, async response => {
+    const { launchImageLibrary } = require('react-native-image-picker');
+    launchImageLibrary({ mediaType: 'photo', quality: 0.9, maxWidth: 1024, maxHeight: 1024 }, async response => {
       if (response.didCancel) return console.debug(`[Screen 1] ${type} cancelled`);
       if (response.errorCode) return console.error(`[Screen 1] ${type} error:`, response.errorMessage);
 
@@ -96,13 +93,8 @@ export default function VirtualTryOnScreen() {
     }
   };
 
-  const toggleCategory = (value: string) => {
-    setSelectedCategory(value);
-    setCategoryModalVisible(false);
-  };
-
   const clearImages = async () => {
-    console.debug('[Screen 1] clearImages called from Screen 2 after success');
+    console.debug('[Screen 1] clearImages called after success');
     setUserImage(null);
     setGarmentImage(null);
     try {
@@ -112,19 +104,16 @@ export default function VirtualTryOnScreen() {
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!userImage || !garmentImage) {
       Toast.show({ type: 'error', text1: 'Please upload both images' });
       return;
     }
-    if (!selectedCategory) {
-      Toast.show({ type: 'error', text1: 'Please select a type' });
-      return;
-    }
+
+    // Navigate to VirtualTryOnDetails with the images
     navigation.navigate('VirtualTryOnDetails', {
       userImage,
       garmentImage,
-      selectedCategory,
       onSuccess: clearImages,
     });
   };
@@ -138,22 +127,6 @@ export default function VirtualTryOnScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Garment Type</Text>
-          <TouchableOpacity
-            style={[styles.categoryButton, selectedCategory && styles.categoryButtonActive]}
-            onPress={() => setCategoryModalVisible(true)}
-          >
-            <Icon name="hanger" size={20} color={selectedCategory ? '#f8ac1b' : '#666666'} />
-            <Text style={[styles.categoryButtonText, selectedCategory && styles.categoryButtonTextActive]}>
-              {selectedCategory
-                ? categories.find(c => c.value === selectedCategory)?.label
-                : 'Select a garment type'}
-            </Text>
-            <Icon name="chevron-right" size={20} color={selectedCategory ? '#f8ac1b' : '#AAAAAA'} />
-          </TouchableOpacity>
-        </View>
-
         {/* Images Preview Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -181,7 +154,18 @@ export default function VirtualTryOnScreen() {
               <View>
                 <Text style={styles.imageLabel}>Garment</Text>
                 <View style={[styles.uploadCard, { height: 280, position: 'relative' }]}>
-                  <Image source={{ uri: garmentImage }} style={styles.uploadImageDisplay} resizeMode="cover" />
+                  {garmentImageLoading && (
+                    <View style={styles.loaderOverlay}>
+                      <ActivityIndicator size="large" color="#f8ac1b" />
+                    </View>
+                  )}
+                  <Image
+                    source={{ uri: garmentImage }}
+                    style={styles.uploadImageDisplay}
+                    resizeMode="cover"
+                    onLoadStart={() => setGarmentImageLoading(true)}
+                    onLoadEnd={() => setGarmentImageLoading(false)}
+                  />
                   <TouchableOpacity
                     style={styles.removeIconButton}
                     onPress={() => removeImage(GARMENT_IMAGE_KEY, setGarmentImage, 'Garment')}
@@ -202,7 +186,18 @@ export default function VirtualTryOnScreen() {
               <View style={{ marginTop: 24 }}>
                 <Text style={styles.imageLabel}>Your Photo</Text>
                 <View style={[styles.uploadCard, { height: 280, position: 'relative' }]}>
-                  <Image source={{ uri: userImage }} style={styles.uploadImageDisplay} resizeMode="cover" />
+                  {userImageLoading && (
+                    <View style={styles.loaderOverlay}>
+                      <ActivityIndicator size="large" color="#f8ac1b" />
+                    </View>
+                  )}
+                  <Image
+                    source={{ uri: userImage }}
+                    style={styles.uploadImageDisplay}
+                    resizeMode="cover"
+                    onLoadStart={() => setUserImageLoading(true)}
+                    onLoadEnd={() => setUserImageLoading(false)}
+                  />
                   <TouchableOpacity
                     style={styles.removeIconButton}
                     onPress={() => removeImage(USER_IMAGE_KEY, setUserImage, 'Photo')}
@@ -235,7 +230,18 @@ export default function VirtualTryOnScreen() {
                 </TouchableOpacity>
               ) : (
                 <View style={[styles.uploadCard, { position: 'relative' }]}>
-                  <Image source={{ uri: garmentImage }} style={styles.uploadImageDisplay} resizeMode="contain" />
+                  {garmentImageLoading && (
+                    <View style={styles.loaderOverlay}>
+                      <ActivityIndicator size="large" color="#f8ac1b" />
+                    </View>
+                  )}
+                  <Image
+                    source={{ uri: garmentImage }}
+                    style={styles.uploadImageDisplay}
+                    resizeMode="contain"
+                    onLoadStart={() => setGarmentImageLoading(true)}
+                    onLoadEnd={() => setGarmentImageLoading(false)}
+                  />
                   <TouchableOpacity
                     style={styles.removeIconButton}
                     onPress={() => removeImage(GARMENT_IMAGE_KEY, setGarmentImage, 'Garment')}
@@ -259,7 +265,18 @@ export default function VirtualTryOnScreen() {
                 </TouchableOpacity>
               ) : (
                 <View style={[styles.uploadCard, styles.uploadCardMarginTop, { position: 'relative' }]}>
-                  <Image source={{ uri: userImage }} style={styles.uploadImageDisplay} resizeMode="contain" />
+                  {userImageLoading && (
+                    <View style={styles.loaderOverlay}>
+                      <ActivityIndicator size="large" color="#f8ac1b" />
+                    </View>
+                  )}
+                  <Image
+                    source={{ uri: userImage }}
+                    style={styles.uploadImageDisplay}
+                    resizeMode="contain"
+                    onLoadStart={() => setUserImageLoading(true)}
+                    onLoadEnd={() => setUserImageLoading(false)}
+                  />
                   <TouchableOpacity
                     style={styles.removeIconButton}
                     onPress={() => removeImage(USER_IMAGE_KEY, setUserImage, 'Photo')}
@@ -275,12 +292,12 @@ export default function VirtualTryOnScreen() {
           <TouchableOpacity
             style={[
               styles.nextButton,
-              (!userImage || !garmentImage || !selectedCategory) && styles.nextButtonDisabled,
+              (!userImage || !garmentImage) && styles.nextButtonDisabled,
             ]}
             onPress={handleNext}
-            disabled={!userImage || !garmentImage || !selectedCategory}
+            disabled={!userImage || !garmentImage}
           >
-            <Text style={styles.nextText}>Try On</Text>
+            <Text style={styles.nextText}>Try It On Now</Text>
             <Icons name="auto-awesome" size={22} color="#FFFFFF" style={{ marginLeft: 10 }} />
           </TouchableOpacity>
         </View>
@@ -361,38 +378,7 @@ export default function VirtualTryOnScreen() {
         </View>
       </Modal>
 
-      {/* Category Selection Modal */}
-      <Modal visible={categoryModalVisible} animationType="fade" transparent onRequestClose={() => setCategoryModalVisible(false)}>
-        <View style={styles.categoryModalOverlay}>
-          <View style={styles.categoryModalContent}>
-            <View style={styles.categoryModalHeader}>
-              <Text style={styles.categoryModalTitle}>Select Garment Type</Text>
-              <TouchableOpacity onPress={() => setCategoryModalVisible(false)}>
-                <Icon name="close" size={28} color="#111111" />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.categoryGrid}>
-              {categories.map(cat => (
-                <TouchableOpacity
-                  key={cat.value}
-                  style={[styles.categoryCard, selectedCategory === cat.value && styles.categoryCardActive]}
-                  onPress={() => toggleCategory(cat.value)}
-                >
-                  <Text
-                    style={[
-                      styles.categoryName,
-                      selectedCategory === cat.value && styles.categoryNameActive,
-                    ]}
-                  >
-                    {cat.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        </View>
-      </Modal>
+      {/* Category Selection Modal logic removed */}
     </View>
   );
 }
@@ -867,5 +853,17 @@ const styles = StyleSheet.create({
   categoryNameActive: {
     color: '#f8ac1b',
     fontWeight: '700',
+  },
+  loaderOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+    borderRadius: 8,
   },
 });

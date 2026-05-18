@@ -44,6 +44,8 @@ import OrderDetailsScreen from '../screens/OrderDetailsScreen';
 import SplashScreen from '../screens/SplashScreen';
 import TryOnResult from '../screens/virtualTry/TryOnResult';
 import VirtualTryOnDetails from '../screens/virtualTry/VirtualTryOnDetails';
+import ImageScoreValidationScreen from '../screens/virtualTry/ImageScoreValidationScreen';
+import DetailedUserInfoScreen from '../screens/virtualTry/DetailedUserInfoScreen';
 import CheckoutScreen from '../screens/CheckoutScreen';
 import WalletScreen from '../screens/Wallet';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
@@ -114,6 +116,8 @@ function AppStack() {
       <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
       <Stack.Screen name="TryOnResult" component={TryOnResult} />
       <Stack.Screen name="VirtualTryOnDetails" component={VirtualTryOnDetails} />
+      <Stack.Screen name="ImageScoreValidation" component={ImageScoreValidationScreen} />
+      <Stack.Screen name="DetailedUserInfo" component={DetailedUserInfoScreen} />
       <Stack.Screen name="VirtualTryOnHistory" component={VirtualTryOnHistoryScreen} />
       <Stack.Screen name="Checkout" component={CheckoutScreen} />
 
