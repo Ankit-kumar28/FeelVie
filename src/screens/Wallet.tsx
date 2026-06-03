@@ -594,7 +594,7 @@ export default function WalletScreen() {
     <>
       <SafeAreaView style={styles.container}>
         {/* Header */}
-        <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+        <View style={[styles.header]}>
           <TouchableOpacity onPress={() => { console.log('[Header] Back button pressed'); navigation.goBack(); }}>
             <Icon name="arrow-left" size={26} color="#111111" />
           </TouchableOpacity>

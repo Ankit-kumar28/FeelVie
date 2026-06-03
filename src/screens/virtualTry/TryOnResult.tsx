@@ -195,7 +195,7 @@ export default function TryOnResult({ route, navigation }) {
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top }]}>
+      <View style={[styles.header]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icons name="arrow-back" size={26} color="#111111" />
         </TouchableOpacity>
