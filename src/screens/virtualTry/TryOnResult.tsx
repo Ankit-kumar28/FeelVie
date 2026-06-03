@@ -1,5 +1,5 @@
 // src/screens/TryOnResult.tsx
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
   StatusBar,
   Dimensions,
+  Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icons from 'react-native-vector-icons/MaterialIcons';
@@ -21,8 +22,9 @@ import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Share from 'react-native-share';
 import ViewShot, { captureRef } from 'react-native-view-shot';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const normalizeImageUri = (value?: string) => {
   if (!value) return '';
@@ -47,6 +49,61 @@ export default function TryOnResult({ route, navigation }) {
   const [isSharing, setIsSharing] = useState(false);
   const [shapeStyle, setShapeStyle] = useState('rounded'); // 'rounded', 'square', 'circle'
   const [imageAspectRatio, setImageAspectRatio] = useState<number>(3 / 4);
+  const [showLowCreditModal, setShowLowCreditModal] = useState(false);
+  const [currentCredit, setCurrentCredit] = useState<string>('0');
+  const [hasActiveSub, setHasActiveSub] = useState(false);
+  const [isPromptingForSub, setIsPromptingForSub] = useState(false);
+
+  useEffect(() => {
+    checkWalletBalance();
+    checkSubscription();
+  }, []);
+
+  const checkSubscription = async () => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) return;
+
+      const response = await fetch(`https://api.feelvie.com/api/wallet/subscriptions/me/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Assuming subscription data is an array as per user prompt
+        const active = Array.isArray(data) && data.some(s => s.status === 'active');
+        setHasActiveSub(active);
+      }
+    } catch (error) {
+      console.error('[TryOnResult] Failed to check subscription:', error);
+    }
+  };
+
+  const checkWalletBalance = async () => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) return;
+
+      const response = await fetch(`https://api.feelvie.com/api/wallet/me/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentCredit(data.credit_balance || '0');
+        const creditBalance = parseFloat(data.credit_balance || '0');
+        if (creditBalance < 5) {
+          setShowLowCreditModal(true);
+        }
+      }
+    } catch (error) {
+      console.error('[TryOnResult] Failed to check wallet balance:', error);
+    }
+  };
 
   const captureResultImage = async (withQr: boolean) => {
     const targetRef = withQr ? shareShotRef : saveShotRef;
@@ -172,11 +229,36 @@ export default function TryOnResult({ route, navigation }) {
                   }
                 }}
               />
-              <Image
-                source={require('../../assets/images/watermark.png')}
-                style={styles.watermark}
+              {!hasActiveSub && (
+                <View style={styles.watermarkWrapper}>
+                  <Image
+                    source={require('../../assets/images/watermark.png')}
+                    style={styles.watermarkInner}
+                    resizeMode="contain"
+                  />
+                  <TouchableOpacity
+                    style={styles.watermarkCloseBtn}
+                    onPress={() => {
+                      setIsPromptingForSub(true);
+                      setShowLowCreditModal(true);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Icons name="close" size={10} color="#111111" />
+                  </TouchableOpacity>
+                </View>
+              )}
+              {/* <Image
+                source={require('../../assets/images/bottom.png')}
+                style={styles.bottomBanner}
                 resizeMode="contain"
-              />
+              /> */}
+
+              {/* <Image
+                source={require('../../assets/images/qr.png')}
+                style={styles.orLogo}
+                resizeMode="contain"
+              /> */}
             </View>
 
             <ViewShot
@@ -190,11 +272,18 @@ export default function TryOnResult({ route, navigation }) {
                 style={[styles.resultImage, getShapeStyle(shapeStyle)]}
                 resizeMode="contain"
               />
-              <Image
+              {!hasActiveSub && (
+                <Image
+                  source={require('../../assets/images/watermark.png')}
+                  style={styles.watermark}
+                  resizeMode="contain"
+                />
+              )}
+              {/* <Image
                 source={require('../../assets/images/bottom.png')}
                 style={styles.bottomBanner}
                 resizeMode="contain"
-              />
+              /> */}
 
               <Image
                 source={require('../../assets/images/qr.png')}
@@ -214,11 +303,11 @@ export default function TryOnResult({ route, navigation }) {
                 style={[styles.resultImage, getShapeStyle(shapeStyle)]}
                 resizeMode="contain"
               />
-              <Image
+              {/* <Image
                 source={require('../../assets/images/bottom.png')}
                 style={styles.bottomBanner}
                 resizeMode="contain"
-              />
+              /> */}
 
               <Image
                 source={require('../../assets/images/qr.png')}
@@ -269,6 +358,45 @@ export default function TryOnResult({ route, navigation }) {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* Low Credit Modal */}
+      <Modal
+        visible={showLowCreditModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLowCreditModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity
+              style={styles.closeIconButton}
+              onPress={() => setShowLowCreditModal(false)}
+            >
+              <Icons name="close" size={24} color="#111111" />
+            </TouchableOpacity>
+
+            <View style={styles.iconContainer}>
+              <Icon name={isPromptingForSub ? "star-outline" : "wallet-outline"} size={40} color="#111111" />
+            </View>
+            <Text style={styles.modalTitle}>{isPromptingForSub ? "Premium Plan" : "Low Credit"}</Text>
+            {!isPromptingForSub && <Text style={styles.creditLeftText}>Remaining Credit: {currentCredit}</Text>}
+            <Text style={styles.modalMessage}>
+              {isPromptingForSub 
+                ? "Get an active subscription plan to remove watermarks and unlock unlimited virtual try-ons!"
+                : "Your credit balance is low. Please purchase credits to try on more outfits!"}
+            </Text>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                setShowLowCreditModal(false);
+                navigation.navigate('WalletScreen');
+              }}
+            >
+              <Text style={styles.modalButtonText}>{isPromptingForSub ? "Get a Plan" : "Top Up Now"}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -418,9 +546,11 @@ const styles = StyleSheet.create({
   bottomBanner: {
     position: 'absolute',
     top: "100%",
-    transform: [{ translateY: "-65%" }],
+    transform: [{ translateY: "-100%" }],
     width: '100%',
-    objectFit: "contain", 
+    height : 60,
+    objectFit: "fill", 
+    backgroundColor : "#787878a8",
   },
   watermark: {
     position: 'absolute',
@@ -433,12 +563,47 @@ const styles = StyleSheet.create({
   orLogo: {
     position: 'absolute',
     bottom: 0,
-    transform: [{ translateY: "-30%" }],
+    // transform: [{ translateY: "-30%" }],
     right: 0,
-    width: 90,
-    height: 90,
+    width: 60,
+    height: 60,
     opacity: 0.95,
-    borderTopLeftRadius: 12,
+    borderTopLeftRadius:6,
+  },
+
+  /* Watermark Styles */
+  watermarkWrapper: {
+    position: 'absolute',
+    bottom: 15,
+    right: 15,
+    borderWidth: 1.5,
+    borderColor: '#111111',
+    borderStyle: 'dotted',
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  watermarkInner: {
+    width: 70,
+    height: 40,
+    opacity: 0.6,
+  },
+  watermarkCloseBtn: {
+    position: 'absolute',
+    top: -10,
+    right: -10,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#111111',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
   },
 
   /* Shape Options */
@@ -483,6 +648,87 @@ const styles = StyleSheet.create({
     marginVertical: 60,
     textAlign: 'center',
     fontFamily: 'Poppins-Regular',
+  },
+
+  /* Modal Styles */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    width: '85%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+  },
+  closeIconButton: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    padding: 4,
+    zIndex: 10,
+  },
+  iconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#F8F8F8',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#EEEEEE',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#111111',
+    marginBottom: 8,
+    fontFamily: 'serif',
+  },
+  creditLeftText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#f8ac1b',
+    backgroundColor: '#FFF8E7',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginBottom: 16,
+    overflow: 'hidden',
+  },
+  modalMessage: {
+    fontSize: 14,
+    color: '#666666',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+    fontFamily: 'Poppins-Regular',
+  },
+  modalButton: {
+    width: '100%',
+    height: 48,
+    backgroundColor: '#111111',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
 
   /* Button Container */

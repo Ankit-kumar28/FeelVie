@@ -129,7 +129,7 @@ const ProductCard = memo(({
 export default function SearchResults() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { query, filters: initialFilters = {}, title, category, sectionId } = route.params || {};
+  const { query, filters: initialFilters = {}, title, category, sectionId, preDefinedProducts } = route.params || {};
 
   const filters = {
     ...initialFilters,
@@ -139,10 +139,10 @@ export default function SearchResults() {
 
   const insets = useSafeAreaInsets();
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>(preDefinedProducts || []);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(preDefinedProducts || []);
   const [wishlistMap, setWishlistMap] = useState<Record<number, WishlistStatus>>({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!preDefinedProducts);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -313,6 +313,14 @@ export default function SearchResults() {
 
   // Reset + initial fetch
   useEffect(() => {
+    if (preDefinedProducts) {
+      setProducts(preDefinedProducts);
+      setFilteredProducts(preDefinedProducts);
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+
     setProducts([]);
     setFilteredProducts([]);
     setNextUrl(null);
@@ -325,7 +333,7 @@ export default function SearchResults() {
     }, 0);
 
     return () => clearTimeout(timer);
-  }, [query, filters?.category, filters?.section, fetchProducts]);
+  }, [query, filters?.category, filters?.section, fetchProducts, preDefinedProducts]);
 
   // Reset filters on new search
   useEffect(() => {

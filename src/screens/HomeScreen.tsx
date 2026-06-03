@@ -21,13 +21,31 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Carousel from 'react-native-banner-carousel';
+import productData from '../utils/product.json';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const BannerWidth = SCREEN_WIDTH - 24; // 12px margin on each side
 const BannerHeight = 220;
 
-const PRODUCT_CARD_WIDTH = (SCREEN_WIDTH - 48) / 2;
-const PRODUCT_IMG_HEIGHT = 280;
+interface Category {
+  id: number;
+  categoryName: string;
+  icon: string;
+  subcategories: Subcategory[];
+}
+
+interface Subcategory {
+  id: number;
+  subcategoryName: string;
+  icon: string;
+  products: Product[];
+}
+
+interface Product {
+  id: number;
+  productName: string;
+  imageUrl: string;
+}
 
 interface CarouselItem {
   id: number;
@@ -39,78 +57,33 @@ interface CarouselItem {
   order: number;
 }
 
-interface ProductImage {
-  id: number;
-  image?: string;
-  image_url?: string;
-  alt_text?: string;
-  sort_order?: number;
-}
-
-interface Product {
-  id: number;
-  name: string;
-  selling_price: string;
-  original_price?: string | null;
-  images: ProductImage[];
-  category: number;
-  description?: string;
-  product_type: string;
-  condition: string;
-}
-
-interface SectionProduct {
-  id: number;
-  product: Product;
-  order: number;
-}
-
-interface Section {
-  id: number;
-  name: string;
-  description: string;
-  section_type: string;
-  is_active: boolean;
-  order: number;
-  products: SectionProduct[];
-}
-
 const BASE_URL = 'https://api.feelvie.com';
-
-const categories = [
-  { name: 'Women', icon: require('../assets/icons/females.png'), slug: 'womens' },
-  { name: 'Male', icon: require('../assets/icons/male.png'), slug: 'mens' },
-  { name: 'Kids', icon: require('../assets/icons/kids.png'), slug: 'kids' },
-];
 
 export default function HomeScreen() {
   const navigation = useNavigation<any>();
 
   const [carousels, setCarousels] = useState<CarouselItem[]>([]);
-  const [sections, setSections] = useState<Section[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [wishlistMap, setWishlistMap] = useState<Record<number, boolean>>({});
   const [creditBalance, setCreditBalance] = useState<number>(0);
+  const [selectedCategory, setSelectedCategory] = useState<Category>(productData.categories[0] as Category);
 
-  const handleVirtualTryOn = (product: Product) => {
-    // Navigate to VirtualTryOn screen with product as garment
-    navigation.navigate('VirtualTryOn', {
-      garment: product,
-      garmentImage: getProductImage(product),
-      garmentName: product.name
-    });
-  };
+  // Animated values for subcategories
+  const [scaleAnims] = useState(() =>
+    productData.categories.flatMap(cat => cat.subcategories).reduce((acc, sub) => {
+      acc[sub.id] = new Animated.Value(1);
+      return acc;
+    }, {} as Record<number, Animated.Value>)
+  );
 
-  const toggleWishlist = (productId: number) => {
-    setWishlistMap(prev => ({
-      ...prev,
-      [productId]: !prev[productId],
-    }));
+  const animateSubcategory = (id: number) => {
+    Animated.sequence([
+      Animated.timing(scaleAnims[id], { toValue: 1.1, duration: 150, useNativeDriver: true }),
+      Animated.timing(scaleAnims[id], { toValue: 1, duration: 150, useNativeDriver: true }),
+    ]).start();
   };
 
   const CAROUSEL_API = `${BASE_URL}/api/common/carousels?type=app`;
-  const SECTIONS_API = `${BASE_URL}/api/common/sections/`;
   const WALLET_API = `${BASE_URL}/api/wallet/me/`;
 
   const fetchHomeData = useCallback(async () => {
@@ -137,17 +110,6 @@ export default function HomeScreen() {
             .sort((a, b) => a.order - b.order)
         );
       }
-
-      // Sections
-      const sectRes = await fetch(SECTIONS_API, { headers });
-      if (sectRes.ok) {
-        const data = await sectRes.json();
-        const sectionData = Array.isArray(data) ? data : data.results || [];
-        const filteredSections = sectionData
-          .filter((s: Section) => s.is_active && s.products && s.products.length > 0)
-          .sort((a: Section, b: Section) => a.order - b.order);
-        setSections(filteredSections);
-      }
     } catch (err) {
       console.log('Home fetch error:', err);
     } finally {
@@ -165,10 +127,6 @@ export default function HomeScreen() {
     fetchHomeData();
   };
 
-  const getProductImage = (p: Product) => p.images?.[0]?.image_url || p.images?.[0]?.image || 'https://via.placeholder.com/400';
-
-  
-
   const renderCarousel = (item: CarouselItem, index: number) => (
     <Image
       key={index}
@@ -176,52 +134,6 @@ export default function HomeScreen() {
       source={{ uri: item.image }}
     />
   );
-
-  const renderProduct = ({ item }: { item: Product }) => {
-    const inWishlist = wishlistMap[item.id] || false;
-
-    return (
-      <View
-        style={styles.productCard}
-        // activeOpacity={0.92}
-        // onPress={() => navigation.navigate('Product', { product: item })}
-      >
-        {/* Heart Icon - Wishlist */}
-        <TouchableOpacity
-          style={styles.heartContainer}
-          onPress={() => toggleWishlist(item.id)}
-        >
-          <Icon
-            name={inWishlist ? 'favorite' : 'favorite-border'}
-            size={18}
-            color={inWishlist ? '#ef4444' : '#ffffff'}
-            style={styles.heartShadow}
-          />
-        </TouchableOpacity>
-
-        {/* AI Virtual Try-On Icon */}
-        <TouchableOpacity
-          style={styles.aiContainer}
-          onPress={() => handleVirtualTryOn(item)}
-        >
-          <Text style={{ color: '#000', fontSize: 14, fontWeight: '600' }}>Try on yourself
-          </Text>
-          <Icon
-            name="auto-awesome"
-            size={16}
-            color="#000"
-            style={styles.aiShadow}
-          />
-        </TouchableOpacity>
-
-        <Image
-          source={{ uri: getProductImage(item) }}
-          style={styles.productImage}
-          resizeMode="cover"
-        />
-      </View>
-    );
-  };
 
   if (loading) {
     return (
@@ -243,25 +155,11 @@ export default function HomeScreen() {
             <View style={styles.skeletonCarousel} />
           </View>
 
-          {/* Products Title Skeleton */}
-          <View style={{ marginTop: 24, marginLeft: 20, marginBottom: 12 }}>
-            <View style={[styles.skeletonText, { width: 150, height: 20 }]} />
-          </View>
-
-          {/* Grid Skeleton */}
-          <View style={styles.gridContent}>
-            <View style={styles.columnWrapper}>
-              <View style={styles.skeletonCard} />
-              <View style={styles.skeletonCard} />
-            </View>
-            <View style={styles.columnWrapper}>
-              <View style={styles.skeletonCard} />
-              <View style={styles.skeletonCard} />
-            </View>
-            <View style={styles.columnWrapper}>
-              <View style={styles.skeletonCard} />
-              <View style={styles.skeletonCard} />
-            </View>
+          {/* Categories Placeholder */}
+          <View style={[styles.categoriesContainer, { opacity: 0.3 }]}>
+            <View style={[styles.skeletonText, { width: 60, height: 60, borderRadius: 30 }]} />
+            <View style={[styles.skeletonText, { width: 60, height: 60, borderRadius: 30 }]} />
+            <View style={[styles.skeletonText, { width: 60, height: 60, borderRadius: 30 }]} />
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -285,100 +183,105 @@ export default function HomeScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#f8ac1b" />}
         showsVerticalScrollIndicator={false}
       >
-        {/* Carousel */}
-        <View style={styles.carouselContainer}>
-          {carousels.length > 0 ? (
-            <Carousel
-              autoplay
-              autoplayTimeout={5000}
-              loop
-              pageSize={BannerWidth}
-              activePageIndicatorStyle={{ backgroundColor: '#f8ac1b' }}
-              pageIndicatorStyle={{ backgroundColor: 'rgba(248,172,27,0.3)' }}
-            >
-              {carousels.map(renderCarousel)}
-            </Carousel>
-          ) : (
-            <View style={styles.carouselPlaceholder} />
-          )}
-        </View>
-
-        {/* Categories */}
-        <View style={styles.categoriesContainer}>
-          {categories.map((category, index) => (
-            <TouchableOpacity 
-              key={index} 
-              style={styles.categoryItem}
-              onPress={() => navigation.navigate('SearchResults', { query: category.name, category: category.slug })}
-            >
-              <View style={styles.categoryIconBox}>
-                <Image source={category.icon} style={styles.categoryIcon} />
-              </View>
-              <Text style={styles.categoryText}>{category.name}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Sections with Products */}
-        {sections.map((section) => (
-          <View key={section.id}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.productsTitle}>{section.name}</Text>
-              {section.products.length > 4 && (
-                <TouchableOpacity onPress={() => navigation.navigate('SearchResults', { query: section.name, sectionId: section.id })}>
-                  <Text style={styles.viewAllButton}>View All</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-            <FlatList
-              scrollEnabled={false}
-              data={section.products.slice(0, 4)}
-              renderItem={({ item }) => (
-                <TouchableOpacity 
-                  style={styles.productCard}
-                  onPress={() => navigation.navigate('Product', { product: item.product })}
-                >
-                  {/* Heart Icon - Wishlist */}
-                  <TouchableOpacity
-                    style={styles.heartContainer}
-                    onPress={() => toggleWishlist(item.product.id)}
-                  >
-                    <Icon
-                      name={wishlistMap[item.product.id] ? 'favorite' : 'favorite-border'}
-                      size={18}
-                      color={wishlistMap[item.product.id] ? '#ef4444' : '#ffffff'}
-                      style={styles.heartShadow}
-                    />
-                  </TouchableOpacity>
-
-                  {/* AI Virtual Try-On Icon */}
-                  <TouchableOpacity
-                    style={styles.aiContainer}
-                    onPress={() => handleVirtualTryOn(item.product)}
-                  >
-                    <Text style={{ color: '#000', fontSize: 14, fontWeight: '600' }}>Try on yourself</Text>
-                    <Icon
-                      name="auto-awesome"
-                      size={16}
-                      color="#000"
-                      style={styles.aiShadow}
-                    />
-                  </TouchableOpacity>
-
-                  <Image
-                    source={{ uri: getProductImage(item.product) }}
-                    style={styles.productImage}
-                    resizeMode="cover"
-                  />
-                </TouchableOpacity>
-              )}
-              keyExtractor={item => String(item.id)}
-              numColumns={2}
-              columnWrapperStyle={styles.columnWrapper}
-              contentContainerStyle={styles.gridContent}
-            />
+        <View style={{ minHeight: SCREEN_HEIGHT - 100 }}>
+          {/* Carousel */}
+          <View style={styles.carouselContainer}>
+            {carousels.length > 0 ? (
+              <Carousel
+                autoplay
+                autoplayTimeout={5000}
+                loop
+                pageSize={BannerWidth}
+                activePageIndicatorStyle={{ backgroundColor: '#f8ac1b' }}
+                pageIndicatorStyle={{ backgroundColor: 'rgba(248,172,27,0.3)' }}
+              >
+                {carousels.map(renderCarousel)}
+              </Carousel>
+            ) : (
+              <View style={styles.carouselPlaceholder} />
+            )}
           </View>
-        ))}
+
+          {/* Categories */}
+          <View style={styles.categoriesContainer}>
+            {productData.categories.map((category: any, index: number) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.categoryItem,
+                  selectedCategory.id === category.id && styles.activeCategoryItem
+                ]}
+                onPress={() => setSelectedCategory(category as Category)}
+              >
+                <View style={[
+                  styles.categoryIconBox,
+                  selectedCategory.id === category.id && styles.activeCategoryIconBox
+                ]}>
+                  {category.icon.startsWith('http') ? (
+                    <Image source={{ uri: category.icon }} style={styles.categoryIcon} />
+                  ) : (
+                    <Text style={{ fontSize: 24 }}>{category.icon}</Text>
+                  )}
+                </View>
+                <Text style={[
+                  styles.categoryText,
+                  selectedCategory.id === category.id && styles.activeCategoryText
+                ]}>{category.categoryName}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Subcategories (List View) */}
+          <View style={styles.subCategoriesContainer}>
+            <Text style={styles.sectionTitle}>{selectedCategory.categoryName} Collections</Text>
+            <View style={{ paddingHorizontal: 16 }}>
+              {selectedCategory.subcategories.map((sub: Subcategory) => (
+                <TouchableOpacity
+                  key={sub.id}
+                  onPress={() => {
+                    animateSubcategory(sub.id);
+                    // Map products to SearchResults format
+                    const products = sub.products.map(p => ({
+                      id: p.id,
+                      name: p.productName,
+                      selling_price: "499", // Placeholder price for static data
+                      images: [{ id: 1, image_url: p.imageUrl }]
+                    }));
+                    navigation.navigate('SearchResults', {
+                      title: sub.subcategoryName,
+                      preDefinedProducts: products
+                    });
+                  }}
+                  activeOpacity={0.7}
+                  style={styles.subCategoryListRow}
+                >
+                  <Animated.View style={[
+                    styles.subCategoryListContent,
+                    { transform: [{ scale: scaleAnims[sub.id] || 1 }] }
+                  ]}>
+                    <View style={styles.subCategoryIconCircle}>
+                      {sub.icon.startsWith('http') ? (
+                         <Image source={{ uri: sub.icon }} style={styles.subCategoryIcon} />
+                      ) : (
+                        <Text style={{ fontSize: 20 }}>{sub.icon}</Text>
+                      )}
+                    </View>
+                    <Text style={styles.subCategoryListText}>{sub.subcategoryName}</Text>
+                    <Icon name="chevron-right" size={24} color="#AAAAAA" />
+                  </Animated.View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+
+
+        {/* Bottom Banner */}
+        <Image
+          source={require('../assets/images/homebottom.png')}
+          style={{ width: '100%', height: 400 }}
+          resizeMode="contain"
+        />
 
         <View style={{ height: 60 }} />
       </ScrollView>
@@ -449,149 +352,106 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     paddingHorizontal: 12,
     marginTop: 24,
-    gap: 24,
+    gap: 20,
     paddingLeft: 14,
   },
   categoryItem: {
     alignItems: 'center',
+    opacity: 0.6,
+  },
+  activeCategoryItem: {
+    opacity: 1,
   },
   categoryIconBox: {
-    padding: 12,
-    borderRadius: "100%",
-    backgroundColor: 'rgba(245, 245, 245, 0.8)',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#F8F9FA',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
     borderWidth: 1,
     borderColor: '#E8E8E8',
+    padding: 4,
+  },
+  activeCategoryIconBox: {
+    borderColor: '#f8ac1b',
+    backgroundColor: '#FFF9F0',
   },
   categoryIcon: {
-    width: 30,
-    height: 30,
+    width: "100%",
+    height: "100%",
+    borderRadius: 30,
+    
   },
   categoryText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
     fontFamily: 'Poppins-SemiBold',
     color: '#111111',
   },
+  activeCategoryText: {
+    color: '#f8ac1b',
+  },
 
+  subCategoriesContainer: {
+    marginTop: 32,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    fontFamily: 'serif',
+    fontStyle: 'italic',
+    color: '#111111',
+    marginBottom: 16,
+    marginLeft: 20,
+  },
+  subCategoryListRow: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#36363652',
+    padding: 12,
+  },
+  subCategoryListContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  subCategoryIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#F8F9FA',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+  },
+  subCategoryListText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#111111',
+    fontFamily: 'Poppins-SemiBold',
+  },
+  subCategoryIcon: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 30,
+    resizeMode: "contain",
+  },
   skeletonCarousel: {
     height: BannerHeight,
     backgroundColor: '#E8E8E8',
     borderRadius: 16,
   },
 
-  skeletonCard: {
-    width: PRODUCT_CARD_WIDTH,
-    height: PRODUCT_IMG_HEIGHT,
-    backgroundColor: '#E8E8E8',
-    borderRadius: 10,
-  },
-
   skeletonText: {
     backgroundColor: '#E8E8E8',
     borderRadius: 4,
-  },
-
-  productsTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    fontFamily: 'serif',
-    fontStyle: 'italic',
-    color: '#111111',
-    marginTop: 24,
-    marginBottom: 12,
-    marginLeft: 20,
-    letterSpacing: -0.5,
-  },
-
-  gridContent: {
-    paddingHorizontal: 12,
-    paddingBottom: 16,
-  },
-  columnWrapper: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 4,
-    marginBottom: 12,
-  },
-
-  productCard: {
-    width: PRODUCT_CARD_WIDTH,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-  },
-
-  heartContainer: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(0,0,0,0.50)',
-    borderRadius: 20,
-    padding: 6,
-    zIndex: 10,
-  },
-
-  aiContainer: {
-    position: 'absolute',
-    bottom: 8,
-    left: 8,
-    backgroundColor: '#fff',
-    paddingVertical: 4,
-    width: '90%',
-    height: 32,
-    borderRadius: 20,
-    padding: 6,
-    zIndex: 10,
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-
-  },
-
-  heartShadow: {
-    textShadowColor: 'rgba(188, 187, 187, 0.8)',
-    textShadowRadius: 3,
-    textShadowOffset: { width: 0, height: 1 },
-  },
-
-  aiShadow: {
-    textShadowColor: 'rgba(248, 172, 27, 0.6)',
-    textShadowRadius: 3,
-    textShadowOffset: { width: 0, height: 1 },
-  },
-
-  productImage: {
-    width: '100%',
-    height: PRODUCT_IMG_HEIGHT,
-    backgroundColor: '#F5F5F5',
-  },
-
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingRight: 20,
-  },
-
-  viewAllButton: {
-    fontSize: 14,
-    fontWeight: '600',
-    fontFamily: 'Poppins-SemiBold',
-    fontStyle: 'italic',
-    color: '#f8ac1b',
-    marginTop: 24,
-    marginBottom: 12,
   },
 
   infoContainer: { padding: 12 },

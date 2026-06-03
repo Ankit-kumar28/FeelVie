@@ -118,6 +118,7 @@ export default function WalletScreen() {
   // UI state
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'b2c' | 'b2b'>('b2c');
 
   // Modal visibility
   const [creditPacksModalVisible, setCreditPacksModalVisible] = useState(false);
@@ -661,53 +662,72 @@ export default function WalletScreen() {
             </>
           )}
 
+          {/* Tab Selector for Plans */}
+          {!activeSub && (
+            <View style={styles.tabContainer}>
+              <TouchableOpacity
+                style={[styles.tabButton, activeTab === 'b2c' && styles.tabButtonActive]}
+                onPress={() => setActiveTab('b2c')}
+              >
+                <Text style={[styles.tabText, activeTab === 'b2c' && styles.tabTextActive]}>
+                  B2C Plans
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.tabButton, activeTab === 'b2b' && styles.tabButtonActive]}
+                onPress={() => setActiveTab('b2b')}
+              >
+                <Text style={[styles.tabText, activeTab === 'b2b' && styles.tabTextActive]}>
+                  B2B Plans
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           {/* Subscription Plans */}
           {
             !activeSub && (
               <View style={styles.sectionRow}>
                 <Text style={styles.sectionTitle}>
-                  {activeSub ? 'OTHER SUBSCRIPTION PLANS' : 'SUBSCRIPTION PLANS'}
+                  {activeSub ? 'OTHER SUBSCRIPTION PLANS' : 'AVAILABLE PLANS'}
                 </Text>
-                {subscriptionPlans.length > 2 && (
-                  <TouchableOpacity onPress={openSubscriptionModal}>
-                    <Text style={styles.seeAll}>See All</Text>
-                  </TouchableOpacity>
-                )}
               </View>
             )
           }
-          {!activeSub && subscriptionPlans.map((plan) => {
-            const isCurrent = activeSub?.plan?.id === plan.id;
-            return (
-              <View key={plan.id} style={[styles.planCard, isCurrent && styles.planCardActive]}>
-                <View style={{ flex: 1 }}>
-                  <View style={styles.planHeader}>
-                    <Text style={styles.planName}>{plan.name}</Text>
-                    {isCurrent && (
-                      <View style={styles.activeBadge}>
-                        <Text style={styles.activeBadgeText}>ACTIVE</Text>
-                      </View>
+          {!activeSub && subscriptionPlans
+            .filter(plan => plan.audience.toLowerCase() === activeTab)
+            .map((plan) => {
+              const isCurrent = activeSub?.plan?.id === plan.id;
+              return (
+                <View key={plan.id} style={[styles.planCard, isCurrent && styles.planCardActive]}>
+                  <View style={{ flex: 1 }}>
+                    <View style={styles.planHeader}>
+                      <Text style={styles.planName}>{plan.name}</Text>
+                      {isCurrent && (
+                        <View style={styles.activeBadge}>
+                          <Text style={styles.activeBadgeText}>ACTIVE</Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={styles.planCredits}>{plan.credits_per_month} Credits/month</Text>
+                  </View>
+                  <View style={styles.planPriceCol}>
+                    <Text style={styles.planPrice}>
+                      ₹{parseFloat(plan.price_inr).toFixed(0)}
+                    </Text>
+                    <Text style={styles.planPriceSub}>/mo</Text>
+                    {!isCurrent && (
+                      <TouchableOpacity
+                        style={styles.subscribeBtn}
+                        onPress={() => handleActivateSubscription(plan)}
+                      >
+                        <Text style={styles.subscribeBtnText}>Subscribe</Text>
+                      </TouchableOpacity>
                     )}
                   </View>
-                  <Text style={styles.planCredits}>{plan.credits_per_month} Credits/month</Text>
                 </View>
-                <View style={styles.planPriceCol}>
-                  <Text style={styles.planPrice}>
-                    ₹{parseFloat(plan.price_inr).toFixed(0)}
-                  </Text>
-                  <Text style={styles.planPriceSub}>/mo</Text>
-                  {!isCurrent && (
-                    <TouchableOpacity
-                      style={styles.subscribeBtn}
-                      onPress={() => handleActivateSubscription(plan)}
-                    >
-                      <Text style={styles.subscribeBtnText}>Subscribe</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </View>
-            );
-          })}
+              );
+            })}
 
           {/* Credit Packs - Only shown if active subscription */}
           {activeSub && (
@@ -716,11 +736,11 @@ export default function WalletScreen() {
                 <Text style={styles.sectionTitle}>CREDIT PACKS</Text>
                 {creditPacks.length > 3 && (
                   <TouchableOpacity onPress={openCreditPacksModal}>
-                    <Text style={styles.seeAll}>See All</Text>
+                    {/* <Text style={styles.seeAll}>See All</Text> */}
                   </TouchableOpacity>
                 )}
               </View>
-              {creditPacks.slice(0, 3).map((pack) => (
+              {creditPacks.map((pack) => (
                 <TouchableOpacity
                   key={pack.id}
                   style={styles.packCard}
@@ -915,6 +935,37 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E8E8E8',
   },
   headerTitle: { fontSize: 20, fontFamily: 'Poppins-SemiBold', color: '#111111' },
+
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#F5F5F5',
+    borderRadius: 8,
+    padding: 4,
+    marginBottom: 20,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 6,
+  },
+  tabButtonActive: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  tabText: {
+    fontSize: 14,
+    fontFamily: 'Poppins-Medium',
+    color: '#666666',
+  },
+  tabTextActive: {
+    color: '#111111',
+    fontFamily: 'Poppins-SemiBold',
+  },
 
   tabBar: {
     flexDirection: 'row',

@@ -147,148 +147,83 @@ export default function VirtualTryOnScreen() {
             </TouchableOpacity>
           </View> */}
 
-          {/* One-Below-Another Layout when both images are uploaded */}
-          {garmentImage && userImage ? (
-            <View>
-              {/* Garment Image */}
-              <View>
-                <Text style={styles.imageLabel}>Garment</Text>
-                <View style={[styles.uploadCard, { height: 280, position: 'relative' }]}>
-                  {garmentImageLoading && (
-                    <View style={styles.loaderOverlay}>
-                      <ActivityIndicator size="large" color="#f8ac1b" />
-                    </View>
-                  )}
-                  <Image
-                    source={{ uri: garmentImage }}
-                    style={styles.uploadImageDisplay}
-                    resizeMode="cover"
-                    onLoadStart={() => setGarmentImageLoading(true)}
-                    onLoadEnd={() => setGarmentImageLoading(false)}
-                  />
+          {/* Unified Side-by-Side Layout */}
+          <View>
+            <View style={styles.previewRow}>
+              {/* Garment Section */}
+              <View style={styles.previewContainer}>
+                <Text style={styles.previewLabelSide}>Garment</Text>
+                {garmentImage ? (
+                  <View style={styles.imageWrapper}>
+                    <Image source={{ uri: garmentImage }} style={styles.previewImageSide} resizeMode="cover" />
+                    <TouchableOpacity
+                      style={styles.removeIconButtonSmall}
+                      onPress={() => removeImage(GARMENT_IMAGE_KEY, setGarmentImage, 'Garment')}
+                    >
+                      <Icon name="close" size={16} color="#FFFFFF" />
+                    </TouchableOpacity>
+                  </View>
+                ) : (
                   <TouchableOpacity
-                    style={styles.removeIconButton}
-                    onPress={() => removeImage(GARMENT_IMAGE_KEY, setGarmentImage, 'Garment')}
+                    style={styles.smallUploadPlaceholder}
+                    onPress={() => pickImage(setGarmentImage, GARMENT_IMAGE_KEY, 'Garment')}
                   >
-                    <Icon name="close" size={24} color="#FFFFFF" />
+                    <Icon name="hanger" size={32} color="#f8ac1b" />
+                    <Text style={styles.smallUploadText}>Upload</Text>
                   </TouchableOpacity>
-                </View>
-                <TouchableOpacity
-                  style={[styles.actionBtn, styles.secondaryBtn, { marginTop: 12 }]}
-                  onPress={() => pickImage(setGarmentImage, GARMENT_IMAGE_KEY, 'Garment')}
-                >
-                  <Icon name="pencil" size={18} color="#111111" />
-                  <Text style={styles.actionBtnText}>Change Garment</Text>
-                </TouchableOpacity>
+                )}
               </View>
 
-              {/* User Photo */}
-              <View style={{ marginTop: 24 }}>
-                <Text style={styles.imageLabel}>Your Photo</Text>
-                <View style={[styles.uploadCard, { height: 280, position: 'relative' }]}>
-                  {userImageLoading && (
-                    <View style={styles.loaderOverlay}>
-                      <ActivityIndicator size="large" color="#f8ac1b" />
-                    </View>
-                  )}
-                  <Image
-                    source={{ uri: userImage }}
-                    style={styles.uploadImageDisplay}
-                    resizeMode="cover"
-                    onLoadStart={() => setUserImageLoading(true)}
-                    onLoadEnd={() => setUserImageLoading(false)}
-                  />
+              {/* User Photo Section */}
+              <View style={styles.previewContainer}>
+                <Text style={styles.previewLabelSide}>Your Photo</Text>
+                {userImage ? (
+                  <View style={styles.imageWrapper}>
+                    <Image source={{ uri: userImage }} style={styles.previewImageSide} resizeMode="cover" />
+                    <TouchableOpacity
+                      style={styles.removeIconButtonSmall}
+                      onPress={() => removeImage(USER_IMAGE_KEY, setUserImage, 'Photo')}
+                    >
+                      <Icon name="close" size={16} color="#FFFFFF" />
+                    </TouchableOpacity>
+                  </View>
+                ) : (
                   <TouchableOpacity
-                    style={styles.removeIconButton}
-                    onPress={() => removeImage(USER_IMAGE_KEY, setUserImage, 'Photo')}
+                    style={styles.smallUploadPlaceholder}
+                    onPress={() => pickImage(setUserImage, USER_IMAGE_KEY, 'User Photo')}
                   >
-                    <Icon name="close" size={24} color="#FFFFFF" />
+                    <Icon name="account-box-outline" size={32} color="#f8ac1b" />
+                    <Text style={styles.smallUploadText}>Upload</Text>
                   </TouchableOpacity>
-                </View>
-                <TouchableOpacity
-                  style={[styles.actionBtn, styles.secondaryBtn, { marginTop: 12 }]}
-                  onPress={() => pickImage(setUserImage, USER_IMAGE_KEY, 'Photo')}
-                >
-                  <Icon name="pencil" size={18} color="#111111" />
-                  <Text style={styles.actionBtnText}>Change Photo</Text>
-                </TouchableOpacity>
+                )}
               </View>
             </View>
-          ) : (
-            <>
-              {/* Single Upload - Garment */}
-              {!garmentImage ? (
-                <TouchableOpacity
-                  style={styles.uploadCard}
-                  onPress={() => pickImage(setGarmentImage, GARMENT_IMAGE_KEY, 'Garment')}
-                >
-                  <View style={styles.uploadPlaceholder}>
-                    <Icon name="hanger" size={56} color="#f8ac1b" />
-                    <Text style={styles.uploadPlaceholderText}>Upload garment</Text>
-                    <Text style={styles.uploadSubtext}>Front view, plain background</Text>
-                  </View>
-                </TouchableOpacity>
-              ) : (
-                <View style={[styles.uploadCard, { position: 'relative' }]}>
-                  {garmentImageLoading && (
-                    <View style={styles.loaderOverlay}>
-                      <ActivityIndicator size="large" color="#f8ac1b" />
-                    </View>
-                  )}
-                  <Image
-                    source={{ uri: garmentImage }}
-                    style={styles.uploadImageDisplay}
-                    resizeMode="contain"
-                    onLoadStart={() => setGarmentImageLoading(true)}
-                    onLoadEnd={() => setGarmentImageLoading(false)}
-                  />
-                  <TouchableOpacity
-                    style={styles.removeIconButton}
-                    onPress={() => removeImage(GARMENT_IMAGE_KEY, setGarmentImage, 'Garment')}
-                  >
-                    <Icon name="close" size={24} color="#FFFFFF" />
-                  </TouchableOpacity>
-                </View>
-              )}
 
-              {/* Single Upload - User Photo */}
-              {!userImage ? (
-                <TouchableOpacity
-                  style={[styles.uploadCard, styles.uploadCardMarginTop]}
-                  onPress={() => pickImage(setUserImage, USER_IMAGE_KEY, 'User Photo')}
-                >
-                  <View style={styles.uploadPlaceholder}>
-                    <Icon name="account-box-outline" size={56} color="#f8ac1b" />
-                    <Text style={styles.uploadPlaceholderText}>Upload your photo</Text>
-                    <Text style={styles.uploadSubtext}>Face camera, good lighting</Text>
-                  </View>
-                </TouchableOpacity>
-              ) : (
-                <View style={[styles.uploadCard, styles.uploadCardMarginTop, { position: 'relative' }]}>
-                  {userImageLoading && (
-                    <View style={styles.loaderOverlay}>
-                      <ActivityIndicator size="large" color="#f8ac1b" />
-                    </View>
-                  )}
-                  <Image
-                    source={{ uri: userImage }}
-                    style={styles.uploadImageDisplay}
-                    resizeMode="contain"
-                    onLoadStart={() => setUserImageLoading(true)}
-                    onLoadEnd={() => setUserImageLoading(false)}
-                  />
-                  <TouchableOpacity
-                    style={styles.removeIconButton}
-                    onPress={() => removeImage(USER_IMAGE_KEY, setUserImage, 'Photo')}
-                  >
-                    <Icon name="close" size={24} color="#FFFFFF" />
-                  </TouchableOpacity>
-                </View>
-              )}
-            </>
-          )}
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <TouchableOpacity
+                style={[styles.actionBtn, styles.secondaryBtn, { flex: 1 }]}
+                onPress={() => pickImage(setGarmentImage, GARMENT_IMAGE_KEY, 'Garment')}
+              >
+                <Icon name={garmentImage ? "pencil" : "plus"} size={16} color="#111111" />
+                <Text style={[styles.actionBtnText, { fontSize: 11 }]}>{garmentImage ? 'Change' : 'Add'} Garment</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.actionBtn, styles.secondaryBtn, { flex: 1 }]}
+                onPress={() => pickImage(setUserImage, USER_IMAGE_KEY, 'Photo')}
+              >
+                <Icon name={userImage ? "pencil" : "plus"} size={16} color="#111111" />
+                <Text style={[styles.actionBtnText, { fontSize: 11 }]}>{userImage ? 'Change' : 'Add'} Photo</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-        <View style={{ paddingHorizontal: 20 , paddingBottom: 120 , paddingTop: 12 }}>
+
+        <View style={{ paddingHorizontal: 20 , paddingTop: 12 }}>
+          <View style={styles.infoSection}>
+            <Text style={styles.infoTitle}>Ready to Generate?</Text>
+            <Text style={styles.infoText}>Your virtual try-on will be generated using the images you provided. This process may take a few seconds.</Text>
+          </View>
+          
           <TouchableOpacity
             style={[
               styles.nextButton,
@@ -865,5 +800,92 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 10,
     borderRadius: 8,
+  },
+
+  /* New List & Info Styles */
+  previewRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    gap: 12,
+  },
+  previewContainer: {
+    flex: 1,
+  },
+  previewLabelSide: {
+    fontSize: 12,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    fontWeight: '600',
+  },
+  previewImageSide: {
+    width: '100%',
+    height: 220,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    backgroundColor: '#F7F7F7',
+  },
+  imageWrapper: {
+    position: 'relative',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  removeIconButtonSmall: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  infoSection: {
+    backgroundColor: '#F9F9F9',
+    borderRadius: 12,
+    borderWidth: 0.8,
+    borderColor: '#E8E8E8',
+    paddingHorizontal: 18,
+    paddingVertical: 20,
+    marginTop: 0,
+    marginBottom: 20,
+  },
+  infoTitle: {
+    fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    marginBottom: 10,
+    fontWeight: '600',
+  },
+  infoText: {
+    fontSize: 14,
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
+    lineHeight: 22,
+  },
+  smallUploadPlaceholder: {
+    width: '100%',
+    height: 220,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#E8E8E8',
+    borderStyle: 'dashed',
+    backgroundColor: '#F9F9F9',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  smallUploadText: {
+    marginTop: 8,
+    fontSize: 12,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
 });

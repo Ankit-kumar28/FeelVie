@@ -276,6 +276,9 @@ export default function SignUpScreen() {
               )}
             </TouchableOpacity>
 
+            
+
+
             {/* <TouchableOpacity
               style={styles.guestButton}
               onPress={() => navigation.replace('MainTabs')}
@@ -297,7 +300,8 @@ export default function SignUpScreen() {
             <Text style={styles.termsText}>Terms and Conditions</Text>
           </TouchableOpacity>
 
-          <View style={{ height: 40 }} />
+          
+
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -329,7 +333,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF' 
   },
   scrollContent: {
-    paddingBottom: scale(40),
+    paddingBottom: scale(100),
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: scale(32),
     borderTopRightRadius: scale(32),

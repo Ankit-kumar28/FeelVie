@@ -52,15 +52,14 @@ export default function OnboardingScreen2() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#F4F5F7" />
 
-      {/* Back Button */}
-      <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-        <Icon name="arrow-back" size={26} color="#1C1C1E" />
-      </TouchableOpacity>
-
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+          <Icon name="arrow-back" size={26} color="#1C1C1E" />
+        </TouchableOpacity>
+
         <View style={styles.innerContent}>
           <Text style={styles.title}>Register As</Text>
           <Text style={styles.subtitle}>
@@ -130,15 +129,13 @@ const styles = StyleSheet.create({
   },
   innerContent: {
     flex: 1,
-    justifyContent: 'center',
-    paddingVertical: 40,
+    paddingVertical: 20,
   },
   backButton: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    zIndex: 10,
+    marginTop: 10,
+    marginBottom: 10,
     padding: 8,
+    marginLeft: -8,
   },
   title: {
     fontSize: 34,

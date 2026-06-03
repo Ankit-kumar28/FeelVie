@@ -1,0 +1,411 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "categoryName": "Womens",
+      "icon": "https://www.shutterstock.com/image-vector/black-dress-on-hanger-iconisolated-260nw-1178512246.jpg",
+      "subcategories": [
+        {
+          "id": 101,
+          "subcategoryName": "Ethnic Wear",
+          "icon": "https://thumbs.dreamstime.com/b/hanbok-black-glyph-icon-national-asian-clothing-oriental-dress-women-eastern-outfit-ethnic-festival-wear-korean-culture-217802419.jpg",
+          "products": [
+            {
+              "id": 1001,
+              "productName": "Floral Anarkali Kurti",
+              "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcQ_lcC5lkY1pcvmk4PC2fkGF26Na3aNMu6Xh8eVM-ttg7ezx_E4ygSOZVNi728kjrE50BGEFpCA2wQ-cgqR1CxjCiZZJi_nLZwDqywlRp0"
+            },
+            {
+              "id": 1002,
+              "productName": "Silk Saree",
+              "imageUrl": "https://m.media-amazon.com/images/I/71jGOYPKHnL._SY879_.jpg"
+            },
+            {
+              "id": 1003,
+              "productName": "Designer Lehenga",
+              "imageUrl": "https://manyavar.scene7.com/is/image/manyavar/TSKT527_425-419-RANI-GAJREE.2210_29-03-2025-16-41-1:894x1263?&dpr=on,2"
+            },
+            {
+              "id": 1004,
+              "productName": "Cotton Kurta Set",
+              "imageUrl": "https://m.media-amazon.com/images/I/91bAKa-OQKL._SX679_.jpg"
+            },
+            {
+              "id": 1005,
+              "productName": "Printed Dupatta",
+              "imageUrl": "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTRMDnO-9_ncTkJFlgsr105I9w87aEuOkcD0Iif1LdWyGVo3ics_zfK1_eDcxV179pNjbh1AVZtmv3hA_wrEXs6LR0K-7_aAfO10uz5KuyA4ArYGcQkkkc1"
+            }
+          ]
+        },
+        {
+          "id": 102,
+          "subcategoryName": "Western Wear",
+          "icon": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4JSWiH-Y6CYtbKRYQTLh03q4zR1knMYLZVA&s",
+          "products": [
+            {
+              "id": 1006,
+              "productName": "Oversized T-Shirt",
+              "imageUrl": "https://chapter2drip.com/cdn/shop/files/Untitled_Session1148.jpg?v=1771308702&width=990"
+            },
+            {
+              "id": 1007,
+              "productName": "Skinny Fit Jeans",
+              "imageUrl": "https://bluebuddha.co.in/cdn/shop/files/dark-blue-ankle-fit-classic-poket-denim-4804526.jpg?crop=center&height=960&v=1772726723&width=640"
+            },
+            {
+              "id": 1008,
+              "productName": "Crop Top",
+              "imageUrl": "https://m.media-amazon.com/images/I/61JDEhlsZdL._SX679_.jpg"
+            },
+            {
+              "id": 1009,
+              "productName": "Bodycon Dress",
+              "imageUrl": "https://m.media-amazon.com/images/I/8155Zii+wpL._SX679_.jpg"
+            },
+            {
+              "id": 1010,
+              "productName": "Denim Jacket",
+              "imageUrl": "https://m.media-amazon.com/images/I/71FMCWK2RbL._SX679_.jpg"
+            }
+          ]
+        },
+        {
+          "id": 103,
+          "subcategoryName": "Winter Wear",
+          "icon": "https://thumbs.dreamstime.com/b/warm-coat-buttons-sleeves-solid-icon-winter-clothing-concept-vector-graphics-women-clothes-sign-white-background-409571054.jpg",
+          "products": [
+            {
+              "id": 1011,
+              "productName": "Woolen Sweater",
+              "imageUrl": "https://rukminim2.flixcart.com/image/1536/1536/xif0q/sweater/u/a/o/15-16-years-frilled-0987-sak-original-imahjhmf4hfg9rfq.jpeg?q=90"
+            },
+            {
+              "id": 1012,
+              "productName": "Long Coat",
+              "imageUrl": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcT974mvhC6w7ZK568BBMcZjGTLrAARCekKsPEG6PyYZU5fo9vxjkejLIT1bKlm5yE9-F98MAVzhDkMmtKHbR6AXJ316ibe4eJKTRPxMwizxE4gLFWVWQ88w3fBzrqKaZPKPBN0BnpYQ&usqp=CAc"
+            },
+            {
+              "id": 1013,
+              "productName": "Puffer Jacket",
+              "imageUrl": "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcSiEbAc5EgxHvbf-NRegKv1QNB2puPqBgXnRSqQRun8UR-FBWq68AhGJePeXoFf4M9uvWfRJtPCmxpIo8jUz5zNOtl6M_285VpJynET13x4YucwP0baR9zsmVYpe4RVrtQm5PLi-ms&usqp=CAc"
+            },
+            {
+              "id": 1014,
+              "productName": "Thermal Top",
+              "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRoLj9TfXH_i0UFw6-Wy5Hcdwa_cOiCQWdEiHyBGa8SIB_ug3UpfLv-Ys7RyftivK3kWyPZewYjZiSEiDPrnPo7iUllJDXhhv_A_htD1vRGmr8oVioKy2wshb5wvGeDJd6U7068w_w&usqp=CAc"
+            },
+            {
+              "id": 1015,
+              "productName": "Knitted Hoodie",
+              "imageUrl": "https://m.media-amazon.com/images/I/81tKRsGFyIL._SX679_.jpg"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "categoryName": "Mens",
+      "icon": "https://static.thenounproject.com/png/860317-200.png",
+      "subcategories": [
+        {
+          "id": 201,
+          "subcategoryName": "Casual Wear",
+          "icon": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTC-bGNnCLaA1uPbzIn9n2QzoAbGQFWuH6qYQ&s",
+          "products": [
+            {
+              "id": 2001,
+              "productName": "Graphic T-Shirt",
+              "imageUrl": "https://m.media-amazon.com/images/I/81EjXHqxMrL._SX679_.jpg"
+            },
+            {
+              "id": 2002,
+              "productName": "Slim Fit Jeans",
+              "imageUrl": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRMciwtOpa8-u3BiwQMDbU_uTu3bD5LPP8Sp82t8tr7aU9-l2n21UzzujfaZIMe_GZxBg7-vjlSf04z_-5TeqwLm6DEzoBmApR1Nn-B9YCq"
+            },
+            {
+              "id": 2003,
+              "productName": "Casual Shirt",
+              "imageUrl": "https://m.media-amazon.com/images/I/91ypr7YcqsL._SX679_.jpg"
+            },
+            {
+              "id": 2004,
+              "productName": "Hoodie Sweatshirt",
+              "imageUrl": "https://maniaclife.com/cdn/shop/files/MN25-SWT-HD-RGLN-FS-BRWN-BISCT-CLBK_1_ff3c0f31-a288-4953-a7eb-d0843f62a801.jpg?v=1755157818"
+            },
+            {
+              "id": 2005,
+              "productName": "Cargo Pants",
+              "imageUrl": "https://www.gritstones.com/cdn/shop/files/GSCRG8PK05BGM_6.jpg?v=1773398233&width=1800"
+            }
+          ]
+        },
+        {
+          "id": 202,
+          "subcategoryName": "Formal Wear",
+          "icon": "https://static.vecteezy.com/system/resources/previews/025/009/206/non_2x/format-suit-icon-in-black-and-white-color-vector.jpg",
+          "products": [
+            {
+              "id": 2006,
+              "productName": "Blazer Suit",
+              "imageUrl": "https://wear.style/cdn/shop/files/17415737220142d65b0a837e62ce6887a7b55f3a81_d0406999-04de-4f71-ac5a-5501e3fd858a.jpg?v=1744024772&width=990"
+            },
+            {
+              "id": 2007,
+              "productName": "Formal Trousers",
+              "imageUrl": "https://www.bombayshirts.com/cdn/shop/files/Artboard_12_03592228-fce2-4bc2-b3af-673fd484ea8d_800x.jpg?v=1750768999"
+            },
+            {
+              "id": 2008,
+              "productName": "White Formal Shirt",
+              "imageUrl": "https://m.media-amazon.com/images/I/810zLkIyS3L._SX679_.jpg"
+            },
+            {
+              "id": 2009,
+              "productName": "Slim Fit Waistcoat",
+              "imageUrl": "https://wear.style/cdn/shop/products/16276153238bb5e601fea7c17c3b51a525753cb00b.jpg?v=1640589643&width=990"
+            },
+            {
+              "id": 2010,
+              "productName": "Formal Blazer Set",
+              "imageUrl": "https://image.hm.com/assets/hm/94/71/9471eb8ce83e1f80404936409a8a1a805cb0409c.jpg?imwidth=2160"
+            }
+          ]
+        },
+        {
+          "id": 203,
+          "subcategoryName": "Ethnic Wear",
+          "icon": "https://static.vecteezy.com/system/resources/previews/047/637/147/non_2x/traditional-indian-clothing-for-men-kurta-pajama-silhouette-icon-vector.jpg",
+          "products": [
+            {
+              "id": 2011,
+              "productName": "Kurta Pajama",
+              "imageUrl": "https://m.media-amazon.com/images/I/91QGinAIayL._SX679_.jpg"
+            },
+            {
+              "id": 2012,
+              "productName": "Sherwani",
+              "imageUrl": "https://m.media-amazon.com/images/I/71fWilLUeHL._SX679_.jpg"
+            },
+            {
+              "id": 2013,
+              "productName": "Nehru Jacket",
+              "imageUrl": "https://m.media-amazon.com/images/I/51mg2pN-qWL._SX679_.jpg"
+            },
+            {
+              "id": 2014,
+              "productName": "Pathani Suit",
+              "imageUrl": "https://rukminim2.flixcart.com/image/1536/1536/xif0q/ethnic-set/n/q/7/m-jokp-sp-w-d-5088purple-jompers-original-imahbpm7hybpvshb.jpeg?q=90"
+            },
+            {
+              "id": 2015,
+              "productName": "Embroidered Kurta Set",
+              "imageUrl": "https://m.media-amazon.com/images/I/81wX1QWxBwL._SX679_.jpg"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "categoryName": "Kids",
+      "icon": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRnsqAYqEkwUA6G9SipyWVx76mO44nsAyR2qA&s",
+      "subcategories": [
+        {
+          "id": 301,
+          "subcategoryName": "Boys Wear",
+          "icon": "https://static.vecteezy.com/system/resources/previews/034/051/376/non_2x/boy-dress-icon-in-illustration-vector.jpg",
+          "products": [
+            {
+              "id": 3001,
+              "productName": "Boys Printed T-Shirt",
+              "imageUrl": "https://rukminim2.flixcart.com/image/1536/1536/xif0q/kids-t-shirt/9/b/s/10-11-years-b-ovr-org-son-goku-blk-acebere-original-imahmbvtku57dsvp.jpeg?q=90"
+            },
+            {
+              "id": 3002,
+              "productName": "Denim Shorts",
+              "imageUrl": "https://cdn.fcglcdn.com/brainbees/images/products/583x720/22408742a.webp"
+            },
+            {
+              "id": 3003,
+              "productName": "Hooded Jacket",
+              "imageUrl": "https://m.media-amazon.com/images/I/61LMHlFsI9L._SX679_.jpg"
+            },
+            {
+              "id": 3004,
+              "productName": "Kids Kurta Set",
+              "imageUrl": "https://m.media-amazon.com/images/I/81SXwubydtL._SX679_.jpg"
+            },
+            {
+              "id": 3005,
+              "productName": "kids Tracksuit",
+              "imageUrl": "https://www.trendzmy.com/cdn/shop/files/1_932a6f9d-a59a-4d0e-a131-1dcf8037320b.jpg?v=1752646639&width=990"
+            }
+          ]
+        },
+        {
+          "id": 302,
+          "subcategoryName": "Girls Wear",
+          "icon": "https://static.vecteezy.com/system/resources/previews/020/005/224/non_2x/baby-girls-dress-icon-vector.jpg",
+          "products": [
+            {
+              "id": 3006,
+              "productName": "Princess Frock",
+              "imageUrl": "https://cdn.fcglcdn.com/brainbees/images/products/583x720/20736806a.webp"
+            },
+            {
+              "id": 3007,
+              "productName": "Girls Top & Skirt Set",
+              "imageUrl": "https://m.media-amazon.com/images/I/71tor7Gn3LL._SX679_.jpg"
+            },
+            {
+              "id": 3008,
+              "productName": "Floral Dress",
+              "imageUrl": "https://includ.com/cdn/shop/files/cc79e315-086f-4890-9f36-b235de8f243e.webp?v=1775475794&width=1000"
+            },
+            {
+              "id": 3009,
+              "productName": "Kids Lehenga",
+              "imageUrl": "https://www.kiddzy.in/cdn/shop/files/Gemini_Generated_Image_brj93sbrj93sbrj9.png?v=1774507132&width=1000"
+            },
+            {
+              "id": 3010,
+              "productName": "western kids",
+              "imageUrl": "https://includ.com/cdn/shop/files/940dd9b6-ab35-414c-8087-3032c1707fdb.webp?v=1779251248&width=1000"
+            }
+          ]
+        },
+        {
+          "id": 303,
+          "subcategoryName": "Baby Wear",
+          "icon": "https://static.vecteezy.com/system/resources/previews/020/005/224/non_2x/baby-girls-dress-icon-vector.jpg",
+          "products": [
+            {
+              "id": 3011,
+              "productName": "Baby Romper",
+              "imageUrl": "https://m.media-amazon.com/images/I/715i05q76GL._SX679_.jpg"
+            },
+            {
+              "id": 3012,
+              "productName": "Baby Cotton Set",
+              "imageUrl": "https://cdn.fcglcdn.com/brainbees/images/products/583x720/21887056a.webp"
+            },
+            {
+              "id": 3013,
+              "productName": "Winter Baby Suit",
+              "imageUrl": "https://cdn.fcglcdn.com/brainbees/images/products/583x720/20668494a.webp"
+            },
+            {
+              "id": 3014,
+              "productName": "Baby Cap Pack",
+              "imageUrl": "https://allthingsbaby.com/cdn/shop/files/1_cb81a3c5-74b1-4544-8687-01d53ac038d7.png?v=1732771318&width=1800"
+            },
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "categoryName": "Party Wear",
+      "icon": "https://static.vecteezy.com/system/resources/previews/026/376/901/non_2x/a-perfect-design-icon-of-party-dress-vector.jpg",
+      "subcategories": [
+        {
+          "id": 401,
+          "subcategoryName": "Women Party Wear",
+          "icon": "https://www.shutterstock.com/image-vector/woman-dress-icon-vector-illustration-260nw-154526042.jpg",
+          "products": [
+            {
+              "id": 4001,
+              "productName": "Sequin Gown",
+              "imageUrl": "https://media.samyakk.in/pub/media/catalog/product/g/j/gj2152.jpg"
+            },
+            {
+              "id": 4002,
+              "productName": "Cocktail Dress",
+              "imageUrl": "https://littleboxindia.com/cdn/shop/products/Solid_Color_Ruched_Drawstring_Midi_Dress_In_Black_720x.jpg?v=1741074216"
+            },
+            {
+              "id": 4003,
+              "productName": "Party Saree",
+              "imageUrl": "https://manyavar.scene7.com/is/image/manyavar/TSSB138_410-BLACK.25310_02-03-2025-20-19:894x1263?&dpr=on,2"
+            },
+            {
+              "id": 4004,
+              "productName": "Designer Party Gown",
+              "imageUrl": "https://macduggal.com/cdn/shop/files/69143-Mocha-AB.jpg?v=1773440806&width=990"
+            },
+            {
+              "id": 4005,
+              "productName": "Sequin Mini Dress",
+              "imageUrl": "https://ribelle.in/cdn/shop/files/ALF16163609.jpg?v=1778141819&width=990"
+            }
+          ]
+        },
+        {
+          "id": 402,
+          "subcategoryName": "Men Party Wear",
+          "icon": "https://c8.alamy.com/comp/2AHYKH2/avatar-fashion-boss-men-clothing-icon-2AHYKH2.jpg",
+          "products": [
+            {
+              "id": 4006,
+              "productName": "Tuxedo Suit",
+              "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRRD5C9sj8wS9n8Ne2Q6DMkEw1G-fWIGiWxMyJH5CY9HnvpDXVAAUEda3i_9Br4719z5TFEYh2Kt_gOiw-NuBhgUkbPQhIa7I0YlgcsR3IKdduG3BBkVXJSRg"
+            },
+            {
+              "id": 4007,
+              "productName": "Party Blazer",
+              "imageUrl": "https://tumuh.in/cdn/shop/files/Black_Geometrical_Printed_Velvet_Tuxedo.png?v=1759154685&width=640"
+            },
+            {
+              "id": 4008,
+              "productName": "embroidered Silk Bandhgala",
+              "imageUrl": "https://www.anitadongre.com/dw/image/v2/BGCX_PRD/on/demandware.static/-/Sites-masterCatalog_AD_India/default/dw246755d6/images/hires/F25/Men/F25MR3J_Black_1.jpg?sw=1400&sh=2100&sm=fit&strip=false"
+            },
+            {
+              "id": 4009,
+              "productName": "Velvet Jacket",
+              "imageUrl": "https://www.mytheresa.com/image/1094/1238/100/11/P01077016.jpg"
+            },
+            {
+              "id": 4010,
+              "productName": "Satin Shirt",
+              "imageUrl": "https://m.media-amazon.com/images/I/91gB02F9duL._SX679_.jpg"
+            }
+          ]
+        },
+        {
+          "id": 403,
+          "subcategoryName": "Kids Party Wear",
+          "icon": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1bclrykjSTIWy9SR0zTLrVUYHcAnB_-mZkQ&s",
+          "products": [
+            {
+              "id": 4011,
+              "productName": "Kids Party Gown",
+              "imageUrl": "https://includ.com/cdn/shop/files/1ee03312-dac3-4ee0-9230-1dc31bd17998.webp?v=1778161493&width=1000"
+            },
+            {
+              "id": 4012,
+              "productName": "Boys Party Suit",
+              "imageUrl": "https://cdn.fcglcdn.com/brainbees/images/products/583x720/22602237a.webp"
+            },
+            {
+              "id": 4013,
+              "productName": "Sparkle Dress",
+              "imageUrl": "https://www.foreverkidz.in/cdn/shop/files/DSC41971copy.jpg?v=1746014561&width=3000"
+            },
+            {
+              "id": 4014,
+              "productName": "Party Shirt & Trouser Set",
+              "imageUrl": "https://cdn.fcglcdn.com/brainbees/images/products/583x720/20886145a.webp"
+            },
+            {
+              "id": 4015,
+              "productName": " Party Blazer ",
+              "imageUrl": "https://cdn.fcglcdn.com/brainbees/images/products/583x720/21668501a.webp"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

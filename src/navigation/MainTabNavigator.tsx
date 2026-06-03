@@ -16,10 +16,10 @@ const Tab = createBottomTabNavigator();
 
 // ── Black & White Theme (matches reference image) ──
 const BG_COLOR     = '#FFFFFF';   // tab bar background
-const ACTIVE_COLOR = '#636262';   // active icon + label
-const INACTIVE_COLOR = '#AAAAAA'; // inactive icon + label
-const BORDER_COLOR = '#E8E8E8';   // top border line
-const INDICATOR_COLOR = '#111111'; // active top indicator dot/line
+const ACTIVE_COLOR = '#000000';   // bold black for active
+const INACTIVE_COLOR = '#94a3b8'; // slate for inactive
+const BORDER_COLOR = '#f1f5f9';   // subtle border
+const INDICATOR_COLOR = '#f8ac1b'; // Brand gold for indicators
 
 export default function MainTabNavigator() {
   return (
@@ -69,6 +69,39 @@ function CustomTabBar({ state, descriptors, navigation }) {
 
           const iconName = getIconName(route.name);
           const label    = getLabel(route.name);
+
+          // ── SPECIAL CASE: Center Try-On Button ──
+          if (route.name === 'TryOn') {
+            return (
+              <TouchableOpacity
+                key={route.key}
+                onPress={onPress}
+                activeOpacity={0.9}
+                style={styles.centerItem}
+              >
+                <View style={[styles.centerCircle, isFocused && styles.activeCenterCircle]}>
+                  {/* Outer glowing border ring */}
+                  <View style={styles.glowRing} />
+                  <Ionicons
+                    name={iconName.replace('-outline', '')}
+                    size={26}
+                    color="#FFFFFF"
+                  />
+                </View>
+                <Text style={[
+                  styles.label, 
+                  { 
+                    color: isFocused ? '#000000' : INACTIVE_COLOR, 
+                    marginTop: 40,
+                    fontWeight: '700',
+                    fontSize: 11
+                  }
+                ]}>
+                  {label}
+                </Text>
+              </TouchableOpacity>
+            );
+          }
 
           return (
             <TouchableOpacity
@@ -168,6 +201,45 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
     paddingTop: 10,
+  },
+  centerItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    height: '100%',
+  },
+  centerCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#111111', 
+    position: 'absolute',
+    top: -20, 
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 0,
+    shadowColor: '#f8ac1b',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  activeCenterCircle: {
+    backgroundColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 15,
+    transform: [{ scale: 1.05 }]
+  },
+  glowRing: {
+    position: 'absolute',
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    borderWidth: 1.5,
+    borderColor: 'rgba(248, 172, 27, 0.4)',
+    top: -4,
+    left: -4,
   },
   activeIndicator: {
     width: 24,

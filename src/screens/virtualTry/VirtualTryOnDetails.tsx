@@ -35,7 +35,36 @@ export default function VirtualTryOnDetails({ route, navigation }) {
 
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // Selection States
+  const [gender, setGender] = useState<string | null>(null);
+  const [ageGroup, setAgeGroup] = useState<string | null>(null);
+  const [heightRange, setHeightRange] = useState<string | null>(null);
+  const [bodyBuild, setBodyBuild] = useState<string | null>(null);
+  const [clothingFit, setClothingFit] = useState<string | null>(null);
+  const [outfitType, setOutfitType] = useState<string | null>(null);
+  const [shoppingCategory, setShoppingCategory] = useState<string | null>(null);
+  const [clothingSize, setClothingSize] = useState<string | null>(null);
+
+  // Option Constants
+  const GENDER_OPTIONS = ['Male', 'Female', 'Other'];
+  const AGE_OPTIONS = ['Kid (0–12)', 'Teen (13–17)', 'Adult (18–40)', 'Above 40'];
+  const HEIGHT_OPTIONS = ['Below 4 ft', '4–5 ft', '5–5.5 ft', '5.5–6 ft', 'Above 6 ft'];
+  const BUILD_OPTIONS = ['Slim', 'Regular', 'Athletic', 'Curvy', 'Broad/Heavy'];
+  const FIT_OPTIONS = ['Tight Fit', 'Regular Fit', 'Relaxed Fit', 'Oversized'];
+  const OUTFIT_OPTIONS = ['Casual', 'Formal', 'Traditional', 'Party Wear', 'Sportswear'];
+  const CATEGORY_OPTIONS = ['Men', 'Women', 'Kids', 'Unisex'];
+  const SIZE_OPTIONS = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
   const handleGenerate = async () => {
+    if (!gender || !ageGroup) {
+      Toast.show({
+        type: 'error',
+        text1: 'Required Fields Missing',
+        text2: 'Please select Gender, Age Group, and Shopping Category.',
+      });
+      return;
+    }
+
     setIsGenerating(true);
     console.log("Starting generation with new API:", {
       userImage: !!userImage,
@@ -62,6 +91,16 @@ export default function VirtualTryOnDetails({ route, navigation }) {
         name: 'garment.jpg',
         type: 'image/jpeg',
       } as any);
+
+      // Add selection details
+      if (gender) formData.append('gender', gender);
+      if (ageGroup) formData.append('age_group', ageGroup);
+      if (heightRange) formData.append('height_range', heightRange);
+      if (bodyBuild) formData.append('body_build', bodyBuild);
+      if (clothingFit) formData.append('clothing_fit', clothingFit);
+      if (outfitType) formData.append('outfit_type', outfitType);
+      if (shoppingCategory) formData.append('shopping_category', shoppingCategory);
+      if (clothingSize) formData.append('clothing_size', clothingSize);
 
       const response = await fetch('https://api.feelvie.com/api/secure/vton/try-on/generate/', {
         method: 'POST',
@@ -97,6 +136,36 @@ export default function VirtualTryOnDetails({ route, navigation }) {
     }
   };
 
+  const SelectionGroup = ({ title, options, selectedValue, onSelect, required = false }: any) => (
+    <View style={styles.selectionGroup}>
+      <Text style={styles.selectionTitle}>
+        {title} {required && <Text style={{ color: '#B03385' }}>*</Text>}
+      </Text>
+      <View style={styles.optionsWrapper}>
+        {options.map((option: string) => (
+          <TouchableOpacity
+            key={option}
+            style={[
+              styles.optionChip,
+              selectedValue === option && styles.optionChipSelected,
+            ]}
+            onPress={() => onSelect(option)}
+            activeOpacity={0.7}
+          >
+            <Text
+              style={[
+                styles.optionChipText,
+                selectedValue === option && styles.optionChipTextSelected,
+              ]}
+            >
+              {option}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+
   return (
     <View style={styles.safeArea}>
       <View style={styles.header}>
@@ -120,9 +189,56 @@ export default function VirtualTryOnDetails({ route, navigation }) {
           </View>
         </View>
 
-        <View style={styles.infoSection}>
+        {/* <View style={styles.infoSection}>
           <Text style={styles.infoTitle}>Ready to Generate?</Text>
           <Text style={styles.infoText}>Your virtual try-on will be generated using the images you provided. This process may take a few seconds.</Text>
+        </View> */}
+
+        <View style={styles.formContainer}>
+          <SelectionGroup
+            title="Gender?"
+            options={GENDER_OPTIONS}
+            selectedValue={gender}
+            onSelect={setGender}
+            required
+          />
+
+          <SelectionGroup
+            title="Age Group?"
+            options={AGE_OPTIONS}
+            selectedValue={ageGroup}
+            onSelect={setAgeGroup}
+            required
+          />
+
+          <SelectionGroup
+            title="Height Range?"
+            options={HEIGHT_OPTIONS}
+            selectedValue={heightRange}
+            onSelect={setHeightRange}
+          />
+
+          <SelectionGroup
+            title="Body Build?"
+            options={BUILD_OPTIONS}
+            selectedValue={bodyBuild}
+            onSelect={setBodyBuild}
+          />
+
+          <SelectionGroup
+            title="Clothing Fit?"
+            options={FIT_OPTIONS}
+            selectedValue={clothingFit}
+            onSelect={setClothingFit}
+          />
+
+
+          <SelectionGroup
+            title="Clothing Size"
+            options={SIZE_OPTIONS}
+            selectedValue={clothingSize}
+            onSelect={setClothingSize}
+          />
         </View>
       </ScrollView>
 
@@ -240,6 +356,47 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     color: '#666666',
     lineHeight: 22,
+  },
+  formContainer: {
+    marginTop: 20,
+    marginBottom: 40,
+  },
+  selectionGroup: {
+    marginBottom: 24,
+  },
+  selectionTitle: {
+    fontSize: 15,
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    marginBottom: 12,
+    fontWeight: '600',
+  },
+  optionsWrapper: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  optionChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    backgroundColor: '#FFFFFF',
+    marginBottom: 4,
+  },
+  optionChipSelected: {
+    borderColor: '#b3b3b3af',
+    backgroundColor: '#b3b3b3af',
+  },
+  optionChipText: {
+    fontSize: 13,
+    fontFamily: 'Poppins-Medium',
+    color: '#666666',
+  },
+  optionChipTextSelected: {
+    color: '#000',
+    fontWeight: '600',
   },
   categoryBold: {
     fontWeight: '600',

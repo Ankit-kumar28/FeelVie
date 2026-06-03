@@ -156,7 +156,11 @@ export default function OnboardingScreen() {
       </View>
 
       {/* Bottom Content Section */}
-      <View style={styles.bottomSection}>
+      <ScrollView
+        style={styles.bottomSection}
+        contentContainerStyle={styles.bottomScrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Title */}
         <Text style={styles.title}>{slides[currentIndex].title}</Text>
 
@@ -188,7 +192,7 @@ export default function OnboardingScreen() {
             <Icon name="arrow-right" size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -250,10 +254,13 @@ const styles = StyleSheet.create({
   // Bottom Content Section
   bottomSection: {
     flex: 1,
+    backgroundColor: '#ffffff',
+  },
+  bottomScrollContent: {
+    flexGrow: 1,
     paddingHorizontal: '6.4%',
     paddingTop: '4%',
     paddingBottom: isIOS ? '8%' : '6.4%',
-    backgroundColor: '#ffffff',
     justifyContent: 'space-between',
   },
 
