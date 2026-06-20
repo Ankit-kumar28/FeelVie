@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   StatusBar,
   Platform,
+  Linking,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -42,6 +43,7 @@ export default function HelpSupportScreen() {
       icon: 'email-outline',
       screen: 'ContactSupport',
     },
+
   ];
 
   return (
@@ -76,6 +78,21 @@ export default function HelpSupportScreen() {
             </TouchableOpacity>
           ))}
         </View>
+
+        <TouchableOpacity
+              style={[
+                styles.menuItem,
+              ]}
+              onPress={() => Linking.openURL('https://catalogue.feelvie.com/delete-account')}
+              activeOpacity={0.7}
+            >
+              <View style={styles.menuLeft}>
+                <Icon name="delete" size={24} color="#111111" />
+                <Text style={styles.menuText}>Delete Account</Text>
+              </View>
+              <Icon name="chevron-right" size={22} color="#AAAAAA" />
+            </TouchableOpacity>
+        
 
         <View style={{ height: 80 }} />
       </ScrollView>
