@@ -93,8 +93,6 @@ export default function SignUpScreen() {
       return showToast('error', 'Invalid', 'Enter a valid email'), false;
     if (!password.trim()) return showToast('error', 'Required', 'Password is required'), false;
     if (password.length < 6) return showToast('error', 'Weak', 'Password min 6 chars'), false;
-    if (!/^\d{10}$/.test(phone.trim()))
-      return showToast('error', 'Invalid', 'Phone must be 10 digits'), false;
     return true;
   };
 
@@ -246,7 +244,9 @@ export default function SignUpScreen() {
             </View>
 
             <View style={styles.inputWrapper}>
-              <Text style={styles.inputLabel}>Phone Number</Text>
+              <Text style={styles.inputLabel}>Phone Number 
+                <Text style={{ fontSize: scale(12), color: '#AAAAAA' }}> (Optional)</Text>
+              </Text>
               <View style={styles.inputCard}>
                 <Icon name="phone" size={18} color="#AAAAAA" />
                 <TextInput

@@ -131,7 +131,7 @@ export default function WalletScreen() {
       if (cachedShowUi !== null) {
         const isTrue = cachedShowUi === 'true';
         setShowUi(isTrue);
-        
+
         // If it's already true in storage, your instructions state no need to refetch
         if (isTrue) return;
       }
@@ -142,10 +142,10 @@ export default function WalletScreen() {
       if (response.ok) {
         const data = await response.json();
         console.log('[checkUiVisibility] API response received:', data);
-        
+
         const apiValue = !!data?.showui;
         setShowUi(apiValue);
-        
+
         // Persist the value to local storage
         await AsyncStorage.setItem('show_ui_config', String(apiValue));
       }
@@ -479,7 +479,7 @@ export default function WalletScreen() {
           </View>
 
           {/* ── CONDITIONAL RENDERING BASED ON ADMIN CONFIGURATION (showUi) ── */}
-          {showUi && (
+          {showUi ? (
             <>
               {/* Active Subscription Card */}
               {activeSub && (
@@ -569,24 +569,35 @@ export default function WalletScreen() {
                   ))}
                 </>
               )}
-            </>
-          )}
-
-          {/* Quick Actions (Always Visible) */}
-          <View style={styles.quickActionsSection}>
-            <TouchableOpacity
-              style={styles.quickActionBtn}
-              activeOpacity={0.7}
-              onPress={() => setCouponModalVisible(true)}
-            >
-              <Icon name="ticket-percent" size={20} color="#111111" />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.quickActionTitle}>Redeem Coupon</Text>
-                <Text style={styles.quickActionDesc}>Enter coupon code for credits</Text>
+              {/* Quick Actions (Always Visible) */}
+              <View style={styles.quickActionsSection}>
+                <TouchableOpacity
+                  style={styles.quickActionBtn}
+                  activeOpacity={0.7}
+                  onPress={() => setCouponModalVisible(true)}
+                >
+                  <Icon name="ticket-percent" size={20} color="#111111" />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.quickActionTitle}>Redeem Coupon</Text>
+                    <Text style={styles.quickActionDesc}>Enter coupon code for credits</Text>
+                  </View>
+                  <Icon name="chevron-right" size={24} color="#AAAAAA" />
+                </TouchableOpacity>
               </View>
-              <Icon name="chevron-right" size={24} color="#AAAAAA" />
-            </TouchableOpacity>
-          </View>
+            </>
+
+          )
+            :
+            <>
+              {/* information that we are initially distributing free credits */}
+              <View style={styles.infoCard}>
+                <Text style={styles.infoTitle}>Welcome to Feelvie!</Text>
+                <Text style={styles.infoDesc}>Currently, we are distributing free 5 credits to all users. Enjoy exploring the platform and stay tuned for upcoming subscription plans and credit packs.</Text>
+              </View>
+            </>
+          }
+
+
         </ScrollView>
       </SafeAreaView>
 
@@ -871,4 +882,7 @@ const styles = StyleSheet.create({
   },
   quickActionTitle: { fontSize: 15, fontFamily: 'Poppins-SemiBold', color: '#111111', marginBottom: 2 },
   quickActionDesc: { fontSize: 13, fontFamily: 'Poppins-Regular', color: '#AAAAAA' },
+  infoCard: { backgroundColor: '#F9F9F9', borderRadius: 8, padding: 16, marginBottom: 16 },
+  infoTitle: { fontSize: 16, fontFamily: 'Poppins-SemiBold', color: '#111111', marginBottom: 8 },
+  infoDesc: { fontSize: 14, fontFamily: 'Poppins-Regular', color: '#555555' },
 });
