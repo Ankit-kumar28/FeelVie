@@ -259,13 +259,6 @@ export default function HomeScreen() {
                     styles.subCategoryListContent,
                     { transform: [{ scale: scaleAnims[sub.id] || 1 }] }
                   ]}>
-                    <View style={styles.subCategoryIconCircle}>
-                      {sub.icon.startsWith('http') ? (
-                         <Image source={{ uri: sub.icon }} style={styles.subCategoryIcon} />
-                      ) : (
-                        <Text style={{ fontSize: 20 }}>{sub.icon}</Text>
-                      )}
-                    </View>
                     <Text style={styles.subCategoryListText}>{sub.subcategoryName}</Text>
                     <Icon name="chevron-right" size={24} color="#AAAAAA" />
                   </Animated.View>
