@@ -1,4 +1,3 @@
-# Resolve react_native_pods.rb with node to allow for hoisting
 require Pod::Executable.execute_command('node', ['-p',
   'require.resolve(
     "react-native/scripts/react_native_pods.rb",
@@ -19,7 +18,6 @@ target 'FeelVie' do
 
   use_react_native!(
     :path => config[:reactNativePath],
-    # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
@@ -28,7 +26,31 @@ target 'FeelVie' do
       installer,
       config[:reactNativePath],
       :mac_catalyst_enabled => false,
-      # :ccache_enabled => true
     )
+
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |cfg|
+        cfg.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+        cfg.build_settings['GCC_WARN_INHIBIT_ALL_WARNINGS'] = 'YES'
+        cfg.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+        cfg.build_settings['SWIFT_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+
+        ['OTHER_CFLAGS', 'OTHER_CPLUSPLUSFLAGS'].each do |flag_key|
+          flags = cfg.build_settings[flag_key]
+          if flags.is_a?(Array)
+            cfg.build_settings[flag_key] = flags.reject { |f| f == '-Werror' }
+          elsif flags.is_a?(String)
+            cfg.build_settings[flag_key] = flags.gsub('-Werror', '')
+          end
+        end
+      end
+
+      if target.name == 'fmt'
+        target.build_configurations.each do |cfg|
+          cfg.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+          cfg.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FMT_USE_NONTYPE_TEMPLATE_ARGS=0'
+        end
+      end
+    end
   end
 end
