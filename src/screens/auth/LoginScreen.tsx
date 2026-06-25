@@ -193,7 +193,7 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#f6ecef" />
-      
+
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
         behavior={isIOS ? 'padding' : 'height'}
@@ -267,9 +267,15 @@ export default function LoginScreen() {
               {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
             </View>
 
-            <TouchableOpacity style={styles.forgotLink} onPress={() => navigation.navigate('ForgotPassword')}>
-              <Text style={styles.forgotText}>Forgot Password?</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: scale(28) }}>
+              <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+                <Text style={styles.loginHighlight}>Sign Up?</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity  onPress={() => navigation.navigate('ForgotPassword')}>
+                <Text style={styles.forgotText}>Forgot Password?</Text>
+              </TouchableOpacity>
+            </View>
 
             <TouchableOpacity
               style={[styles.loginButton, isLoading && styles.buttonDisabled]}
@@ -346,8 +352,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  keyboardAvoid: { 
-    flex: 1 
+  keyboardAvoid: {
+    flex: 1
   },
   scrollContent: {
     paddingBottom: scale(40),
@@ -446,8 +452,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
   },
   forgotLink: {
-    alignSelf: 'flex-end',
     marginBottom: scale(25),
+    backgroundColor: 'pink',
   },
   forgotText: {
     color: '#111111',

@@ -211,7 +211,7 @@ export default function VirtualTryOnDetails({ route, navigation }) {
             required
           />
 
-          <SelectionGroup
+          {/* <SelectionGroup
             title="Height Range?"
             options={HEIGHT_OPTIONS}
             selectedValue={heightRange}
@@ -230,7 +230,7 @@ export default function VirtualTryOnDetails({ route, navigation }) {
             options={FIT_OPTIONS}
             selectedValue={clothingFit}
             onSelect={setClothingFit}
-          />
+          /> */}
 
 
           <SelectionGroup

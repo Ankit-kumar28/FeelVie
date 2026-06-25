@@ -285,11 +285,11 @@ export default function TryOnResult({ route, navigation }) {
                 resizeMode="contain"
               /> */}
 
-              <Image
+              {/* <Image
                 source={require('../../assets/images/qr.png')}
                 style={styles.orLogo}
                 resizeMode="contain"
-              />
+              /> */}
             </ViewShot>
 
             <ViewShot
@@ -309,11 +309,11 @@ export default function TryOnResult({ route, navigation }) {
                 resizeMode="contain"
               /> */}
 
-              <Image
+              {/* <Image
                 source={require('../../assets/images/qr.png')}
                 style={styles.orLogo}
                 resizeMode="contain"
-              />
+              /> */}
             </ViewShot>
           </View>
         ) : (
@@ -352,7 +352,7 @@ export default function TryOnResult({ route, navigation }) {
                 <Text style={styles.shareText}>Share Image</Text>
               </>
             )}
-          </TouchableOpacity>
+          </TouchableOpacity>        
         </View>
 
 

@@ -19,31 +19,20 @@ export default function HelpSupportScreen() {
 
   const menuItems = [
     {
-      title: 'Frequently Asked Questions',
-      icon: 'help-circle-outline',
-      screen: 'FAQs',
-    },
-    {
       title: 'About Us',
       icon: 'information-outline',
       screen: 'AboutUs',
     },
-    {
-      title: 'Terms of Use',
-      icon: 'file-outline',
-      screen: 'TermsOfUse',
-    },
-    {
-      title: 'Privacy Policy',
-      icon: 'shield-lock-outline',
-      screen: 'PrivacyPolicy',
-    },
-    {
-      title: 'Contact Support',
-      icon: 'email-outline',
-      screen: 'ContactSupport',
-    },
-
+    // {
+    //   title: 'Terms of Use',
+    //   icon: 'file-outline',
+    //   screen: 'TermsOfUse',
+    // },
+    // {
+    //   title: 'Privacy Policy',
+    //   icon: 'shield-lock-outline',
+    //   screen: 'PrivacyPolicy',
+    // },
   ];
 
   return (
@@ -79,20 +68,36 @@ export default function HelpSupportScreen() {
           ))}
         </View>
 
+
         <TouchableOpacity
-              style={[
-                styles.menuItem,
-              ]}
-              onPress={() => Linking.openURL('https://catalogue.feelvie.com/delete-account')}
-              activeOpacity={0.7}
-            >
-              <View style={styles.menuLeft}>
-                <Icon name="delete" size={24} color="#111111" />
-                <Text style={styles.menuText}>Delete Account</Text>
-              </View>
-              <Icon name="chevron-right" size={22} color="#AAAAAA" />
-            </TouchableOpacity>
+          style={[
+            styles.menuItem,
+          ]}
+          onPress={() => Linking.openURL('https://docs.google.com/forms/d/e/1FAIpQLSemcCEREBM3eYyT0jQ9KORD1pdD-ZM9H2DNUZdhKenr2fm5pA/viewform')}
+          activeOpacity={0.7}
+        >
+          <View style={styles.menuLeft}>
+            <Icon name="email-outline" size={24} color="#111111" />
+            <Text style={styles.menuText}>Contact Us</Text>
+          </View>
+          <Icon name="chevron-right" size={22} color="#AAAAAA" />
+        </TouchableOpacity>
         
+
+        <TouchableOpacity
+          style={[
+            styles.menuItem,
+          ]}
+          onPress={() => Linking.openURL('https://catalogue.feelvie.com/delete-account')}
+          activeOpacity={0.7}
+        >
+          <View style={styles.menuLeft}>
+            <Icon name="delete" size={24} color="#111111" />
+            <Text style={styles.menuText}>Delete Account</Text>
+          </View>
+          <Icon name="chevron-right" size={22} color="#AAAAAA" />
+        </TouchableOpacity>
+
 
         <View style={{ height: 80 }} />
       </ScrollView>
