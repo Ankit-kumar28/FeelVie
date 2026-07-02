@@ -17,7 +17,7 @@ export default function PrivacyPolicyScreen() {
   const navigation = useNavigation();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
       <View style={styles.header}>
@@ -30,73 +30,87 @@ export default function PrivacyPolicyScreen() {
 
       <ScrollView style={styles.scrollView}>
         <View style={styles.contentContainer}>
-          <Text style={styles.lastUpdated}>Last updated: February 25, 2025</Text>
+  <Text style={styles.lastUpdated}>Last updated: July 3, 2026</Text>
 
-          <Text style={styles.paragraph}>
-            At FeelVie, we respect your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your data when you use our mobile application and website.
-          </Text>
+  <Text style={styles.paragraph}>
+    Your privacy is important to us. This Privacy Policy explains what information FeelVie collects, how we use it, and how we protect it.
+  </Text>
 
-          <Text style={styles.sectionTitle}>1. Information We Collect</Text>
-          <Text style={styles.paragraph}>
-            We may collect:{'\n'}
-            • Personal identification information (name, email, phone number){'\n'}
-            • Profile picture and address details{'\n'}
-            • Payment information (processed securely via third-party gateways){'\n'}
-            • Device information and usage data{'\n'}
-            • Location data (with your permission)
-          </Text>
+  <Text style={styles.sectionTitle}>1. Information We Collect</Text>
+  <Text style={styles.paragraph}>
+    When you create an account, we may collect:
+    {"\n"}• Name
+    {"\n"}• Email address
+    {"\n"}• Password
+    {"\n"}• Phone number (optional)
+    {"\n\n"}
+    When you use the AI Virtual Try-On feature, we collect:
+    {"\n"}• Your uploaded image(s)
+    {"\n"}• Clothing image(s)
+    {"\n"}• AI-generated output image(s)
+  </Text>
 
-          <Text style={styles.sectionTitle}>2. How We Use Your Information</Text>
-          <Text style={styles.paragraph}>
-            We use your information to:{'\n'}
-            • Provide and maintain the Service{'\n'}
-            • Process transactions and deliveries{'\n'}
-            • Send order updates, promotions, and support messages{'\n'}
-            • Improve app features and user experience{'\n'}
-            • Prevent fraud and ensure platform safety
-          </Text>
+  <Text style={styles.sectionTitle}>2. How We Use Your Information</Text>
+  <Text style={styles.paragraph}>
+    We use your information to:
+    {"\n"}• Create and manage your account.
+    {"\n"}• Generate AI Virtual Try-On results.
+    {"\n"}• Improve the app and user experience.
+    {"\n"}• Respond to your support requests.
+  </Text>
 
-          <Text style={styles.sectionTitle}>3. Sharing of Information</Text>
-          <Text style={styles.paragraph}>
-            We may share your information with:{'\n'}
-            • Sellers/Buyers (only necessary details for transaction){'\n'}
-            • Payment processors and logistics partners{'\n'}
-            • Legal authorities when required by law
-          </Text>
+  <Text style={styles.sectionTitle}>3. AI Processing</Text>
+  <Text style={styles.paragraph}>
+    To generate AI Virtual Try-On results, your uploaded image and clothing image are securely sent to our third-party AI provider, Replicate.
+    {"\n\n"}
+    Replicate processes these images only to generate your requested result and does not retain them after processing.
+  </Text>
 
-          <Text style={styles.sectionTitle}>4. Data Security</Text>
-          <Text style={styles.paragraph}>
-            We implement appropriate technical and organizational measures to protect your personal data. However, no method of transmission over the internet is 100% secure.
-          </Text>
+  <Text style={styles.sectionTitle}>4. Image Storage</Text>
+  <Text style={styles.paragraph}>
+    • Uploaded input images are deleted after AI processing is completed.
+    {"\n"}
+    • AI-generated output images are securely stored on our servers so you can access them later.
+  </Text>
 
-          <Text style={styles.sectionTitle}>5. Your Rights</Text>
-          <Text style={styles.paragraph}>
-            You have the right to:{'\n'}
-            • Access, update, or delete your personal information{'\n'}
-            • Withdraw consent where applicable{'\n'}
-            • Lodge a complaint with the relevant data protection authority
-          </Text>
+  <Text style={styles.sectionTitle}>5. Data Sharing</Text>
+  <Text style={styles.paragraph}>
+    We do not sell or rent your personal information.
+    {"\n\n"}
+    Your uploaded images are shared only with Replicate for AI image generation. No other personal information is shared unless required by law.
+  </Text>
 
-          <Text style={styles.sectionTitle}>6. Cookies & Tracking</Text>
-          <Text style={styles.paragraph}>
-            We use cookies and similar technologies to enhance user experience, analyze usage, and show personalized content/ads.
-          </Text>
+  <Text style={styles.sectionTitle}>6. Data Security</Text>
+  <Text style={styles.paragraph}>
+    We use reasonable security measures to protect your information from unauthorized access, loss, or misuse. However, no internet transmission or storage method is completely secure.
+  </Text>
 
-          <Text style={styles.sectionTitle}>7. Changes to This Policy</Text>
-          <Text style={styles.paragraph}>
-            We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new policy on this page and updating the "Last updated" date.
-          </Text>
+  <Text style={styles.sectionTitle}>7. Your Rights</Text>
+  <Text style={styles.paragraph}>
+    You may update your account information, request account deletion, or contact us if you have questions about your personal data.
+  </Text>
 
-          <Text style={styles.sectionTitle}>8. Contact Us</Text>
-          <Text style={styles.paragraph}>
-            If you have questions about this Privacy Policy, please contact us at:{'\n'}
-            support@feelvie.in
-          </Text>
+  <Text style={styles.sectionTitle}>8. Children's Privacy</Text>
+  <Text style={styles.paragraph}>
+    FeelVie is not intended for children under the age of 13. We do not knowingly collect personal information from children.
+  </Text>
 
-          <View style={{ height: 60 }} />
-        </View>
+  <Text style={styles.sectionTitle}>9. Changes to This Policy</Text>
+  <Text style={styles.paragraph}>
+    We may update this Privacy Policy from time to time. Any changes will be reflected by updating the "Last updated" date at the top of this page.
+  </Text>
+
+  <Text style={styles.sectionTitle}>10. Contact Us</Text>
+  <Text style={styles.paragraph}>
+    If you have any questions about this Privacy Policy, please contact us at:
+    {"\n\n"}
+    support@feelvie.in
+  </Text>
+
+  <View style={{ height: 60 }} />
+</View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

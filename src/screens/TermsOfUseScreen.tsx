@@ -17,76 +17,78 @@ export default function TermsOfUseScreen() {
   const navigation = useNavigation();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Icon name="arrow-left" size={26} color="#111" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Terms of Use</Text>
+        <Text style={styles.headerTitle}>Terms and Conditions</Text>
         <View style={{ width: 26 }} />
       </View>
 
       <ScrollView style={styles.scrollView}>
         <View style={styles.contentContainer}>
-          <Text style={styles.lastUpdated}>Last updated: February 25, 2025</Text>
+  <Text style={styles.lastUpdated}>Last updated: July 3, 2026</Text>
 
-          <Text style={styles.paragraph}>
-            Welcome to FeelVie! These Terms of Use ("Terms") govern your access to and use of the FeelVie mobile application and website (collectively, the "Service"), operated by FeelVie Private Limited.
-          </Text>
+  <Text style={styles.paragraph}>
+    Welcome to FeelVie! By using our app, you agree to these Terms and Conditions. Please read them carefully before using our services.
+  </Text>
 
-          <Text style={styles.sectionTitle}>1. Acceptance of Terms</Text>
-          <Text style={styles.paragraph}>
-            By accessing or using the Service, you agree to be bound by these Terms. If you do not agree with any part of these Terms, you may not use our Service.
-          </Text>
+  <Text style={styles.sectionTitle}>1. About FeelVie</Text>
+  <Text style={styles.paragraph}>
+    FeelVie is an AI-powered virtual try-on application that allows users to visualize clothing on themselves using images and artificial intelligence.
+  </Text>
 
-          <Text style={styles.sectionTitle}>2. User Accounts</Text>
-          <Text style={styles.paragraph}>
-            When you create an account with us, you must provide accurate, complete, and current information. You are responsible for safeguarding your account and for any activities that occur under your account.
-          </Text>
+  <Text style={styles.sectionTitle}>2. Your Account</Text>
+  <Text style={styles.paragraph}>
+    • Provide accurate information when creating your account.{"\n"}
+    • Keep your account credentials secure.{"\n"}
+    • You are responsible for all activity under your account.
+  </Text>
 
-          <Text style={styles.sectionTitle}>3. Buying, Selling & Renting</Text>
-          <Text style={styles.paragraph}>
-            • Sellers are responsible for the accuracy of listings, quality of items, and timely delivery/rental handover.{"\n"}
-            • Buyers must pay the agreed amount through the platform's secure payment system.{"\n"}
-            • All transactions are subject to our cancellation and refund policies.
-          </Text>
+  <Text style={styles.sectionTitle}>3. Using the App</Text>
+  <Text style={styles.paragraph}>
+    You agree to use FeelVie only for lawful purposes. Do not misuse the app, interfere with its operation, or attempt to access features you are not authorized to use.
+  </Text>
 
-          <Text style={styles.sectionTitle}>4. Prohibited Activities</Text>
-          <Text style={styles.paragraph}>
-            You agree not to: {"\n"}
-            • Post counterfeit, illegal, or prohibited items{"\n"}
-            • Harass, threaten, or impersonate others{"\n"}
-            • Use the Service for any unlawful purpose{"\n"}
-            • Attempt to interfere with the Service's functionality
-          </Text>
+  <Text style={styles.sectionTitle}>4. Uploaded Images</Text>
+  <Text style={styles.paragraph}>
+    You are responsible for the images you upload. Please upload only images that you own or have permission to use. Do not upload illegal, offensive, or copyrighted content without authorization.
+  </Text>
 
-          <Text style={styles.sectionTitle}>5. Intellectual Property</Text>
-          <Text style={styles.paragraph}>
-            The Service and its original content (excluding user content) are owned by FeelVie and protected by copyright, trademark, and other laws.
-          </Text>
+  <Text style={styles.sectionTitle}>5. AI-Generated Results</Text>
+  <Text style={styles.paragraph}>
+    The virtual try-on results are generated using artificial intelligence and are intended for visualization purposes only. Results may vary and may not perfectly represent the final appearance of a product.
+  </Text>
 
-          <Text style={styles.sectionTitle}>6. Limitation of Liability</Text>
-          <Text style={styles.paragraph}>
-            FeelVie is not liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the Service.
-          </Text>
+  <Text style={styles.sectionTitle}>6. Intellectual Property</Text>
+  <Text style={styles.paragraph}>
+    The FeelVie app, its design, logo, and technology are owned by FeelVie. You may not copy, modify, or distribute any part of the app without permission.
+  </Text>
 
-          <Text style={styles.sectionTitle}>7. Changes to Terms</Text>
-          <Text style={styles.paragraph}>
-            We reserve the right to modify or replace these Terms at any time. We will provide notice of material changes by updating the "Last updated" date at the top of this page.
-          </Text>
+  <Text style={styles.sectionTitle}>7. Limitation of Liability</Text>
+  <Text style={styles.paragraph}>
+    FeelVie is provided on an "as is" basis. We do our best to provide a reliable service but cannot guarantee uninterrupted or error-free operation.
+  </Text>
 
-          <Text style={styles.sectionTitle}>8. Contact Us</Text>
-          <Text style={styles.paragraph}>
-            If you have any questions about these Terms, please contact us at:{'\n'}
-            support@feelvie.in
-          </Text>
+  <Text style={styles.sectionTitle}>8. Changes to These Terms</Text>
+  <Text style={styles.paragraph}>
+    We may update these Terms from time to time. Continued use of the app after changes means you accept the updated Terms.
+  </Text>
 
-          <View style={{ height: 60 }} />
-        </View>
+  <Text style={styles.sectionTitle}>9. Contact Us</Text>
+  <Text style={styles.paragraph}>
+    If you have any questions about these Terms, please contact us at:
+    {"\n\n"}
+    support@feelvie.in
+  </Text>
+
+  <View style={{ height: 60 }} />
+</View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
