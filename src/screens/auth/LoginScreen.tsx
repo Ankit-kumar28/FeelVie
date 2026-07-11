@@ -308,9 +308,9 @@ export default function LoginScreen() {
           </View>
 
           {/* Terms and Conditions */}
-          <TouchableOpacity>
+          {/* <TouchableOpacity>
             <Text style={styles.termsText}>Terms and Conditions</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <View style={{ height: 40 }} />
         </ScrollView>

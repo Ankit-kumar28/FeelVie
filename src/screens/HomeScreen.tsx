@@ -15,6 +15,9 @@ import {
   RefreshControl,
   ActivityIndicator,
   Animated,
+  Modal,
+  Platform,
+  Linking,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -22,6 +25,8 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Carousel from 'react-native-banner-carousel';
 import productData from '../utils/product.json';
+import DeviceInfo from 'react-native-device-info';
+
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const BannerWidth = SCREEN_WIDTH - 24; // 12px margin on each side
@@ -67,6 +72,16 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [creditBalance, setCreditBalance] = useState<number>(0);
   const [selectedCategory, setSelectedCategory] = useState<Category>(productData.categories[0] as Category);
+  const [updateInfo, setUpdateInfo] = useState<{
+    platform: string;
+    latest_version: string;
+    latest_build_number: string;
+    is_mandatory: boolean;
+    update_required: boolean;
+    message: string;
+    url: string;
+  } | null>(null);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
 
   // Animated values for subcategories
   const [scaleAnims] = useState(() =>
@@ -122,6 +137,28 @@ export default function HomeScreen() {
     fetchHomeData();
   }, [fetchHomeData]);
 
+  useEffect(() => {
+    const checkAppVersion = async () => {
+      try {
+        const appversion = DeviceInfo.getVersion();
+        const buildNumber = DeviceInfo.getBuildNumber();
+        
+        const response = await fetch(`${BASE_URL}/api/common/version/?platform=${(Platform.OS).toLowerCase()}`);
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (data?.update_required && (data.latest_version !== appversion || data.latest_build_number !== buildNumber)) {
+          setUpdateInfo(data);
+          setShowUpdateModal(true);
+        }
+      } catch (error) {
+        console.log('Update check failed:', error);
+      }
+    };
+
+    checkAppVersion();
+  }, []);
+
   const onRefresh = () => {
     setRefreshing(true);
     fetchHomeData();
@@ -169,6 +206,49 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+
+      <Modal
+        visible={showUpdateModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          if (!updateInfo?.is_mandatory) {
+            setShowUpdateModal(false);
+          }
+        }}
+      >
+        <View style={styles.updateModalOverlay}>
+          <View style={styles.updateModalContainer}>
+            <Text style={styles.updateModalTitle}>Update Available</Text>
+            <Text style={styles.updateModalMessage}>
+              {updateInfo?.message ?? 'A newer version is available.'}
+            </Text>
+            <Text style={styles.updateModalVersion}>
+              Version {updateInfo?.latest_version}
+            </Text>
+            <View style={styles.updateModalActions}>
+              {!updateInfo?.is_mandatory && (
+                <TouchableOpacity
+                  style={styles.updateModalCloseButton}
+                  onPress={() => setShowUpdateModal(false)}
+                >
+                  <Text style={styles.updateModalCloseText}>Later</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                style={styles.updateModalActionButton}
+                onPress={async () => {
+                  if (updateInfo?.url) {
+                    await Linking.openURL(updateInfo.url);
+                  }
+                }}
+              >
+                <Text style={styles.updateModalActionText}>Update Now</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Header */}
       <View style={[styles.header]}>
@@ -233,7 +313,7 @@ export default function HomeScreen() {
 
           {/* Subcategories (List View) */}
           <View style={styles.subCategoriesContainer}>
-            <Text style={styles.sectionTitle}>{selectedCategory.categoryName} Collections</Text>
+            <Text style={styles.sectionTitle}>{selectedCategory.categoryName} Sample Garments</Text>
             <View style={{ paddingHorizontal: 16 }}>
               {selectedCategory.subcategories.map((sub: Subcategory) => (
                 <TouchableOpacity
@@ -485,5 +565,68 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
     color: '#FFFFFF',
+  },
+  updateModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  updateModalContainer: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  updateModalTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#111111',
+    marginBottom: 12,
+  },
+  updateModalMessage: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#333333',
+    marginBottom: 16,
+  },
+  updateModalVersion: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#444444',
+    marginBottom: 24,
+  },
+  updateModalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+  },
+  updateModalCloseButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 12,
+    backgroundColor: '#F2F2F2',
+  },
+  updateModalCloseText: {
+    color: '#333333',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  updateModalActionButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 12,
+    backgroundColor: 'black',
+  },
+  updateModalActionText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
   },
 });

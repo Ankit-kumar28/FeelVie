@@ -64,7 +64,7 @@ export default function VirtualTryOnScreen() {
   // --- NEW IMAGE SELECTION LOGIC ---
   const cropConfig = {
     width: 900,
-    height: 1200, // 3:4 aspect ratio (shorter than 9:16)
+    height: 1400, // 3:4 aspect ratio (shorter than 9:16)
     cropping: true,
     mediaType: 'photo' as const,
   };
@@ -236,15 +236,12 @@ export default function VirtualTryOnScreen() {
           </View>
         </View>
 
-        <View style={{ paddingHorizontal: 20 , paddingTop: 12 }}>
-          <View style={styles.infoSection}>
-            <Text style={styles.infoTitle}>Ready to Generate?</Text>
-            <Text style={styles.infoText}>Your virtual try-on will be generated using the images you provided. This process may take a few seconds.</Text>
-          </View>
+        <View style={{ paddingHorizontal: 20 , paddingTop: 12 , paddingBottom: 20 }}>
           
           <TouchableOpacity
             style={[
               styles.nextButton,
+              {marginBottom: 20},
               (!userImage || !garmentImage) && styles.nextButtonDisabled,
             ]}
             onPress={handleNext}
@@ -253,6 +250,11 @@ export default function VirtualTryOnScreen() {
             <Text style={styles.nextText}>Try It On Now</Text>
             <Icons name="auto-awesome" size={22} color="#FFFFFF" style={{ marginLeft: 10 }} />
           </TouchableOpacity>
+
+          <View style={styles.infoSection}>
+            <Text style={styles.infoTitle}>Ready to Generate?</Text>
+            <Text style={styles.infoText}>Your virtual try-on will be generated using the images you provided. This process may take a few seconds.</Text>
+          </View>
         </View>
 
       </ScrollView>

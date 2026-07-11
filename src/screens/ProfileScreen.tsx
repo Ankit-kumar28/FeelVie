@@ -20,6 +20,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { BASE_URL } from '../config/env';
+import DeviceInfo from 'react-native-device-info';
 
 // Responsive scaling utility
 const scale = (size: number, baseWidth: number = 375) => {
@@ -290,6 +291,10 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
+        <Text style={{ textAlign: 'center', fontSize: scale(12), color: '#AAAAAA', marginBottom: scale(80) }}>
+          Version {DeviceInfo.getVersion()}
+        </Text>
+
         <View style={{ height: scale(80) }} />
       </ScrollView>
     </SafeAreaView>
@@ -297,9 +302,9 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#FFFFFF' 
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF'
   },
   header: {
     flexDirection: 'row',
@@ -312,24 +317,24 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E8E8E8',
   },
-  backButton: { 
+  backButton: {
     padding: scale(8),
     marginLeft: -scale(8),
   },
-  headerTitle: { 
-    fontSize: scale(20), 
-    fontFamily: 'Poppins-SemiBold', 
+  headerTitle: {
+    fontSize: scale(20),
+    fontFamily: 'Poppins-SemiBold',
     color: '#111111',
     letterSpacing: -0.3,
   },
-  center: { 
-    flex: 1, 
-    justifyContent: 'center', 
-    alignItems: 'center' 
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
-  loadingText: { 
-    marginTop: scale(12), 
-    fontSize: scale(16), 
+  loadingText: {
+    marginTop: scale(12),
+    fontSize: scale(16),
     color: '#AAAAAA',
     fontFamily: 'Poppins-Regular',
   },
@@ -374,8 +379,8 @@ const styles = StyleSheet.create({
     zIndex: 10,
     display: 'none',
   },
-  profileContent: { 
-    flexDirection: 'row', 
+  profileContent: {
+    flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: scale(14),
     paddingHorizontal: scale(8),
@@ -421,28 +426,28 @@ const styles = StyleSheet.create({
   },
 
   userInfo: { flex: 1, paddingLeft: scale(8) },
-  userName: { 
-    fontSize: scale(18), 
-    fontFamily: 'Poppins-Bold', 
-    color: '#111111', 
+  userName: {
+    fontSize: scale(18),
+    fontFamily: 'Poppins-Bold',
+    color: '#111111',
     marginBottom: scale(8),
     fontWeight: '700',
   },
-  infoRow: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    marginBottom: scale(6) 
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: scale(6)
   },
-  infoText: { 
-    fontSize: scale(13), 
-    color: '#555555', 
-    marginLeft: scale(8), 
+  infoText: {
+    fontSize: scale(13),
+    color: '#555555',
+    marginLeft: scale(8),
     flex: 1,
     fontFamily: 'Poppins-Regular',
     fontWeight: '500',
   },
-  verifiedIcon: { 
-    marginLeft: scale(6) 
+  verifiedIcon: {
+    marginLeft: scale(6)
   },
   editProfileButton: {
     flexDirection: 'row',
@@ -461,7 +466,7 @@ const styles = StyleSheet.create({
   },
 
   /* Menu Sections */
-  sectionsContainer: { 
+  sectionsContainer: {
     marginHorizontal: '6.4%'
   },
   section: {
@@ -498,10 +503,10 @@ const styles = StyleSheet.create({
     shadowRadius: 0,
     elevation: 0,
   },
-  menuLeft: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    flex: 1 
+  menuLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1
   },
   menuIconBox: {
     width: scale(40),
@@ -513,9 +518,9 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     marginRight: scale(2),
   },
-  menuText: { 
-    fontSize: scale(14), 
-    color: '#222222', 
+  menuText: {
+    fontSize: scale(14),
+    color: '#222222',
     marginLeft: scale(8),
     fontFamily: 'Poppins-Medium',
     fontWeight: '500',
@@ -523,10 +528,10 @@ const styles = StyleSheet.create({
   },
 
   /* Logout */
-  logoutContainer: { 
-    marginHorizontal: '6.4%', 
-    marginTop: scale(32), 
-    marginBottom: scale(80) 
+  logoutContainer: {
+    marginHorizontal: '6.4%',
+    marginTop: scale(32),
+    marginBottom: scale(30)
   },
   logoutButton: {
     flexDirection: 'row',
@@ -541,13 +546,13 @@ const styles = StyleSheet.create({
     shadowRadius: 0,
     elevation: 0,
   },
-  logoutDisabled: { 
-    opacity: 0.7 
+  logoutDisabled: {
+    opacity: 0.7
   },
-  logoutText: { 
-    fontSize: scale(15), 
-    fontFamily: 'Poppins-Bold', 
-    color: '#FFFFFF', 
+  logoutText: {
+    fontSize: scale(15),
+    fontFamily: 'Poppins-Bold',
+    color: '#FFFFFF',
     marginLeft: scale(8),
     fontWeight: '700',
   },

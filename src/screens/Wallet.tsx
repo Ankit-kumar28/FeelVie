@@ -21,9 +21,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import RazorpayCheckout from 'react-native-razorpay';
 import Toast from 'react-native-toast-message';
+import { Platform } from 'react-native';
+
 
 const { width } = Dimensions.get('window');
 const BASE_URL = 'https://api.feelvie.com';
+const PlatformName = Platform.OS === 'ios' ? 'iOS' : 'Android';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -124,20 +127,12 @@ export default function WalletScreen() {
 
   const checkUiVisibility = useCallback(async () => {
     try {
-      // 1. Check local storage first
-      const cachedShowUi = await AsyncStorage.getItem('show_ui_config');
-      console.log('[checkUiVisibility] Cached show_ui value:', cachedShowUi);
-
-      if (cachedShowUi !== null) {
-        const isTrue = cachedShowUi === 'true';
-        setShowUi(isTrue);
-
-        // If it's already true in storage, your instructions state no need to refetch
-        if (isTrue) return;
-      }
-
-      // 2. If it's false or not in storage, fetch from backend (No extra loader added)
       console.log('[checkUiVisibility] Fetching fresh UI config from admin api...');
+
+      if(PlatformName == 'Android'){
+        setShowUi(true);
+        return; // Skip API check for Android as per requirement
+      }
       const response = await fetch(`${BASE_URL}/api/admin/showui/`);
       if (response.ok) {
         const data = await response.json();
@@ -145,9 +140,6 @@ export default function WalletScreen() {
 
         const apiValue = !!data?.showui;
         setShowUi(apiValue);
-
-        // Persist the value to local storage
-        await AsyncStorage.setItem('show_ui_config', String(apiValue));
       }
     } catch (error) {
       console.error('[checkUiVisibility] Error checking admin UI visibility:', error);
@@ -300,24 +292,46 @@ export default function WalletScreen() {
       const token = await AsyncStorage.getItem('access_token');
       if (!token) { navigation.navigate('Login'); return; }
 
-      await openRazorpay({
-        token,
-        description: `${plan.name} – ${plan.credits_per_month} Credits/month`,
-        initializePayment: async () => {
-          const activateRes = await fetch(`${BASE_URL}/api/wallet/credits/activate-subscription/`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ plan_id: plan.id }),
-          });
-          if (!activateRes.ok) throw new Error('Could not initialize subscription');
-          return activateRes.json();
-        },
-        onSuccess: async () => {
-          Toast.show({ type: 'success', text1: `Subscribed to ${plan.name}!` });
-          setSubscriptionModalVisible(false);
-          fetchAllData();
-        },
+      const autopayRes = await fetch(`${BASE_URL}/api/secure/subscriptions/autopay/`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan_id: plan.id.toString() }),
       });
+
+      if (!autopayRes.ok) {
+        const errorText = await autopayRes.text();
+        throw new Error(errorText || 'Could not start plan autopay');
+      }
+
+      const autopayData = await autopayRes.json();
+      const subscriptionId = autopayData?.subscription_id;
+      const razorpayKey = autopayData?.razorpay_key_id;
+      if (!subscriptionId || !razorpayKey) throw new Error('Could not initialize Razorpay subscription');
+
+      const userRes = await fetch(`${BASE_URL}/api/auth/me/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const userData = userRes.ok ? await userRes.json() : {};
+      const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || 'Customer';
+
+      const options = {
+        key: razorpayKey,
+        subscription_id: subscriptionId,
+        name: 'Feelvie',
+        description: `${plan.name} Subscription`,
+        prefill: {
+          email: userData.email || '',
+          contact: userData.phone || '',
+          name: fullName,
+        },
+        theme: { color: '#111111' },
+      };
+
+      setSubscriptionModalVisible(false);
+      const razorpayResponse = await RazorpayCheckout.open(options);
+      Toast.show({ type: 'success', text1: `Subscribed to ${plan.name}!` });
+      console.log('Razorpay subscription success:', razorpayResponse);
+      fetchAllData();
     } catch (err: any) {
       if (err.code === 'payment_cancelled') {
         Toast.show({ type: 'info', text1: 'Payment Cancelled' });
