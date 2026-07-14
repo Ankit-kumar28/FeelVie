@@ -40,7 +40,7 @@ export default function TryOnResult({ route, navigation }) {
 
   const { resultBase64, isUrl, category, timestamp, metadata } = route.params ?? {};
   console.debug('[TryOnResult] Received result:', isUrl ? 'URL' : 'Base64 length ' + (resultBase64?.length || 'missing'));
-  
+
   const resultImageUri = isUrl ? resultBase64 : normalizeImageUri(resultBase64);
   const saveShotRef = useRef<ViewShot | null>(null);
   const shareShotRef = useRef<ViewShot | null>(null);
@@ -107,11 +107,13 @@ export default function TryOnResult({ route, navigation }) {
 
   const captureResultImage = async (withQr: boolean) => {
     const targetRef = withQr ? shareShotRef : saveShotRef;
-    if (!targetRef.current) {
+    const shotTarget = targetRef.current;
+
+    if (!shotTarget) {
       throw new Error('Result image is not ready yet');
     }
 
-    return await captureRef(targetRef, {
+    return await captureRef(shotTarget, {
       format: 'png',
       quality: 1,
       result: 'tmpfile',
@@ -136,6 +138,7 @@ export default function TryOnResult({ route, navigation }) {
     const result = await request(permission);
     return result === RESULTS.GRANTED || result === RESULTS.LIMITED;
   };
+
 
   const saveToGallery = async () => {
     if (!resultImageUri) {
@@ -322,21 +325,39 @@ export default function TryOnResult({ route, navigation }) {
 
         {/* Action Buttons */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.downloadButton, isSaving && styles.downloadButtonDisabled]}
-            onPress={saveToGallery}
-            disabled={isSaving}
-            activeOpacity={0.8}
-          >
-            {isSaving ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <>
-                <Icon name="download" size={22} color="#FFFFFF" style={{ marginRight: 10 }} />
-                <Text style={styles.downloadText}>Save to Gallery</Text>
-              </>
-            )}
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
+            <TouchableOpacity
+              style={[styles.downloadButton, isSaving && styles.downloadButtonDisabled]}
+              onPress={saveToGallery}
+              disabled={isSaving}
+              activeOpacity={0.8}
+            >
+              {isSaving ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <>
+                  <Icon name="download" size={22} color="#FFFFFF" style={{ marginRight: 10 }} />
+                  <Text style={styles.downloadText}>Save to Gallery</Text>
+                </>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.downloadButton, isSaving && styles.downloadButtonDisabled]}
+              onPress={navigation.navigate.bind(null, 'MainTabs')}
+              disabled={isSaving}
+              activeOpacity={0.8}
+            >
+              {isSaving ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <>
+                  <Icons name="auto-awesome" size={22} color="#FFFFFF" style={{ marginRight: 10 }} />
+                  <Text style={styles.downloadText}>Try Another</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity
             style={[styles.shareButton, isSharing && styles.shareButtonDisabled]}
@@ -352,7 +373,7 @@ export default function TryOnResult({ route, navigation }) {
                 <Text style={styles.shareText}>Share Image</Text>
               </>
             )}
-          </TouchableOpacity>        
+          </TouchableOpacity>
         </View>
 
 
@@ -381,7 +402,7 @@ export default function TryOnResult({ route, navigation }) {
             <Text style={styles.modalTitle}>{isPromptingForSub ? "Premium Plan" : "Low Credit"}</Text>
             {!isPromptingForSub && <Text style={styles.creditLeftText}>Remaining Credit: {currentCredit}</Text>}
             <Text style={styles.modalMessage}>
-              {isPromptingForSub 
+              {isPromptingForSub
                 ? "Get an active subscription plan to remove watermarks and unlock unlimited virtual try-ons!"
                 : "Your credit balance is low. Please purchase credits to try on more outfits!"}
             </Text>
@@ -548,9 +569,9 @@ const styles = StyleSheet.create({
     top: "100%",
     transform: [{ translateY: "-100%" }],
     width: '100%',
-    height : 60,
-    objectFit: "fill", 
-    backgroundColor : "#787878a8",
+    height: 60,
+    objectFit: "fill",
+    backgroundColor: "#787878a8",
   },
   watermark: {
     position: 'absolute',
@@ -568,7 +589,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     opacity: 0.95,
-    borderTopLeftRadius:6,
+    borderTopLeftRadius: 6,
   },
 
   /* Watermark Styles */

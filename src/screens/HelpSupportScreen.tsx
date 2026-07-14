@@ -98,6 +98,20 @@ export default function HelpSupportScreen() {
           <Icon name="chevron-right" size={22} color="#AAAAAA" />
         </TouchableOpacity>
 
+        <TouchableOpacity
+          style={[
+            styles.menuItem,
+          ]}
+          onPress={() => Linking.openURL('https://catalogue.feelvie.com/chat')}
+          activeOpacity={0.7}
+        >
+          <View style={styles.menuLeft}>
+            <Icon name="robot" size={24} color="#111111" />
+            <Text style={styles.menuText}>Chat With Us</Text>
+          </View>
+          <Icon name="chevron-right" size={22} color="#AAAAAA" />
+        </TouchableOpacity>
+
 
         <View style={{ height: 80 }} />
       </ScrollView>
