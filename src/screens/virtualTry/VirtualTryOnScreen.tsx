@@ -378,6 +378,6 @@ const styles = StyleSheet.create({
   sampleLabel: { fontSize: 15, fontFamily: 'Poppins-SemiBold', color: '#111111', textAlign: 'center', marginVertical: 24, fontWeight: '700' },
   fullSampleImage: { width: '100%', height: 480, marginVertical: 16, borderRadius: 12, borderWidth: 1, borderColor: '#E8E8E8', backgroundColor: '#F5F5F5' },
   imageCaption: { fontSize: 13, color: '#AAAAAA', textAlign: 'center', marginTop: 4, fontFamily: 'Poppins-Regular' },
-  gotItButton: { backgroundColor: '#f8ac1b', paddingVertical: 16, marginHorizontal: 20, marginBottom: 20, borderRadius: 10, alignItems: 'center', shadowColor: '#f8ac1b', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
+  gotItButton: { backgroundColor: '#000', paddingVertical: 16, marginHorizontal: 20, marginBottom: 20, borderRadius: 10, alignItems: 'center', shadowColor: '#f8ac1b', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
   gotItText: { color: '#FFFFFF', fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '700' },
 });

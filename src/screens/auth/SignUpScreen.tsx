@@ -252,7 +252,9 @@ export default function SignUpScreen() {
 
             <View style={styles.inputWrapper}>
               <Text style={styles.inputLabel}>Phone Number 
-                <Text style={{ fontSize: scale(12), color: '#AAAAAA' }}> (Optional)</Text>
+                {
+                  Platform.OS === 'ios' && <Text style={{ color: '#AAAAAA', fontSize: scale(12) }}> (Optional)</Text>
+                }
               </Text>
               <View style={styles.inputCard}>
                 <Icon name="phone" size={18} color="#AAAAAA" />

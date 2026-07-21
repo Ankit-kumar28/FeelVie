@@ -32,6 +32,7 @@ import MyWishListScreen from '../screens/MyWishList';
 import SearchResultsScreen from '../screens/SearchResultsScreen';
 import MarketplaceScreen from '../screens/MarketplaceScreen';
 import HelpSupportScreen from '../screens/HelpSupportScreen';
+import ChatSupportScreen from '../screens/ChatSupportScreen';
 import AboutUsScreen from '../screens/AboutUsScreen';
 import TermsOfUseScreen from '../screens/TermsOfUseScreen';
 import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
@@ -108,6 +109,7 @@ function AppStack() {
       <Stack.Screen name="MyWishList" component={MyWishListScreen} />
       <Stack.Screen name="SearchResults" component={SearchResultsScreen} />
       <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
+      <Stack.Screen name="ChatSupport" component={ChatSupportScreen} />
       <Stack.Screen name="AboutUs" component={AboutUsScreen} />
       <Stack.Screen name="TermsOfUse" component={TermsOfUseScreen} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />

@@ -70,6 +70,7 @@ async function deleteProfilePicture(token: string) {
   const res = await axios.delete(`${BASE_URL}/api/auth/me/profile-picture`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+  console.log('Profile picture deleted:', res.data);
   return res.data;
 }
 
@@ -347,6 +348,7 @@ export default function PersonalInfoScreen({ navigation }: any) {
             setAvatarUrl(null);
             if (setUser && user) setUser({ ...user, profile_picture: null, avatar: null });
           } catch (err: any) {
+            console.error('Failed to remove profile photo:', err);
             const friendlyMsg = err?.response?.data?.detail || err?.message || 'Failed to remove photo.';
             Alert.alert('Remove Failed', friendlyMsg);
           } finally {

@@ -180,10 +180,10 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={[styles.header]}>
           <Text style={styles.logo}>FeelVie</Text>
-          <View style={styles.creditBadge}>
+          <TouchableOpacity style={styles.creditBadge} onPress={() => navigation.navigate('WalletScreen')}>
             <Icon name="account-balance-wallet" size={16} color="#000" />
             <Text style={styles.creditText}>{creditBalance} Credit</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -253,10 +253,10 @@ export default function HomeScreen() {
       {/* Header */}
       <View style={[styles.header]}>
         <Text style={styles.logo}>FeelVie</Text>
-        <View style={styles.creditBadge}>
+        <TouchableOpacity style={styles.creditBadge} onPress={() => navigation.navigate('WalletScreen')}>
           <Icon name="account-balance-wallet" size={16} color="#000" />
           <Text style={styles.creditText}>{creditBalance} Credit</Text>
-        </View>
+        </TouchableOpacity>
       </View>
 
       <ScrollView

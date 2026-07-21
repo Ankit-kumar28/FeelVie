@@ -102,7 +102,7 @@ export default function HelpSupportScreen() {
           style={[
             styles.menuItem,
           ]}
-          onPress={() => Linking.openURL('https://catalogue.feelvie.com/chat')}
+          onPress={() => navigation.navigate('ChatSupport' as never)}
           activeOpacity={0.7}
         >
           <View style={styles.menuLeft}>

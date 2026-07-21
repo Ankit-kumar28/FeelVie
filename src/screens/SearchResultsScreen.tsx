@@ -553,7 +553,7 @@ export default function SearchResults() {
           numColumns={2}
           columnWrapperStyle={styles.row}
           contentContainerStyle={styles.listContent}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#B03385']} />}
+          // refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#B03385']} />}
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
           ListFooterComponent={

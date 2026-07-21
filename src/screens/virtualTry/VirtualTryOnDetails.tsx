@@ -36,6 +36,8 @@ export default function VirtualTryOnDetails({ route, navigation }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [notifyOnCompletion, setNotifyOnCompletion] = useState(false);
   const [generatedResult, setGeneratedResult] = useState<any>(null);
+  const [walletCreditBalance, setWalletCreditBalance] = useState<number | null>(null);
+  const hasInsufficientCredits = walletCreditBalance !== null && walletCreditBalance <= 0;
 
   useEffect(() => {
     const hydrateGeneratingStatus = async () => {
@@ -50,6 +52,30 @@ export default function VirtualTryOnDetails({ route, navigation }) {
     };
 
     hydrateGeneratingStatus();
+  }, []);
+
+  useEffect(() => {
+    const fetchWalletCreditBalance = async () => {
+      try {
+        const token = await AsyncStorage.getItem('access_token');
+        if (!token) return;
+
+        const response = await fetch(`${BASE_URL}/api/wallet/me/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setWalletCreditBalance(Number(data?.credit_balance || 0));
+        }
+      } catch (error) {
+        console.error('[VirtualTryOnDetails] Failed to fetch wallet balance:', error);
+      }
+    };
+
+    fetchWalletCreditBalance();
   }, []);
 
   // Selection States
@@ -273,6 +299,15 @@ export default function VirtualTryOnDetails({ route, navigation }) {
       setIsGenerating(false);
       await AsyncStorage.setItem('isGenerating', 'false');
     }
+  };
+
+  const handleGeneratePress = () => {
+    if (hasInsufficientCredits) {
+      navigation.navigate('WalletScreen');
+      return;
+    }
+
+    handleGenerate();
   };
 
   const SelectionGroup = ({ title, options, selectedValue, onSelect, required = false }: any) => (
@@ -563,10 +598,16 @@ export default function VirtualTryOnDetails({ route, navigation }) {
       <View style={styles.bottomBar}>
         {!isGenerating ? (
           <TouchableOpacity
-            style={styles.generateBtn}
-            onPress={handleGenerate}
+            style={[
+              styles.generateBtn,
+              hasInsufficientCredits && styles.generateBtnDisabled,
+            ]}
+            onPress={handleGeneratePress}
+            activeOpacity={0.85}
           >
-            <Text style={styles.generateText}>Generate Try-On</Text>
+            <Text style={styles.generateText}>
+              {hasInsufficientCredits ? 'Insufficient Credits' : 'Generate Try-On'}
+            </Text>
             <Icons name="auto-awesome" size={22} color="#FFFFFF" style={{ marginLeft: 10 }} />
           </TouchableOpacity>
         ) : (
