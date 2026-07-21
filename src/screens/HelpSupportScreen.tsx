@@ -23,16 +23,16 @@ export default function HelpSupportScreen() {
       icon: 'information-outline',
       screen: 'AboutUs',
     },
-    // {
-    //   title: 'Terms of Use',
-    //   icon: 'file-outline',
-    //   screen: 'TermsOfUse',
-    // },
-    // {
-    //   title: 'Privacy Policy',
-    //   icon: 'shield-lock-outline',
-    //   screen: 'PrivacyPolicy',
-    // },
+    {
+      title: 'Terms of Use',
+      icon: 'file-outline',
+      screen: 'TermsOfUse',
+    },
+    {
+      title: 'Privacy Policy',
+      icon: 'shield-lock-outline',
+      screen: 'PrivacyPolicy',
+    },
   ];
 
   return (

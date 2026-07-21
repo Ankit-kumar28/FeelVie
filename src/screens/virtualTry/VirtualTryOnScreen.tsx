@@ -10,6 +10,7 @@ import {
   Modal,
   Dimensions,
   Alert,
+  Platform,
 } from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker'; // <-- Replaced image picker
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -23,6 +24,7 @@ const { width, height } = Dimensions.get('window');
 
 const USER_IMAGE_KEY = 'VIRTUAL_TRYON_USER_IMAGE';
 const GARMENT_IMAGE_KEY = 'VIRTUAL_TRYON_GARMENT_IMAGE';
+const IOS_POLICY_ACCEPTED_KEY = 'VIRTUAL_TRYON_IOS_POLICY_ACCEPTED';
 
 export default function VirtualTryOnScreen() {
   console.debug('[Screen 1] VirtualTryOnScreen mounted');
@@ -33,10 +35,26 @@ export default function VirtualTryOnScreen() {
   const [userImage, setUserImage] = useState<string | null>(null);
   const [garmentImage, setGarmentImage] = useState<string | null>(null);
   const [showInstructions, setShowInstructions] = useState(false);
+  const [hasAcceptedPolicy, setHasAcceptedPolicy] = useState(false);
 
   useEffect(() => {
     console.debug('[Screen 1] Loading stored images from AsyncStorage');
     loadStoredImages();
+  }, []);
+
+  useEffect(() => {
+    const loadPolicyAcceptance = async () => {
+      if (Platform.OS !== 'ios') return;
+
+      try {
+        const storedValue = await AsyncStorage.getItem(IOS_POLICY_ACCEPTED_KEY);
+        setHasAcceptedPolicy(storedValue === 'true');
+      } catch (err) {
+        console.error('[Screen 1] Failed to load policy acceptance:', err);
+      }
+    };
+
+    loadPolicyAcceptance();
   }, []);
 
   useEffect(() => {
@@ -138,9 +156,26 @@ export default function VirtualTryOnScreen() {
     }
   };
 
+  const handlePolicyToggle = async () => {
+    if (Platform.OS !== 'ios') return;
+
+    const nextValue = !hasAcceptedPolicy;
+    setHasAcceptedPolicy(nextValue);
+    try {
+      await AsyncStorage.setItem(IOS_POLICY_ACCEPTED_KEY, nextValue ? 'true' : 'false');
+    } catch (err) {
+      console.error('[Screen 1] Failed to save policy acceptance:', err);
+    }
+  };
+
   const handleNext = async () => {
     if (!userImage || !garmentImage) {
       Toast.show({ type: 'error', text1: 'Please upload both images' });
+      return;
+    }
+
+    if (Platform.OS === 'ios' && !hasAcceptedPolicy) {
+      Toast.show({ type: 'error', text1: 'Please accept the privacy policy and terms first' });
       return;
     }
 
@@ -151,13 +186,19 @@ export default function VirtualTryOnScreen() {
     });
   };
 
+  const canProceed = !!userImage && !!garmentImage && (Platform.OS !== 'ios' || hasAcceptedPolicy);
+
   return (
-    <View style={{ flex: 1 }}>
+    <SafeAreaView style={styles.safeArea}>
       <View style={[styles.header]}>
         <Text style={styles.logo}>Virtual Try</Text>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Images</Text>
@@ -236,16 +277,49 @@ export default function VirtualTryOnScreen() {
           </View>
         </View>
 
-        <View style={{ paddingHorizontal: 20 , paddingTop: 12 , paddingBottom: 20 }}>
-          
+        <View style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 20 }}>
+          {Platform.OS === 'ios' && (
+            <>
+              <View style={styles.checkboxContainer}>
+                <TouchableOpacity
+                  style={styles.checkbox}
+                  onPress={handlePolicyToggle}
+                  activeOpacity={0.8}
+                >
+                  <Icons
+                    name={hasAcceptedPolicy ? 'check-box' : 'check-box-outline-blank'}
+                    size={24}
+                    color={hasAcceptedPolicy ? '#111111' : '#AAAAAA'}
+                  />
+                </TouchableOpacity>
+                <Text style={styles.checkboxText}>
+                  By continuing, I accept the{' '}
+                  <Text
+                    style={styles.linkText}
+                    onPress={() => navigation.navigate('PrivacyPolicy')}
+                  >
+                    Privacy Policy
+                  </Text>
+                  {' '}and{' '}
+                  <Text
+                    style={styles.linkText}
+                    onPress={() => navigation.navigate('TermsOfUse')}
+                  >
+                    Terms and Conditions
+                  </Text>
+                </Text>
+              </View>
+            </>
+          )}
+
           <TouchableOpacity
             style={[
               styles.nextButton,
-              {marginBottom: 20},
-              (!userImage || !garmentImage) && styles.nextButtonDisabled,
+              { marginBottom: 20 },
+              !canProceed && styles.nextButtonDisabled,
             ]}
             onPress={handleNext}
-            disabled={!userImage || !garmentImage}
+            disabled={!canProceed}
           >
             <Text style={styles.nextText}>Try It On Now</Text>
             <Icons name="auto-awesome" size={22} color="#FFFFFF" style={{ marginLeft: 10 }} />
@@ -255,6 +329,7 @@ export default function VirtualTryOnScreen() {
             <Text style={styles.infoTitle}>Ready to Generate?</Text>
             <Text style={styles.infoText}>Your virtual try-on will be generated using the images you provided. This process may take a few seconds.</Text>
           </View>
+
         </View>
 
       </ScrollView>
@@ -273,55 +348,49 @@ export default function VirtualTryOnScreen() {
             <ScrollView
               style={styles.modalScroll}
               contentContainerStyle={styles.modalScrollContent}
+              showsVerticalScrollIndicator={false}
             >
-              <Text style={styles.stepTitle}>Step 1: Select Type</Text>
-              <Text style={styles.stepDesc}>Choose from Tops, Bottoms, or Dress using the buttons above.</Text>
+              <Text style={styles.stepTitle}>Step 1: Select or Upload Garment Image</Text>
+              <Text style={styles.stepDesc}>Choose an existing garment or upload a photo of the item you want to try on.</Text>
+              {/* <Text style={styles.sampleLabel}>Example Image</Text> */}
+              <Image
+                source={require('../../assets/images/grment.png')}
+                style={styles.fullSampleImage}
+                resizeMode="cover"
+              />
 
-              <Text style={styles.stepTitle}>Step 2: Upload Your Photo</Text>
+              <Text style={styles.stepTitle}>Step 2: Upload Your Image</Text>
               <Text style={styles.stepDesc}>
-                • Stand straight, face the camera{'\n'}
-                • Full body visible (head to feet){'\n'}
-                • Plain background{'\n'}
-                • Good lighting{'\n'}
-                • No group or mirror selfies
+                • Stand straight{'\n'}
+                • Full body visible with a plain background{'\n'}
+                • Keep hands straight down by your sides{'\n'}
+                • Avoid selfies (have someone take it or use a timer)
               </Text>
 
-              <Text style={styles.sampleLabel}>Example Images</Text>
-
+              {/* <Text style={styles.sampleLabel}>Example Image</Text> */}
               <Image
-                source={require('../../assets/images/instruct1.jpg')}
+                source={require('../../assets/images/output.jpeg')}
                 style={styles.fullSampleImage}
-                resizeMode="contain"
+                resizeMode="cover"
               />
               <Text style={styles.imageCaption}>Good full-body photo</Text>
 
+              <Text style={styles.stepTitle}>Step 3: Next</Text>
+              <Text style={styles.stepDesc}>Click next to proceed to the generation settings.</Text>
+
+              <Text style={styles.stepTitle}>Step 4: Select Category</Text>
+              <Text style={styles.stepDesc}>Choose the correct category for your item. for e.g. Kids / Mens / Womens</Text>
+
+              <Text style={styles.stepTitle}>Step 5: Select Size and Fits</Text>
+              <Text style={styles.stepDesc}>Pick your preferred sizing and fit options, then click generate.</Text>
+
+              <Text style={styles.sampleLabel}>Successfully Generated!</Text>
               <Image
-                source={require('../../assets/images/instruct2.jpg')}
+                source={require('../../assets/images/boy.png')}
                 style={styles.fullSampleImage}
-                resizeMode="contain"
+                resizeMode="cover"
               />
-              <Text style={styles.imageCaption}>Good garment photo</Text>
-
-              <Text style={styles.stepTitle}>Step 3: Upload Garment</Text>
-              <Text style={styles.stepDesc}>
-                • Front view{'\n'}
-                • Plain background preferred{'\n'}
-                • Full garment visible{'\n'}
-                • High quality{'\n'}
-                • One garment per photo
-              </Text>
-
-              <Text style={styles.stepTitle}>Step 4: Select Details</Text>
-              <Text style={styles.stepDesc}>On the next page select generation category, garment size, and body size.</Text>
-
-              <Text style={styles.stepTitle}>Step 5: Generate</Text>
-              <Text style={styles.stepDesc}>Click Generate to see the result.</Text>
-
-              <Image
-                source={require('../../assets/images/instruct3.jpg')}
-                style={styles.fullSampleImage}
-                resizeMode="contain"
-              />
+              <Text style={styles.imageCaption}>Your virtual try-on result</Text>
 
               <View style={{ height: 80 }} />
             </ScrollView>
@@ -332,14 +401,14 @@ export default function VirtualTryOnScreen() {
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   // Your original styles remain exactly the same below...
-  safeArea: { flex: 1, backgroundColor: 'red' },
-  scrollContent: { paddingBottom: 300 },
+  safeArea: { flex: 1, backgroundColor: '#FFFFFF' },
+  scrollContent: { flexGrow: 1, paddingBottom: 300 },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignContent: 'center',
     alignItems: 'center', paddingHorizontal: 20, paddingBottom: 14,
@@ -364,6 +433,10 @@ const styles = StyleSheet.create({
   infoSection: { backgroundColor: '#F9F9F9', borderRadius: 12, borderWidth: 0.8, borderColor: '#E8E8E8', paddingHorizontal: 18, paddingVertical: 20, marginTop: 0, marginBottom: 20 },
   infoTitle: { fontSize: 16, fontFamily: 'Poppins-SemiBold', color: '#111111', marginBottom: 10, fontWeight: '600' },
   infoText: { fontSize: 14, fontFamily: 'Poppins-Regular', color: '#666666', lineHeight: 22 },
+  checkboxContainer: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 14, gap: 10 },
+  checkbox: { paddingTop: 1 },
+  checkboxText: { flex: 1, fontSize: 13, color: '#444444', fontFamily: 'Poppins-Regular', lineHeight: 19 },
+  linkText: { color: '#111111', fontFamily: 'Poppins-SemiBold', textDecorationLine: 'underline' },
   nextButton: { backgroundColor: '#111111', paddingVertical: 16, borderRadius: 10, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', shadowColor: '#111111', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 5 },
   nextButtonDisabled: { backgroundColor: '#DCDCDC' },
   nextText: { color: '#FFFFFF', fontSize: 17, fontFamily: 'Poppins-SemiBold', fontWeight: '700' },

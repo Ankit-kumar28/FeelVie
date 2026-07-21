@@ -1,5 +1,5 @@
 // src/screens/ProfileScreen.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,8 @@ import {
   Alert,
   Dimensions,
   useWindowDimensions,
+  Modal,
+  Linking,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';
@@ -21,6 +23,8 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { BASE_URL } from '../config/env';
 import DeviceInfo from 'react-native-device-info';
+import Share from 'react-native-share';
+import ViewShot, { captureRef } from 'react-native-view-shot';
 
 // Responsive scaling utility
 const scale = (size: number, baseWidth: number = 375) => {
@@ -49,10 +53,15 @@ export default function ProfileScreen() {
   const { user, logout, token, isLoading: authLoading, setUser } = useAuth();
   const navigation = useNavigation<any>();
   const [loggingOut, setLoggingOut] = useState(false);
+  const qrShotRef = useRef<ViewShot | null>(null);
 
   // ── Fresh profile data fetched from API (not stale context) ──
   const [profileData, setProfileData] = useState<any>(null);
   const [fetchingProfile, setFetchingProfile] = useState(true);
+  const [qrVisible, setQrVisible] = useState(false);
+  const [qrUrl, setQrUrl] = useState('');
+  const [qrTitle, setQrTitle] = useState('Share App QR Code');
+  const [qrLoading, setQrLoading] = useState(false);
 
   // ── Fetch on mount AND every time the screen comes back into focus ──
   useFocusEffect(
@@ -168,6 +177,52 @@ export default function ProfileScreen() {
     );
   };
 
+
+  const generateQRCode = async () => {
+    try {
+      setQrLoading(true);
+      const response = await axios.get(`${BASE_URL}/api/common/version/?platform=${Platform.OS}`);
+      const url = response.data?.url;
+
+      if (!url) {
+        Alert.alert('Error', 'No share URL was returned by the server.');
+        return;
+      }
+
+      setQrUrl(url);
+      setQrTitle(response.data?.message || 'Share App QR Code');
+      setQrVisible(true);
+    } catch (error) {
+      console.error('[ProfileScreen] generateQRCode error:', error);
+      Alert.alert('Error', 'Could not load the share link. Please try again.');
+    } finally {
+      setQrLoading(false);
+    }
+  };
+
+  const shareQRCode = async () => {
+    try {
+      if (!qrShotRef.current) {
+        Alert.alert('Error', 'QR code is not ready yet.');
+        return;
+      }
+
+      const capturedUri = await captureRef(qrShotRef, {
+        format: 'png',
+        quality: 1,
+      });
+
+      await Share.open({
+        url: capturedUri.startsWith('file://') ? capturedUri : `file://${capturedUri}`,
+        type: 'image/png',
+        failOnCancel: false,
+      });
+    } catch (error) {
+      console.error('[ProfileScreen] shareQRCode error:', error);
+      Alert.alert('Error', 'Could not open share options.');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -262,6 +317,13 @@ export default function ProfileScreen() {
           </View>
 
           <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Share</Text>
+            <View style={styles.menuGroupCard}>
+              <MenuItem icon="share-outline" title="Share App QR Code" onPress={() => generateQRCode() } />
+            </View>
+          </View>
+
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>HELP & SUPPORT</Text>
             <View style={styles.menuGroupCard}>
               <MenuItem
@@ -297,6 +359,51 @@ export default function ProfileScreen() {
 
         <View style={{ height: scale(80) }} />
       </ScrollView>
+
+      <Modal visible={qrVisible} transparent animationType="fade" onRequestClose={() => setQrVisible(false)}>
+        <View style={styles.qrModalOverlay}>
+          <View style={styles.qrModalCard}>
+            <View style={styles.qrModalHeader}>
+              <Text style={styles.qrModalTitle}>{qrTitle}</Text>
+              <TouchableOpacity onPress={() => setQrVisible(false)}>
+                <Icon name="close" size={scale(22)} color="#111111" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.qrInfoBox}>
+              <Text style={styles.qrInfoLabel}>{Platform.OS === 'ios' ? 'iOS' : 'Android'} App URL</Text>
+              <Text style={styles.qrInfoUrl} numberOfLines={2}>{qrUrl}</Text>
+            </View>
+
+            <ViewShot ref={qrShotRef} style={styles.qrShot} options={{ format: 'png', quality: 1, result: 'tmpfile' }}>
+              <View style={styles.qrCodeCard}>
+                <View style={styles.qrCodeInner}>
+                  {qrLoading ? (
+                    <ActivityIndicator size="large" color="#111111" />
+                  ) : (
+                    <Image
+                      source={{ uri: `https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=${encodeURIComponent(qrUrl)}` }}
+                      style={styles.qrImage}
+                    />
+                  )}
+                </View>
+              </View>
+            </ViewShot>
+
+            <View style={styles.qrActions}>
+              <TouchableOpacity
+                style={[styles.qrActionButton, styles.qrSecondaryButton]}
+                onPress={() => Linking.openURL(qrUrl)}
+              >
+                <Text style={styles.qrSecondaryButtonText}>Open</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.qrActionButton, styles.qrPrimaryButton]} onPress={shareQRCode}>
+                <Text style={styles.qrPrimaryButtonText}>Share</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -555,5 +662,101 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginLeft: scale(8),
     fontWeight: '700',
+  },
+  qrModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: scale(18),
+  },
+  qrModalCard: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: scale(18),
+    padding: scale(18),
+  },
+  qrModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: scale(14),
+  },
+  qrModalTitle: {
+    flex: 1,
+    fontSize: scale(18),
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+    marginRight: scale(12),
+  },
+  qrInfoBox: {
+    backgroundColor: '#F8F8F8',
+    borderRadius: scale(12),
+    padding: scale(12),
+    marginBottom: scale(16),
+  },
+  qrInfoLabel: {
+    fontSize: scale(11),
+    fontFamily: 'Poppins-SemiBold',
+    color: '#888888',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: scale(6),
+  },
+  qrInfoUrl: {
+    fontSize: scale(13),
+    fontFamily: 'Poppins-Regular',
+    color: '#111111',
+    lineHeight: scale(20),
+  },
+  qrShot: {
+    alignSelf: 'center',
+    marginBottom: scale(18),
+  },
+  qrCodeCard: {
+    backgroundColor: '#FFFFFF',
+    padding: scale(12),
+    borderRadius: scale(16),
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+  },
+  qrCodeInner: {
+    width: scale(260),
+    height: scale(260),
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  qrImage: {
+    width: '100%',
+    height: '100%',
+  },
+  qrActions: {
+    flexDirection: 'row',
+    gap: scale(12),
+  },
+  qrActionButton: {
+    flex: 1,
+    paddingVertical: scale(13),
+    borderRadius: scale(12),
+    alignItems: 'center',
+  },
+  qrPrimaryButton: {
+    backgroundColor: '#111111',
+  },
+  qrSecondaryButton: {
+    backgroundColor: '#F4F4F4',
+    borderWidth: 1,
+    borderColor: '#E2E2E2',
+  },
+  qrPrimaryButtonText: {
+    color: '#FFFFFF',
+    fontSize: scale(14),
+    fontFamily: 'Poppins-SemiBold',
+  },
+  qrSecondaryButtonText: {
+    color: '#111111',
+    fontSize: scale(14),
+    fontFamily: 'Poppins-SemiBold',
   },
 });
