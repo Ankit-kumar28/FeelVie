@@ -82,6 +82,20 @@ interface CreditPack {
   is_active: boolean;
 }
 
+/** Price suffix for a plan's billing cycle — "/mo", "/yr", … */
+const cycleSuffix = (cycle?: string) => {
+  switch ((cycle ?? '').toLowerCase()) {
+    case 'monthly': return '/mo';
+    case 'yearly':
+    case 'annual':
+    case 'annually': return '/yr';
+    case 'quarterly': return '/qtr';
+    case 'weekly': return '/wk';
+    case 'daily': return '/day';
+    default: return cycle ? `/${cycle.toLowerCase()}` : '';
+  }
+};
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function WalletScreen() {
@@ -416,7 +430,7 @@ export default function WalletScreen() {
         </View>
         <View style={styles.planPriceCol}>
           <Text style={styles.planPrice}>₹{parseFloat(item.price_inr).toFixed(0)}</Text>
-          <Text style={styles.planPriceSub}>/mo</Text>
+          <Text style={styles.planPriceSub}>{cycleSuffix(item.billing_cycle)}</Text>
           {!isCurrent && (
             <TouchableOpacity style={styles.subscribeBtn} onPress={() => handleActivateSubscription(item)}>
               <Text style={styles.subscribeBtnText}>Subscribe</Text>
@@ -549,7 +563,7 @@ export default function WalletScreen() {
                       </View>
                       <View style={styles.planPriceCol}>
                         <Text style={styles.planPrice}>₹{parseFloat(plan.price_inr).toFixed(0)}</Text>
-                        <Text style={styles.planPriceSub}>/mo</Text>
+                        <Text style={styles.planPriceSub}>{cycleSuffix(plan.billing_cycle)}</Text>
                         {!isCurrent && (
                           <TouchableOpacity style={styles.subscribeBtn} onPress={() => handleActivateSubscription(plan)}>
                             <Text style={styles.subscribeBtnText}>Subscribe</Text>

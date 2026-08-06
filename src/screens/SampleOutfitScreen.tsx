@@ -40,7 +40,7 @@ interface Product {
   imageUrl: string;
 }
 
-const PRODUCTS_API = `${BASE_URL}/api/json/products`;
+const PRODUCTS_API = `${BASE_URL}/api/json/products/`;
 
 const FALLBACK_CATEGORIES = productData.categories as Category[];
 
