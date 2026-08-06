@@ -82,6 +82,12 @@ interface CreditPack {
   is_active: boolean;
 }
 
+/** Struck-through "MRP" — 2× the real price. Returns null when the price isn't numeric. */
+const strikePrice = (price?: string) => {
+  const value = parseFloat(price ?? '');
+  return Number.isFinite(value) && value > 0 ? (value * 2).toFixed(0) : null;
+};
+
 /** Price suffix for a plan's billing cycle — "/mo", "/yr", … */
 const cycleSuffix = (cycle?: string) => {
   switch ((cycle ?? '').toLowerCase()) {
@@ -401,7 +407,12 @@ export default function WalletScreen() {
         <Text style={styles.packRate}>@ ₹{item.effective_rate}/credit</Text>
       </View>
       <View style={styles.packPriceCol}>
-        <Text style={styles.packPrice}>₹{parseFloat(item.price_inr).toFixed(0)}</Text>
+        <View style={styles.priceRow}>
+          <Text style={styles.packPrice}>₹{parseFloat(item.price_inr).toFixed(0)}</Text>
+          {strikePrice(item.price_inr) && (
+            <Text style={styles.strikePrice}>₹{strikePrice(item.price_inr)}</Text>
+          )}
+        </View>
         <View style={styles.buyBtn}>
           <Text style={styles.buyBtnText}>Buy</Text>
         </View>
@@ -429,7 +440,12 @@ export default function WalletScreen() {
           )}
         </View>
         <View style={styles.planPriceCol}>
-          <Text style={styles.planPrice}>₹{parseFloat(item.price_inr).toFixed(0)}</Text>
+          <View style={styles.priceRow}>
+            <Text style={styles.planPrice}>₹{parseFloat(item.price_inr).toFixed(0)}</Text>
+            {strikePrice(item.price_inr) && (
+              <Text style={styles.strikePrice}>₹{strikePrice(item.price_inr)}</Text>
+            )}
+          </View>
           <Text style={styles.planPriceSub}>{cycleSuffix(item.billing_cycle)}</Text>
           {!isCurrent && (
             <TouchableOpacity style={styles.subscribeBtn} onPress={() => handleActivateSubscription(item)}>
@@ -562,8 +578,12 @@ export default function WalletScreen() {
                         <Text style={styles.planCredits}>{plan.credits_per_month} Credits/month</Text>
                       </View>
                       <View style={styles.planPriceCol}>
-                        <Text style={styles.planPrice}>₹{parseFloat(plan.price_inr).toFixed(0)}</Text>
-                        <Text style={styles.planPriceSub}>{cycleSuffix(plan.billing_cycle)}</Text>
+                      
+                        <Text style={styles.planPrice}>₹{parseFloat(plan.price_inr).toFixed(0)}{cycleSuffix(plan.billing_cycle)}</Text>
+                        {/* <Text style={styles.planPriceSub}></Text> */}
+                        {strikePrice(plan.price_inr) && (
+                          <Text style={styles.strikePrice}>₹{strikePrice(plan.price_inr)}</Text>
+                        )}
                         {!isCurrent && (
                           <TouchableOpacity style={styles.subscribeBtn} onPress={() => handleActivateSubscription(plan)}>
                             <Text style={styles.subscribeBtnText}>Subscribe</Text>
@@ -588,7 +608,12 @@ export default function WalletScreen() {
                         <Text style={styles.packRate}>@ ₹{pack.effective_rate}/credit</Text>
                       </View>
                       <View style={styles.packPriceCol}>
-                        <Text style={styles.packPrice}>₹{parseFloat(pack.price_inr).toFixed(0)}</Text>
+                        <View style={styles.priceRow}>
+                          {strikePrice(pack.price_inr) && (
+                            <Text style={styles.strikePrice}>₹{strikePrice(pack.price_inr)}</Text>
+                          )}
+                          <Text style={styles.packPrice}>₹{parseFloat(pack.price_inr).toFixed(0)}</Text>
+                        </View>
                         <View style={styles.buyBtn}>
                           <Text style={styles.buyBtnText}>Buy</Text>
                         </View>
@@ -835,6 +860,13 @@ const styles = StyleSheet.create({
   packRate: { fontSize: 12, fontFamily: 'Poppins-Regular', color: '#AAAAAA', marginTop: 2 },
   packPriceCol: { alignItems: 'flex-end', gap: 8 },
   packPrice: { fontSize: 16, fontFamily: 'Poppins-SemiBold', color: '#111111' },
+  priceRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  strikePrice: {
+    fontSize: 13,
+    fontFamily: 'Poppins-Regular',
+    color: '#AAAAAA',
+    textDecorationLine: 'line-through',
+  },
   buyBtn: { backgroundColor: '#111111', paddingHorizontal: 16, paddingVertical: 6, borderRadius: 6 },
   buyBtnText: { fontSize: 13, fontFamily: 'Poppins-SemiBold', color: '#FFFFFF' },
   planCard: {
