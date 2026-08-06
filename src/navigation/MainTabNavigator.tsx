@@ -11,6 +11,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import VirtualTryOnScreen from '../screens/virtualTry/VirtualTryOnScreen';
+import SampleOutfitScreen from '../screens/SampleOutfitScreen';
+import VirtualTryOnHistoryScreen from '../screens/virtualTry/VirtualTryOnHistoryScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -32,10 +34,11 @@ export default function MainTabNavigator() {
       }}
       tabBar={(props) => <CustomTabBar {...props} />}
     >
-      {/* ── DEMO MODE: Only 2 tabs active ── */}
-      <Tab.Screen name="Home"        component={HomeScreen} />
-      <Tab.Screen name="TryOn"   component={VirtualTryOnScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Home"         component={HomeScreen} />
+      <Tab.Screen name="SampleOutfit" component={SampleOutfitScreen} />
+      <Tab.Screen name="TryOn"        component={VirtualTryOnScreen} />
+      <Tab.Screen name="History"      component={VirtualTryOnHistoryScreen} />
+      <Tab.Screen name="Profile"      component={ProfileScreen} />
 
       {/* ── Restore these for full app ──
       
@@ -149,6 +152,8 @@ function getIconName(name: string) {
     case 'TryOn':   return 'shirt-outline';
     case 'Profile': return 'person-outline';
     case 'Home':        return 'home-outline';
+    case 'SampleOutfit': return 'grid-outline';
+    case 'History':      return 'time-outline';
     // case 'Marketplace': return 'tag-outline';
     // case 'Cart':        return 'shopping-bag-outline';
     default: return 'circle-outline';
@@ -159,6 +164,8 @@ function getLabel(name: string) {
   switch (name) {
     case 'TryOn':   return 'Try On';
     case 'Profile': return 'Me';
+    case 'SampleOutfit': return 'Samples';
+    case 'History':      return 'History';
     default: return name;
   }
 }

@@ -14,17 +14,19 @@ import {
   Dimensions,
   RefreshControl,
   ActivityIndicator,
-  Animated,
   Modal,
   Platform,
   Linking,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
+import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ImagePicker from 'react-native-image-crop-picker';
+import Toast from 'react-native-toast-message';
 import Carousel from 'react-native-banner-carousel';
-import productData from '../utils/product.json';
 import DeviceInfo from 'react-native-device-info';
 
 
@@ -32,25 +34,26 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const BannerWidth = SCREEN_WIDTH - 24; // 12px margin on each side
 const BannerHeight = 220;
 
-interface Category {
+// Shared with VirtualTryOnScreen so a pick made here carries into the try-on flow
+const USER_IMAGE_KEY = 'VIRTUAL_TRYON_USER_IMAGE';
+const GARMENT_IMAGE_KEY = 'VIRTUAL_TRYON_GARMENT_IMAGE';
+
+const RECENT_LIMIT = 5;
+
+interface HistoryItem {
   id: number;
-  categoryName: string;
-  icon: string;
-  subcategories: Subcategory[];
+  category: string;
+  output_image_url: string;
+  request_meta: string;
+  created_at: string;
 }
 
-interface Subcategory {
-  id: number;
-  subcategoryName: string;
-  icon: string;
-  products: Product[];
-}
-
-interface Product {
-  id: number;
-  productName: string;
-  imageUrl: string;
-}
+/** Match TryOnResult: check if URL, otherwise apply base64 prefix */
+const toImageUri = (value: string): string => {
+  if (!value) return '';
+  if (value.startsWith('http')) return value;
+  return `data:image/png;base64,${value.replace(/^data:image\/\w+;base64,/, '')}`;
+};
 
 interface CarouselItem {
   id: number;
@@ -71,7 +74,10 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [creditBalance, setCreditBalance] = useState<number>(0);
-  const [selectedCategory, setSelectedCategory] = useState<Category>(productData.categories[0] as Category);
+  const [garmentImage, setGarmentImage] = useState<string | null>(null);
+  const [userImage, setUserImage] = useState<string | null>(null);
+  const [recent, setRecent] = useState<HistoryItem[]>([]);
+  const [recentLoading, setRecentLoading] = useState(true);
   const [updateInfo, setUpdateInfo] = useState<{
     platform: string;
     latest_version: string;
@@ -83,23 +89,33 @@ export default function HomeScreen() {
   } | null>(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
 
-  // Animated values for subcategories
-  const [scaleAnims] = useState(() =>
-    productData.categories.flatMap(cat => cat.subcategories).reduce((acc, sub) => {
-      acc[sub.id] = new Animated.Value(1);
-      return acc;
-    }, {} as Record<number, Animated.Value>)
-  );
-
-  const animateSubcategory = (id: number) => {
-    Animated.sequence([
-      Animated.timing(scaleAnims[id], { toValue: 1.1, duration: 150, useNativeDriver: true }),
-      Animated.timing(scaleAnims[id], { toValue: 1, duration: 150, useNativeDriver: true }),
-    ]).start();
-  };
-
   const CAROUSEL_API = `${BASE_URL}/api/common/carousels?type=app`;
   const WALLET_API = `${BASE_URL}/api/wallet/me/`;
+  const HISTORY_API = `${BASE_URL}/api/secure/vton/history/`;
+
+  const fetchRecent = useCallback(async () => {
+    setRecentLoading(true);
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) return;
+
+      const res = await fetch(HISTORY_API, {
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+
+      const data = await res.json();
+      const sorted = (Array.isArray(data) ? data : []).sort(
+        (a: HistoryItem, b: HistoryItem) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      setRecent(sorted.slice(0, RECENT_LIMIT));
+    } catch (err) {
+      console.log('Recent generations fetch error:', err);
+    } finally {
+      setRecentLoading(false);
+    }
+  }, []);
 
   const fetchHomeData = useCallback(async () => {
     setLoading(true);
@@ -136,6 +152,67 @@ export default function HomeScreen() {
   useEffect(() => {
     fetchHomeData();
   }, [fetchHomeData]);
+
+  // Keep the two selection boxes and the recent strip in sync with the try-on flow
+  useFocusEffect(
+    useCallback(() => {
+      loadStoredImages();
+      fetchRecent();
+    }, [fetchRecent])
+  );
+
+  const loadStoredImages = async () => {
+    try {
+      const [garment, user] = await AsyncStorage.multiGet([GARMENT_IMAGE_KEY, USER_IMAGE_KEY]);
+      setGarmentImage(garment[1]);
+      setUserImage(user[1]);
+    } catch (err) {
+      console.log('Failed to load stored try-on images:', err);
+    }
+  };
+
+  // ── Image selection (shares storage keys with VirtualTryOnScreen) ──
+  const cropConfig = {
+    width: 900,
+    height: 1400, // 3:4 aspect ratio
+    cropping: true,
+    mediaType: 'photo' as const,
+  };
+
+  const pickImage = async (
+    fromCamera: boolean,
+    setter: (uri: string) => void,
+    key: string,
+    type: string
+  ) => {
+    try {
+      const image = fromCamera
+        ? await ImagePicker.openCamera(cropConfig)
+        : await ImagePicker.openPicker(cropConfig);
+      if (image?.path) {
+        setter(image.path);
+        await AsyncStorage.setItem(key, image.path);
+      }
+    } catch (error: any) {
+      if (error?.message !== 'User cancelled image selection') {
+        console.log(`${type} picker error:`, error);
+        Toast.show({ type: 'error', text1: `Failed to open ${fromCamera ? 'camera' : 'gallery'}` });
+      }
+    }
+  };
+
+  const selectImageSource = (setter: (uri: string) => void, key: string, type: string) => {
+    Alert.alert(
+      `Upload ${type}`,
+      'Choose an option to upload your image:',
+      [
+        { text: 'Take a Photo', onPress: () => pickImage(true, setter, key, type) },
+        { text: 'Choose from Gallery', onPress: () => pickImage(false, setter, key, type) },
+        { text: 'Cancel', style: 'cancel' },
+      ],
+      { cancelable: true }
+    );
+  };
 
   useEffect(() => {
     const checkAppVersion = async () => {
@@ -282,69 +359,115 @@ export default function HomeScreen() {
             )}
           </View>
 
-          {/* Categories */}
-          <View style={styles.categoriesContainer}>
-            {productData.categories.map((category: any, index: number) => (
+          {/* Garment + Photo selection boxes */}
+          <View style={styles.selectionSection}>
+            <Text style={styles.sectionTitle}>Start Your Try-On</Text>
+            <View style={styles.selectionRow}>
               <TouchableOpacity
-                key={index}
-                style={[
-                  styles.categoryItem,
-                  selectedCategory.id === category.id && styles.activeCategoryItem
-                ]}
-                onPress={() => setSelectedCategory(category as Category)}
+                style={styles.selectionBox}
+                activeOpacity={0.85}
+                onPress={() => selectImageSource(setGarmentImage, GARMENT_IMAGE_KEY, 'Garment')}
               >
-                <View style={[
-                  styles.categoryIconBox,
-                  selectedCategory.id === category.id && styles.activeCategoryIconBox
-                ]}>
-                  {category.icon.startsWith('http') ? (
-                    <Image source={{ uri: category.icon }} style={styles.categoryIcon} />
-                  ) : (
-                    <Text style={{ fontSize: 24 }}>{category.icon}</Text>
-                  )}
-                </View>
-                <Text style={[
-                  styles.categoryText,
-                  selectedCategory.id === category.id && styles.activeCategoryText
-                ]}>{category.categoryName}</Text>
+                {garmentImage ? (
+                  <>
+                    <Image source={{ uri: garmentImage }} style={styles.selectionImage} resizeMode="cover" />
+                    <View style={styles.selectionEditBadge}>
+                      <MCIcon name="pencil" size={14} color="#FFFFFF" />
+                    </View>
+                  </>
+                ) : (
+                  <View style={styles.selectionPlaceholder}>
+                    <MCIcon name="hanger" size={34} color="#f8ac1b" />
+                    <Text style={styles.selectionPlaceholderText}>Upload</Text>
+                  </View>
+                )}
+                <Text style={styles.selectionLabel}>Garment</Text>
               </TouchableOpacity>
-            ))}
+
+              <TouchableOpacity
+                style={styles.selectionBox}
+                activeOpacity={0.85}
+                onPress={() => selectImageSource(setUserImage, USER_IMAGE_KEY, 'Your Photo')}
+              >
+                {userImage ? (
+                  <>
+                    <Image source={{ uri: userImage }} style={styles.selectionImage} resizeMode="cover" />
+                    <View style={styles.selectionEditBadge}>
+                      <MCIcon name="pencil" size={14} color="#FFFFFF" />
+                    </View>
+                  </>
+                ) : (
+                  <View style={styles.selectionPlaceholder}>
+                    <MCIcon name="account-box-outline" size={34} color="#f8ac1b" />
+                    <Text style={styles.selectionPlaceholderText}>Upload</Text>
+                  </View>
+                )}
+                <Text style={styles.selectionLabel}>Your Photo</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.tryOnButton, !(garmentImage && userImage) && styles.tryOnButtonDisabled]}
+              activeOpacity={0.85}
+              onPress={() => navigation.navigate('TryOn')}
+            >
+              <Text style={styles.tryOnButtonText}>
+                {garmentImage && userImage ? 'Try It On Now' : 'Continue to Try-On'}
+              </Text>
+              <Icon name="auto-awesome" size={20} color="#FFFFFF" style={{ marginLeft: 8 }} />
+            </TouchableOpacity>
           </View>
 
-          {/* Subcategories (List View) */}
-          <View style={styles.subCategoriesContainer}>
-            <Text style={styles.sectionTitle}>{selectedCategory.categoryName} Sample Garments</Text>
-            <View style={{ paddingHorizontal: 16 }}>
-              {selectedCategory.subcategories.map((sub: Subcategory) => (
-                <TouchableOpacity
-                  key={sub.id}
-                  onPress={() => {
-                    animateSubcategory(sub.id);
-                    // Map products to SearchResults format
-                    const products = sub.products.map(p => ({
-                      id: p.id,
-                      name: p.productName,
-                      selling_price: "499", // Placeholder price for static data
-                      images: [{ id: 1, image_url: p.imageUrl }]
-                    }));
-                    navigation.navigate('SearchResults', {
-                      title: sub.subcategoryName,
-                      preDefinedProducts: products
-                    });
-                  }}
-                  activeOpacity={0.7}
-                  style={styles.subCategoryListRow}
-                >
-                  <Animated.View style={[
-                    styles.subCategoryListContent,
-                    { transform: [{ scale: scaleAnims[sub.id] || 1 }] }
-                  ]}>
-                    <Text style={styles.subCategoryListText}>{sub.subcategoryName}</Text>
-                    <Icon name="chevron-right" size={24} color="#AAAAAA" />
-                  </Animated.View>
-                </TouchableOpacity>
-              ))}
+          {/* Recent generations */}
+          <View style={styles.recentSection}>
+            <View style={styles.recentHeader}>
+              <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Recent Generations</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('History')}>
+                <Text style={styles.viewAllText}>View all</Text>
+              </TouchableOpacity>
             </View>
+
+            {recentLoading ? (
+              <View style={styles.recentPlaceholderRow}>
+                <ActivityIndicator size="small" color="#111111" />
+              </View>
+            ) : recent.length === 0 ? (
+              <View style={styles.recentEmpty}>
+                <MCIcon name="tshirt-crew-outline" size={40} color="#DDDDDD" />
+                <Text style={styles.recentEmptyText}>
+                  Your try-on results will appear here once you generate them.
+                </Text>
+              </View>
+            ) : (
+              <FlatList
+                data={recent}
+                horizontal
+                keyExtractor={item => String(item.id)}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.recentListContent}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.recentCard}
+                    activeOpacity={0.85}
+                    onPress={() =>
+                      navigation.navigate('TryOnResult', {
+                        resultBase64: item.output_image_url,
+                        isUrl: true,
+                        category: item.category,
+                        timestamp: item.created_at,
+                        metadata: item.request_meta,
+                      })
+                    }
+                  >
+                    <Image
+                      source={{ uri: toImageUri(item.output_image_url) }}
+                      style={styles.recentImage}
+                      resizeMode="cover"
+                    />
+                  </TouchableOpacity>
+                )}
+              />
+            )}
           </View>
         </View>
 
@@ -428,48 +551,142 @@ const styles = StyleSheet.create({
     gap: 20,
     paddingLeft: 14,
   },
-  categoryItem: {
-    alignItems: 'center',
-    opacity: 0.6,
+
+  /* Garment + Photo selection */
+  selectionSection: {
+    marginTop: 28,
+    paddingHorizontal: 20,
   },
-  activeCategoryItem: {
-    opacity: 1,
+  selectionRow: {
+    flexDirection: 'row',
+    gap: 12,
   },
-  categoryIconBox: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#F8F9FA',
+  selectionBox: {
+    flex: 1,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#E8E8E8',
+    backgroundColor: '#F9F9F9',
+    overflow: 'hidden',
+  },
+  selectionImage: {
+    width: '100%',
+    height: 190,
+    backgroundColor: '#F2F2F2',
+  },
+  selectionPlaceholder: {
+    width: '100%',
+    height: 190,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 6,
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
-    padding: 4,
   },
-  activeCategoryIconBox: {
-    borderColor: '#f8ac1b',
-    backgroundColor: '#FFF9F0',
-  },
-  categoryIcon: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 30,
-    
-  },
-  categoryText: {
-    fontSize: 11,
-    fontWeight: '600',
+  selectionPlaceholderText: {
+    marginTop: 8,
+    fontSize: 12,
     fontFamily: 'Poppins-SemiBold',
     color: '#111111',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  activeCategoryText: {
-    color: '#f8ac1b',
+  selectionEditBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectionLabel: {
+    fontSize: 12,
+    fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    color: '#111111',
+    textAlign: 'center',
+    paddingVertical: 10,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E8E8E8',
+  },
+  tryOnButton: {
+    marginTop: 16,
+    backgroundColor: '#111111',
+    paddingVertical: 15,
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tryOnButtonDisabled: {
+    backgroundColor: '#333333',
+  },
+  tryOnButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
+    fontWeight: '700',
   },
 
-  subCategoriesContainer: {
+  /* Recent generations */
+  recentSection: {
     marginTop: 32,
   },
+  recentHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginBottom: 14,
+  },
+  viewAllText: {
+    fontSize: 13,
+    fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    color: '#f8ac1b',
+  },
+  recentListContent: {
+    paddingHorizontal: 20,
+    gap: 12,
+  },
+  recentCard: {
+    width: 140,
+    height: 200,
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    backgroundColor: '#F7F7F7',
+  },
+  recentImage: {
+    width: '100%',
+    height: '100%',
+  },
+  recentPlaceholderRow: {
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  recentEmpty: {
+    marginHorizontal: 20,
+    paddingVertical: 28,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    backgroundColor: '#F9F9F9',
+    alignItems: 'center',
+  },
+  recentEmptyText: {
+    marginTop: 10,
+    fontSize: 13,
+    fontFamily: 'Poppins-Regular',
+    color: '#AAAAAA',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+
   sectionTitle: {
     fontSize: 18,
     fontWeight: '800',
@@ -477,44 +694,6 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     color: '#111111',
     marginBottom: 16,
-    marginLeft: 20,
-  },
-  subCategoryListRow: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#36363652',
-    padding: 12,
-  },
-  subCategoryListContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  subCategoryIconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#F8F9FA',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
-  },
-  subCategoryListText: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#111111',
-    fontFamily: 'Poppins-SemiBold',
-  },
-  subCategoryIcon: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 30,
-    resizeMode: "contain",
   },
   skeletonCarousel: {
     height: BannerHeight,

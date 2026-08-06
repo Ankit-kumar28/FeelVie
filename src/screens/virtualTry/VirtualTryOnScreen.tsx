@@ -1,5 +1,5 @@
 // src/screens/VirtualTryOnScreen.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -18,7 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -37,10 +37,14 @@ export default function VirtualTryOnScreen() {
   const [showInstructions, setShowInstructions] = useState(false);
   const [hasAcceptedPolicy, setHasAcceptedPolicy] = useState(false);
 
-  useEffect(() => {
-    console.debug('[Screen 1] Loading stored images from AsyncStorage');
-    loadStoredImages();
-  }, []);
+  // Re-read on focus: the screen stays mounted as a tab, and images can also be
+  // picked from HomeScreen using the same storage keys.
+  useFocusEffect(
+    useCallback(() => {
+      console.debug('[Screen 1] Loading stored images from AsyncStorage');
+      loadStoredImages();
+    }, [])
+  );
 
   useEffect(() => {
     const loadPolicyAcceptance = async () => {

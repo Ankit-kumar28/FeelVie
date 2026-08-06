@@ -1,5 +1,5 @@
 // src/screens/VirtualTryOnHistoryScreen.tsx
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from '../../config/env';
 
@@ -193,9 +193,12 @@ export default function VirtualTryOnHistoryScreen() {
     }
   }, []);
 
-  useEffect(() => {
-    loadHistory();
-  }, [loadHistory]);
+  // Reload whenever the screen comes into focus (it stays mounted as a tab)
+  useFocusEffect(
+    useCallback(() => {
+      loadHistory();
+    }, [loadHistory])
+  );
 
   const handleCardPress = (item: HistoryItem) => {
     // Navigate to TryOnResult with the image URL and metadata
@@ -218,12 +221,16 @@ export default function VirtualTryOnHistoryScreen() {
     <View style={styles.safeArea}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Icon name="arrow-left" size={24} color="#111111" />
-        </TouchableOpacity>
+        {navigation.canGoBack() ? (
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Icon name="arrow-left" size={24} color="#111111" />
+          </TouchableOpacity>
+        ) : (
+          <View style={{ width: 24 }} />
+        )}
 
         <Text style={styles.headerTitle}>Try-On History</Text>
 
@@ -322,7 +329,7 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 10,
     paddingTop: 10,
-    paddingBottom: 40,
+    paddingBottom: 110,
   },
   emptyList: {
     flex: 1,
