@@ -16,7 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
-const BASE_URL = 'https://feelvie.yaytech.in';
+const BASE_URL = 'https://api.feelvie.com';
 
 interface OrderItem {
   id: number;
@@ -122,11 +122,11 @@ export default function MyOrdersScreen() {
 
   const getStatusColor = (status: string) => {
     const s = status.toLowerCase();
-    if (s.includes('delivered')) return '#10b981';
-    if (s.includes('shipped')) return '#3b82f6';
-    if (s.includes('confirmed') || s.includes('processing')) return '#f59e0b';
-    if (s.includes('cancel')) return '#ef4444';
-    return '#64748b'; // pending/placed/default
+    if (s.includes('delivered')) return '#16A34A';
+    if (s.includes('shipped')) return '#111111';
+    if (s.includes('confirmed') || s.includes('processing')) return '#f8ac1b';
+    if (s.includes('cancel')) return '#EF4444';
+    return '#666666'; // pending/placed/default
   };
 
   const renderOrderItem = ({ item }: { item: Order }) => {
@@ -171,7 +171,7 @@ export default function MyOrdersScreen() {
 
         <View style={styles.amountRow}>
           <Text style={styles.amount}>₹{parseFloat(item.total).toFixed(0)}</Text>
-          <Icon name="chevron-right" size={24} color="#999" style={{ marginLeft: 8 }} />
+          <Icon name="chevron-right" size={24} color="#AAAAAA" style={{ marginLeft: 8 }} />
         </View>
       </View>
     </TouchableOpacity>
@@ -185,7 +185,7 @@ export default function MyOrdersScreen() {
           <Text style={styles.headerTitle}>My Orders</Text>
         </View>
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#B03385" />
+          <ActivityIndicator size="large" color="#f8ac1b" />
         </View>
       </SafeAreaView>
     );
@@ -196,7 +196,7 @@ export default function MyOrdersScreen() {
       {/* Optional: Add header if your app doesn't have one from navigator */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-left" size={26} color="#000" />
+          <Icon name="arrow-left" size={26} color="#111111" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Orders</Text>
         <View style={{ width: 26 }} />
@@ -208,7 +208,7 @@ export default function MyOrdersScreen() {
         renderItem={renderOrderItem}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Icon name="package-variant-closed" size={80} color="#d1d5db" />
+            <Icon name="package-variant-closed" size={80} color="#E8E8E8" />
             <Text style={styles.emptyText}>No orders yet</Text>
             <Text style={styles.emptySubText}>
               When you place an order, it will appear here
@@ -225,7 +225,7 @@ export default function MyOrdersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F9F9F9',
   },
   header: {
     flexDirection: 'row',
@@ -233,14 +233,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingBottom: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#E8E8E8',
   },
   headerTitle: {
     fontSize: 19,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#B03385',
+    color: '#f8ac1b',
   },
   center: {
     flex: 1,
@@ -255,14 +256,14 @@ const styles = StyleSheet.create({
 
   orderCard: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     // borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#e0e0e0',
+        borderColor: '#E8E8E8',
     padding: 12,
     // marginBottom: 12,
     // elevation: 2,
-    shadowColor: '#000',
+    shadowColor: '#111111',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -272,7 +273,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 8,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#F9F9F9',
     marginRight: 12,
   },
 
@@ -282,14 +283,16 @@ const styles = StyleSheet.create({
   },
   orderId: {
     fontSize: 15,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#000',
+    color: '#111111',
     marginBottom: 4,
   },
   orderStatus: {
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#B03385',
+    color: '#f8ac1b',
   },
 
   rightColumn: {
@@ -299,7 +302,8 @@ const styles = StyleSheet.create({
   },
   orderDate: {
     fontSize: 12,
-    color: '#666',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     marginBottom: 8,
   },
   amountRow: {
@@ -308,8 +312,9 @@ const styles = StyleSheet.create({
   },
   amount: {
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#B03385',
+    color: '#f8ac1b',
   },
 
   emptyContainer: {
@@ -320,13 +325,15 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 20,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#333',
+    color: '#444444',
     marginTop: 20,
   },
   emptySubText: {
     fontSize: 15,
-    color: '#777',
+    fontFamily: 'Poppins-Regular',
+    color: '#AAAAAA',
     textAlign: 'center',
     marginTop: 8,
   },

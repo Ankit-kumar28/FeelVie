@@ -24,7 +24,7 @@ import Toast from "react-native-toast-message";
 import RazorpayCheckout from 'react-native-razorpay';
 
 const { width } = Dimensions.get('window');
-const BASE_URL = 'https://feelvie.yaytech.in';
+const BASE_URL = 'https://api.feelvie.com';
 
 type ModalType = 'success' | 'error' | 'warning' | 'info';
 
@@ -78,19 +78,19 @@ function CustomModal({
 }: CustomModalProps) {
   const getIcon = () => {
     switch (type) {
-      case 'success': return <Icon name="check-circle" size={64} color="#10b981" />;
-      case 'error': return <Icon name="alert-circle" size={64} color="#ef4444" />;
-      case 'warning': return <Icon name="alert" size={64} color="#f59e0b" />;
-      default: return <Icon name="information" size={64} color="#3b82f6" />;
+      case 'success': return <Icon name="check-circle" size={64} color="#16A34A" />;
+      case 'error': return <Icon name="alert-circle" size={64} color="#EF4444" />;
+      case 'warning': return <Icon name="alert" size={64} color="#f8ac1b" />;
+      default: return <Icon name="information" size={64} color="#111111" />;
     }
   };
 
   const getButtonColor = () => {
     switch (type) {
-      case 'success': return '#10b981';
-      case 'error': return '#ef4444';
-      case 'warning': return '#f59e0b';
-      default: return '#3b82f6';
+      case 'success': return '#16A34A';
+      case 'error': return '#EF4444';
+      case 'warning': return '#f8ac1b';
+      default: return '#111111';
     }
   };
 
@@ -382,7 +382,7 @@ export default function CheckoutScreen() {
         order_id: paymentData.razorpay_order_id,
         name: 'Feelvie',
         prefill: { email, contact: phone, name: fullName },
-        theme: { color: '#B03385' },
+        theme: { color: '#f8ac1b' },
       };
 
       const razorpayResponse = await RazorpayCheckout.open(options);
@@ -437,8 +437,8 @@ export default function CheckoutScreen() {
   if (loading || !displayItem) {
     return (
       <SafeAreaView style={styles.center}>
-        <ActivityIndicator size="large" color="#B03385" />
-        <Text style={{ marginTop: 20, color: '#64748b' }}>Preparing checkout...</Text>
+        <ActivityIndicator size="large" color="#f8ac1b" />
+        <Text style={{ marginTop: 20, color: '#666666' }}>Preparing checkout...</Text>
       </SafeAreaView>
     );
   }
@@ -448,7 +448,7 @@ export default function CheckoutScreen() {
       <View style={[styles.headerContainer, { paddingTop: 18, paddingBottom: 12 }]}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="arrow-left" size={24} color="#111827" />
+            <Icon name="arrow-left" size={24} color="#111111" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Checkout</Text>
           <View style={{ width: 24 }} />
@@ -504,7 +504,7 @@ export default function CheckoutScreen() {
                 })
               ) : (
                 <View style={styles.emptyAddressContainer}>
-                  <Icon name="map-marker-off" size={70} color="#d1d5db" />
+                  <Icon name="map-marker-off" size={70} color="#E8E8E8" />
                   <Text style={styles.emptyTitle}>No Address Found</Text>
                   <TouchableOpacity
                     style={styles.addAddressBtn}
@@ -529,7 +529,7 @@ export default function CheckoutScreen() {
                   }
                 })}
               >
-                <Icon name="plus" size={20} color="#B03385" />
+                <Icon name="plus" size={20} color="#f8ac1b" />
                 <Text style={styles.addNewText}>Add New Address</Text>
               </TouchableOpacity>
             </View>
@@ -551,14 +551,14 @@ export default function CheckoutScreen() {
                   <Icon
                     name="wallet"
                     size={28}
-                    color={paymentMethod === 'wallet' ? '#B03385' : '#64748b'}
+                    color={paymentMethod === 'wallet' ? '#f8ac1b' : '#666666'}
                   />
                   <View style={{ marginLeft: 16, flex: 1 }}>
                     <Text style={styles.paymentTitle}>FeelVie Wallet</Text>
                     <Text
                       style={[
                         styles.paymentSubtitle,
-                        { color: walletBalance >= totalAmount ? '#10b981' : '#ef4444' },
+                        { color: walletBalance >= totalAmount ? '#16A34A' : '#EF4444' },
                       ]}
                     >
                       Balance: ₹{walletBalance.toFixed(0)}
@@ -566,7 +566,7 @@ export default function CheckoutScreen() {
                     </Text>
                   </View>
                   {walletLoading && (
-                    <ActivityIndicator size="small" color="#B03385" style={{ marginLeft: 12 }} />
+                    <ActivityIndicator size="small" color="#f8ac1b" style={{ marginLeft: 12 }} />
                   )}
                 </TouchableOpacity>
               )}
@@ -578,7 +578,7 @@ export default function CheckoutScreen() {
                 <Icon
                   name="cash"
                   size={28}
-                  color={paymentMethod === 'cod' ? '#B03385' : '#64748b'}
+                  color={paymentMethod === 'cod' ? '#f8ac1b' : '#666666'}
                 />
                 <View style={{ marginLeft: 16 }}>
                   <Text style={styles.paymentTitle}>Cash on Delivery</Text>
@@ -593,7 +593,7 @@ export default function CheckoutScreen() {
                 <Icon
                   name="credit-card-outline"
                   size={28}
-                  color={paymentMethod === 'online' ? '#B03385' : '#64748b'}
+                  color={paymentMethod === 'online' ? '#f8ac1b' : '#666666'}
                 />
                 <View style={{ marginLeft: 16 }}>
                   <Text style={styles.paymentTitle}>Pay Online</Text>
@@ -652,7 +652,7 @@ export default function CheckoutScreen() {
           disabled={submitting || !selectedAddress || (step === 2 && !paymentMethod)}
         >
           {submitting ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#FFFFFF" />
           ) : (
             <Text style={styles.placeOrderText}>
               {step === 1 ? 'Continue to Payment' : `Pay Now • ₹${totalAmount.toFixed(0)}`}
@@ -676,65 +676,65 @@ export default function CheckoutScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
+  container: { flex: 1, backgroundColor: '#F9F9F9' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  headerContainer: { backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e5e7eb' },
+  headerContainer: { backgroundColor: '#FFFFFF', borderBottomWidth: 1, borderBottomColor: '#E8E8E8' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20,},
-  headerTitle: { fontSize: 22, fontWeight: '700', color: '#B03385' },
-  progressContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, backgroundColor: '#fff' },
+  headerTitle: { fontSize: 22, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#111111' },
+  progressContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, backgroundColor: '#FFFFFF' },
   stepWrapper: { alignItems: 'center', width: 100 },
-  stepCircle: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#e5e7eb', justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#d1d5db' },
-  stepActive: { backgroundColor: '#B03385', borderColor: '#B03385' },
-  stepNumber: { fontSize: 14, fontWeight: '600', color: '#6b7280' },
-  stepNumberActive: { color: '#fff' },
-  stepLabel: { marginTop: 6, fontSize: 13, color: '#9ca3af' },
-  stepLabelActive: { color: '#111827', fontWeight: '600' },
-  stepConnector: { height: 2, width: 110, backgroundColor: '#d1d5db',paddingBottom:1,marginBottom:15, marginHorizontal:-4,},
+  stepCircle: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#E8E8E8', justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#E8E8E8' },
+  stepActive: { backgroundColor: '#f8ac1b', borderColor: '#f8ac1b' },
+  stepNumber: { fontSize: 14, fontFamily: 'Poppins-SemiBold', fontWeight: '600', color: '#666666' },
+  stepNumberActive: { color: '#FFFFFF' },
+  stepLabel: { marginTop: 6, fontSize: 13, fontFamily: 'Poppins-Regular', color: '#AAAAAA' },
+  stepLabelActive: { color: '#111111', fontWeight: '600' },
+  stepConnector: { height: 2, width: 110, backgroundColor: '#E8E8E8',paddingBottom:1,marginBottom:15, marginHorizontal:-4,},
   scrollContent: { padding: 0, paddingBottom: 180 },
-  bottomBar: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#f8fafc', paddingHorizontal: 16, paddingTop: 12, shadowColor: '#000', shadowOffset: { width: 0, height: -3 }, shadowOpacity: 0.1, shadowRadius: 10 },
-  placeOrderBtn: { backgroundColor: '#B03385', paddingVertical: 16, borderRadius: 30, alignItems: 'center' },
-  btnDisabled: { backgroundColor: '#cbd5e1' },
-  placeOrderText: { color: '#fff', fontSize: 17, fontWeight: '700' },
-  sectionTitle: { fontSize: 19, fontWeight: '700', color: '#111827', marginBottom: 16 },
-  addressCard: { flexDirection: 'row', backgroundColor: '#fff', padding: 16, borderRadius: 12, marginBottom: 12, borderWidth: 1.5, borderColor: '#e5e7eb' },
-  addressCardSelected: { borderColor: '#B03385', backgroundColor: '#fdf2f8' },
-  radioCircle: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: '#B03385', justifyContent: 'center', alignItems: 'center' },
-  radioInner: { width: 14, height: 14, borderRadius: 7, backgroundColor: '#B03385' },
-  nameText: { fontSize: 16, fontWeight: '700', color: '#111827' },
-  phoneText: { fontSize: 14, color: '#4b5563', marginVertical: 4 },
-  addressFullText: { fontSize: 14, color: '#374151', lineHeight: 20 },
-  addNewBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, borderWidth: 2, borderColor: '#B03385', borderStyle: 'dashed', borderRadius: 12, marginTop: 8 },
-  addNewText: { color: '#B03385', fontSize: 16, fontWeight: '700', marginLeft: 10 },
+  bottomBar: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#F9F9F9', paddingHorizontal: 16, paddingTop: 12, shadowColor: '#111111', shadowOffset: { width: 0, height: -3 }, shadowOpacity: 0.1, shadowRadius: 10 },
+  placeOrderBtn: { backgroundColor: '#111111', paddingVertical: 16, borderRadius: 30, alignItems: 'center' },
+  btnDisabled: { backgroundColor: '#E8E8E8' },
+  placeOrderText: { color: '#FFFFFF', fontSize: 17, fontFamily: 'Poppins-SemiBold', fontWeight: '700' },
+  sectionTitle: { fontSize: 19, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#111111', marginBottom: 16 },
+  addressCard: { flexDirection: 'row', backgroundColor: '#FFFFFF', padding: 16, borderRadius: 12, marginBottom: 12, borderWidth: 1.5, borderColor: '#E8E8E8' },
+  addressCardSelected: { borderColor: '#f8ac1b', backgroundColor: '#FFF6E3' },
+  radioCircle: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: '#f8ac1b', justifyContent: 'center', alignItems: 'center' },
+  radioInner: { width: 14, height: 14, borderRadius: 7, backgroundColor: '#f8ac1b' },
+  nameText: { fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#111111' },
+  phoneText: { fontSize: 14, fontFamily: 'Poppins-Regular', color: '#666666', marginVertical: 4 },
+  addressFullText: { fontSize: 14, fontFamily: 'Poppins-Regular', color: '#444444', lineHeight: 20 },
+  addNewBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, borderWidth: 2, borderColor: '#f8ac1b', borderStyle: 'dashed', borderRadius: 12, marginTop: 8 },
+  addNewText: { color: '#f8ac1b', fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '700', marginLeft: 10 },
   emptyAddressContainer: { alignItems: 'center', paddingVertical: 80 },
-  emptyTitle: { fontSize: 20, fontWeight: '700', color: '#1e293b', marginTop: 20 },
-  addAddressBtn: { marginTop: 24, backgroundColor: '#B03385', paddingHorizontal: 40, paddingVertical: 16, borderRadius: 30 },
-  addAddressText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  paymentOption: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', padding: 16, borderRadius: 12, marginBottom: 12, borderWidth: 1, borderColor: '#e5e7eb' },
-  paymentSelected: { borderColor: '#B03385', borderWidth: 2, backgroundColor: '#fdf2f8' },
-  paymentTitle: { fontSize: 16, fontWeight: '600', color: '#111827' },
-  paymentSubtitle: { fontSize: 13, color: '#64748b' },
-  priceCard: { backgroundColor: '#fff', borderRadius: 16, padding: 16, marginTop: 20, borderWidth: 1, borderColor: '#e5e7eb' },
-  priceCardTitle: { fontSize: 17, fontWeight: '700', marginBottom: 16 },
+  emptyTitle: { fontSize: 20, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#111111', marginTop: 20 },
+  addAddressBtn: { marginTop: 24, backgroundColor: '#111111', paddingHorizontal: 40, paddingVertical: 16, borderRadius: 30 },
+  addAddressText: { color: '#FFFFFF', fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '700' },
+  paymentOption: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', padding: 16, borderRadius: 12, marginBottom: 12, borderWidth: 1, borderColor: '#E8E8E8' },
+  paymentSelected: { borderColor: '#f8ac1b', borderWidth: 2, backgroundColor: '#FFF6E3' },
+  paymentTitle: { fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '600', color: '#111111' },
+  paymentSubtitle: { fontSize: 13, fontFamily: 'Poppins-Regular', color: '#666666' },
+  priceCard: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginTop: 20, borderWidth: 1, borderColor: '#E8E8E8' },
+  priceCardTitle: { fontSize: 17, fontFamily: 'Poppins-SemiBold', fontWeight: '700', marginBottom: 16 },
   itemRow: { flexDirection: 'row', marginBottom: 20 },
-  smallImage: { width: 80, height: 80, borderRadius: 8, backgroundColor: '#f1f5f9' },
-  itemName: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  itemMeta: { fontSize: 13, color: '#64748b', marginTop: 4 },
-  itemPrice: { fontSize: 15, fontWeight: '700', color: '#B03385', marginTop: 6 },
+  smallImage: { width: 80, height: 80, borderRadius: 8, backgroundColor: '#F9F9F9' },
+  itemName: { fontSize: 15, fontFamily: 'Poppins-SemiBold', fontWeight: '600', color: '#111111' },
+  itemMeta: { fontSize: 13, fontFamily: 'Poppins-Regular', color: '#666666', marginTop: 4 },
+  itemPrice: { fontSize: 15, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#f8ac1b', marginTop: 6 },
   priceLine: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  label: { fontSize: 14, color: '#64748b' },
-  value: { fontSize: 14, fontWeight: '600', color: '#111827' },
-  free: { color: '#16a34a', fontWeight: '700' },
-  totalLine: { flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: '#e5e7eb', paddingTop: 12, marginTop: 8 },
-  totalLabel: { fontSize: 16, fontWeight: '700' },
-  totalValue: { fontSize: 20, fontWeight: '800', color: '#B03385' },
+  label: { fontSize: 14, fontFamily: 'Poppins-Regular', color: '#666666' },
+  value: { fontSize: 14, fontFamily: 'Poppins-SemiBold', fontWeight: '600', color: '#111111' },
+  free: { color: '#16A34A', fontWeight: '700' },
+  totalLine: { flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: '#E8E8E8', paddingTop: 12, marginTop: 8 },
+  totalLabel: { fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '700' },
+  totalValue: { fontSize: 20, fontFamily: 'Poppins-SemiBold', fontWeight: '800', color: '#f8ac1b' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
-  modalContainer: { width: width * 0.82, backgroundColor: '#fff', borderRadius: 24, padding: 32, alignItems: 'center' },
+  modalContainer: { width: width * 0.82, backgroundColor: '#FFFFFF', borderRadius: 24, padding: 32, alignItems: 'center' },
   modalIconContainer: { marginBottom: 24 },
-  modalTitle: { fontSize: 22, fontWeight: '700', marginBottom: 12 },
-  modalMessage: { fontSize: 16, color: '#4b5563', textAlign: 'center', lineHeight: 24, marginBottom: 32 },
+  modalTitle: { fontSize: 22, fontFamily: 'Poppins-SemiBold', fontWeight: '700', marginBottom: 12 },
+  modalMessage: { fontSize: 16, fontFamily: 'Poppins-Regular', color: '#666666', textAlign: 'center', lineHeight: 24, marginBottom: 32 },
   modalButtons: { flexDirection: 'row', width: '100%', gap: 12 },
   modalConfirmBtn: { flex: 1, paddingVertical: 16, borderRadius: 16, alignItems: 'center' },
-  modalConfirmText: { color: 'white', fontSize: 16, fontWeight: '700' },
-  modalCancelBtn: { flex: 1, paddingVertical: 16, borderRadius: 16, backgroundColor: '#f1f5f9', alignItems: 'center' },
-  modalCancelText: { color: '#374151', fontSize: 16, fontWeight: '700' },
+  modalConfirmText: { color: 'white', fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '700' },
+  modalCancelBtn: { flex: 1, paddingVertical: 16, borderRadius: 16, backgroundColor: '#F9F9F9', alignItems: 'center' },
+  modalCancelText: { color: '#444444', fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '700' },
 });

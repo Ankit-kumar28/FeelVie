@@ -49,28 +49,28 @@ function CustomModal({
   const getIcon = () => {
     switch (type) {
       case 'success':
-        return <Icon name="check-circle" size={64} color="#10b981" />;
+        return <Icon name="check-circle" size={64} color="#16A34A" />;
       case 'error':
-        return <Icon name="alert-circle" size={64} color="#ef4444" />;
+        return <Icon name="alert-circle" size={64} color="#EF4444" />;
       case 'warning':
-        return <Icon name="alert" size={64} color="#f59e0b" />;
+        return <Icon name="alert" size={64} color="#f8ac1b" />;
       case 'info':
       default:
-        return <Icon name="information" size={64} color="#3b82f6" />;
+        return <Icon name="information" size={64} color="#111111" />;
     }
   };
 
   const getButtonColor = () => {
     switch (type) {
       case 'success':
-        return '#10b981';
+        return '#16A34A';
       case 'error':
-        return '#ef4444';
+        return '#EF4444';
       case 'warning':
-        return '#f59e0b';
+        return '#f8ac1b';
       case 'info':
       default:
-        return '#3b82f6';
+        return '#111111';
     }
   };
 
@@ -221,10 +221,10 @@ export default function SellProductScreen() {
         };
 
         const [catRes, colorRes, sizeRes, addrRes] = await Promise.all([
-          fetch('https://feelvie.yaytech.in/api/catalog/categories/', { headers }),
-          fetch('https://feelvie.yaytech.in/api/catalog/colors/', { headers }),
-          fetch('https://feelvie.yaytech.in/api/catalog/sizes/', { headers }),
-          fetch('https://feelvie.yaytech.in/api/auth/addresses/', { headers }),
+          fetch('https://api.feelvie.com/api/catalog/categories/', { headers }),
+          fetch('https://api.feelvie.com/api/catalog/colors/', { headers }),
+          fetch('https://api.feelvie.com/api/catalog/sizes/', { headers }),
+          fetch('https://api.feelvie.com/api/auth/addresses/', { headers }),
         ]);
 
         if (catRes.ok) setCategories((await catRes.json()) || []);
@@ -335,7 +335,7 @@ export default function SellProductScreen() {
         is_default: true,
       };
 
-      const res = await fetch('https://feelvie.yaytech.in/api/auth/addresses/', {
+      const res = await fetch('https://api.feelvie.com/api/auth/addresses/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -493,7 +493,7 @@ export default function SellProductScreen() {
         formData.append(`images[${i}]sort_order`, String(i));
       }
 
-      const response = await fetch('https://feelvie.yaytech.in/api/catalog/products/', {
+      const response = await fetch('https://api.feelvie.com/api/catalog/products/', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -579,7 +579,7 @@ export default function SellProductScreen() {
     if (dataLoading) {
       return (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#B03385" />
+          <ActivityIndicator size="large" color="#f8ac1b" />
           <Text style={styles.loadingText}>Loading options...</Text>
         </View>
       );
@@ -594,7 +594,7 @@ export default function SellProductScreen() {
           value={title}
           onChangeText={setTitle}
           maxLength={100}
-          placeholderTextColor="#ccc"
+          placeholderTextColor="#E8E8E8"
         />
 
         <Text style={styles.sectionTitle}>Product Type *</Text>
@@ -605,7 +605,7 @@ export default function SellProductScreen() {
           <Text style={productType ? styles.dropdownText : styles.dropdownPlaceholder}>
             {productType === 'new' ? 'New' : productType === 'used' ? 'Used' : 'Rental'}
           </Text>
-          <Icon name="chevron-down" size={24} color="#6b7280" />
+          <Icon name="chevron-down" size={24} color="#666666" />
         </TouchableOpacity>
 
         {showProductTypeDropdown && (
@@ -629,7 +629,7 @@ export default function SellProductScreen() {
 
         <Text style={styles.sectionTitle}>Photos (up to 6) *</Text>
         <TouchableOpacity style={styles.imageUploadBox} onPress={openGallery}>
-          <Icon name="camera-plus" size={32} color="#B03385" />
+          <Icon name="camera-plus" size={32} color="#f8ac1b" />
           <Text style={styles.uploadText}>Add Photos</Text>
           <Text style={styles.uploadSubText}>Camera or Gallery</Text>
         </TouchableOpacity>
@@ -643,7 +643,7 @@ export default function SellProductScreen() {
                   style={styles.removeImageBtn}
                   onPress={() => setImages(images.filter((_, i) => i !== index))}
                 >
-                  <Icon name="close-circle" size={24} color="#ef4444" />
+                  <Icon name="close-circle" size={24} color="#EF4444" />
                 </TouchableOpacity>
               </View>
             ))}
@@ -702,7 +702,7 @@ export default function SellProductScreen() {
               <View
                 style={[
                   styles.colorCircle,
-                  { backgroundColor: color.hex_code || '#000000' },
+                  { backgroundColor: color.hex_code || '#111111' },
                 ]}
               />
               <Text
@@ -727,7 +727,7 @@ export default function SellProductScreen() {
               <Text style={condition ? styles.dropdownText : styles.dropdownPlaceholder}>
                 {condition || 'Select condition'}
               </Text>
-              <Icon name="chevron-down" size={24} color="#6b7280" />
+              <Icon name="chevron-down" size={24} color="#666666" />
             </TouchableOpacity>
 
             {showConditionDropdown && (
@@ -760,7 +760,7 @@ export default function SellProductScreen() {
                 style={styles.priceTextInput}
                 value={originalPrice}
                 onChangeText={setOriginalPrice}
-                placeholderTextColor="#ccc"
+                placeholderTextColor="#E8E8E8"
               />
             </View>
           </View>
@@ -774,7 +774,7 @@ export default function SellProductScreen() {
                 style={styles.priceTextInput}
                 value={sellingPrice}
                 onChangeText={setSellingPrice}
-                placeholderTextColor="#ccc"
+                placeholderTextColor="#E8E8E8"
               />
             </View>
           </View>
@@ -787,7 +787,7 @@ export default function SellProductScreen() {
           keyboardType="numeric"
           value={stock}
           onChangeText={setStock}
-          placeholderTextColor="#ccc"
+          placeholderTextColor="#E8E8E8"
         />
 
         <Text style={styles.sectionTitle}>Description *</Text>
@@ -798,7 +798,7 @@ export default function SellProductScreen() {
           numberOfLines={5}
           value={description}
           onChangeText={setDescription}
-          placeholderTextColor="#ccc"
+          placeholderTextColor="#E8E8E8"
         />
 
         {productType === 'rental' && (
@@ -814,7 +814,7 @@ export default function SellProductScreen() {
                 keyboardType="numeric"
                 value={rentalPricePerDay}
                 onChangeText={setRentalPricePerDay}
-                placeholderTextColor="#ccc"
+                placeholderTextColor="#E8E8E8"
               />
             </View>
 
@@ -827,7 +827,7 @@ export default function SellProductScreen() {
                 keyboardType="numeric"
                 value={lateReturnPenalty}
                 onChangeText={setLateReturnPenalty}
-                placeholderTextColor="#ccc"
+                placeholderTextColor="#E8E8E8"
               />
             </View>
 
@@ -840,7 +840,7 @@ export default function SellProductScreen() {
                 keyboardType="numeric"
                 value={damageProtectionFee}
                 onChangeText={setDamageProtectionFee}
-                placeholderTextColor="#ccc"
+                placeholderTextColor="#E8E8E8"
               />
             </View>
 
@@ -887,7 +887,7 @@ export default function SellProductScreen() {
               keyboardType="numeric"
               value={minRentalDays}
               onChangeText={setMinRentalDays}
-              placeholderTextColor="#ccc"
+              placeholderTextColor="#E8E8E8"
             />
 
             <Text style={styles.fieldLabel}>Maximum Rental Days *</Text>
@@ -897,7 +897,7 @@ export default function SellProductScreen() {
               keyboardType="numeric"
               value={maxRentalDays}
               onChangeText={setMaxRentalDays}
-              placeholderTextColor="#ccc"
+              placeholderTextColor="#E8E8E8"
             />
           </>
         )}
@@ -919,13 +919,13 @@ export default function SellProductScreen() {
 
           {loadingAddress ? (
             <View style={styles.addressLoading}>
-              <ActivityIndicator size="small" color="#B03385" />
-              <Text style={{ marginLeft: 12, color: '#64748b' }}>Loading saved addresses...</Text>
+              <ActivityIndicator size="small" color="#f8ac1b" />
+              <Text style={{ marginLeft: 12, color: '#666666' }}>Loading saved addresses...</Text>
             </View>
           ) : recentAddress && !showAddressForm ? (
             <View style={styles.savedAddressCard}>
               <View style={styles.cardHeader}>
-                <Icon name="map-marker-check" size={24} color="#B03385" />
+                <Icon name="map-marker-check" size={24} color="#f8ac1b" />
                 <Text style={styles.cardTitle}>Saved Address</Text>
               </View>
 
@@ -958,7 +958,7 @@ export default function SellProductScreen() {
                 placeholder="House/Flat, Street name"
                 value={addressForm.line1}
                 onChangeText={t => setAddressForm({ ...addressForm, line1: t })}
-                placeholderTextColor="#ccc"
+                placeholderTextColor="#E8E8E8"
               />
               {addressErrors.line1 && <Text style={styles.errorText}>{addressErrors.line1}</Text>}
 
@@ -968,7 +968,7 @@ export default function SellProductScreen() {
                 placeholder="Landmark, nearby area"
                 value={addressForm.line2}
                 onChangeText={t => setAddressForm({ ...addressForm, line2: t })}
-                placeholderTextColor="#ccc"
+                placeholderTextColor="#E8E8E8"
               />
 
               <Text style={styles.fieldLabel}>City *</Text>
@@ -977,7 +977,7 @@ export default function SellProductScreen() {
                 placeholder="e.g. Delhi"
                 value={addressForm.city}
                 onChangeText={t => setAddressForm({ ...addressForm, city: t })}
-                placeholderTextColor="#ccc"
+                placeholderTextColor="#E8E8E8"
               />
               {addressErrors.city && <Text style={styles.errorText}>{addressErrors.city}</Text>}
 
@@ -989,7 +989,7 @@ export default function SellProductScreen() {
                     placeholder="e.g. Uttar Pradesh"
                     value={addressForm.state}
                     onChangeText={t => setAddressForm({ ...addressForm, state: t })}
-                    placeholderTextColor="#ccc"
+                    placeholderTextColor="#E8E8E8"
                   />
                   {addressErrors.state && <Text style={styles.errorText}>{addressErrors.state}</Text>}
                 </View>
@@ -1003,7 +1003,7 @@ export default function SellProductScreen() {
                     maxLength={6}
                     value={addressForm.postal_code}
                     onChangeText={t => setAddressForm({ ...addressForm, postal_code: t })}
-                    placeholderTextColor="#ccc"
+                    placeholderTextColor="#E8E8E8"
                   />
                   {addressErrors.postal_code && <Text style={styles.errorText}>{addressErrors.postal_code}</Text>}
                 </View>
@@ -1031,7 +1031,7 @@ export default function SellProductScreen() {
                   style={styles.useSavedLink}
                   onPress={() => setShowAddressForm(false)}
                 >
-                  <Icon name="history" size={18} color="#2563eb" />
+                  <Icon name="history" size={18} color="#111111" />
                   <Text style={styles.useSavedText}>Back to saved addresses</Text>
                 </TouchableOpacity>
               )}
@@ -1067,7 +1067,7 @@ export default function SellProductScreen() {
               ))
             ) : (
               <View style={styles.noImagePlaceholder}>
-                <Icon name="image-off" size={40} color="#d1d5db" />
+                <Icon name="image-off" size={40} color="#E8E8E8" />
                 <Text style={styles.noImageText}>No images</Text>
               </View>
             )}
@@ -1102,7 +1102,7 @@ export default function SellProductScreen() {
 
         <View style={styles.detailRow}>
           <Text style={styles.detailLabel}>Variants</Text>
-          <Text style={[styles.detailValue, { color: '#B03385' }]}>
+          <Text style={[styles.detailValue, { color: '#f8ac1b' }]}>
             {selectedColors.length * selectedSizeStrings.length || '—'}
           </Text>
         </View>
@@ -1166,7 +1166,7 @@ export default function SellProductScreen() {
       {/* Fixed Header */}
       <View style={[styles.header, { paddingTop: insets.top }]}>
         <TouchableOpacity onPress={() => (step === 1 ? navigation.goBack() : setStep(step - 1))}>
-          <Icon name="arrow-left" size={24} color="#111827" />
+          <Icon name="arrow-left" size={24} color="#111111" />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Sell Your Product</Text>
@@ -1188,7 +1188,7 @@ export default function SellProductScreen() {
                 ]}
               >
                 {s.id < step ? (
-                  <Icon name="check" size={16} color="#fff" />
+                  <Icon name="check" size={16} color="#FFFFFF" />
                 ) : (
                   <Text
                     style={[
@@ -1246,7 +1246,7 @@ export default function SellProductScreen() {
           disabled={!canGoNext() || submitting}
         >
           {submitting ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#FFFFFF" />
           ) : (
             <Text style={styles.nextText}>
               {step === 3 ? 'Post Product' : 'Continue'}
@@ -1272,7 +1272,7 @@ export default function SellProductScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#F9F9F9',
   },
 
   header: {
@@ -1281,11 +1281,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: '#F9F9F9',
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: '#111111',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 3,
@@ -1293,8 +1293,9 @@ const styles = StyleSheet.create({
 
   headerTitle: {
     fontSize: 19,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#B03385',
+    color: '#111111',
   },
 
   progressBarContainer: {
@@ -1302,9 +1303,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: '#F9F9F9',
     marginBottom: 1,  
   },
 
@@ -1317,63 +1318,65 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: '#E8E8E8',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#d1d5db',
+    borderColor: '#E8E8E8',
   },
 
   stepCompleted: {
-    backgroundColor: '#B03385',
-    borderColor: '#B03385',
+    backgroundColor: '#f8ac1b',
+    borderColor: '#f8ac1b',
   },
 
   stepActive: {
-    backgroundColor: '#ffffff',
-    borderColor: '#B03385',
+    backgroundColor: '#FFFFFF',
+    borderColor: '#f8ac1b',
     borderWidth: 2.5,
   },
 
   stepFuture: {
-    backgroundColor: '#f3f4f6',
-    borderColor: '#d1d5db',
+    backgroundColor: '#F9F9F9',
+    borderColor: '#E8E8E8',
   },
 
   stepNumber: {
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#6b7280',
+    color: '#666666',
   },
 
   stepNumberActive: {
-    color: '#B03385',
+    color: '#f8ac1b',
     fontWeight: '700',
   },
 
   stepLabel: {
     marginTop: 6,
     fontSize: 12.5,
+    fontFamily: 'Poppins-Regular',
     fontWeight: '500',
-    color: '#9ca3af',
+    color: '#AAAAAA',
     textAlign: 'center',
   },
 
   stepLabelActive: {
-    color: '#111827',
+    color: '#111111',
     fontWeight: '600',
   },
 
   stepConnector: {
     height: 2,
     width: 80,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: '#E8E8E8',
     marginHorizontal: -10,
     marginBottom: 14,
   },
 
   stepConnectorCompleted: {
-    backgroundColor: '#B03385',
+    backgroundColor: '#f8ac1b',
   },
 
   scrollContent: {
@@ -1385,41 +1388,44 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#F9F9F9',
     paddingHorizontal: 20,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
+    borderTopColor: '#E8E8E8',
   },
 
   nextBtn: {
-    backgroundColor: '#B03385',
+    backgroundColor: '#111111',
     paddingVertical: 16,
     borderRadius: 30,
     alignItems: 'center',
   },
 
   nextBtnDisabled: {
-    backgroundColor: '#94a3b8',
+    backgroundColor: '#AAAAAA',
   },
 
   nextText: {
     color: 'white',
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
   },
 
   sectionTitle: {
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#1e293b',
+    color: '#111111',
     marginTop: 16,
     marginBottom: 8,
   },
 
   fieldLabel: {
     fontSize: 14,
-    color: '#475569',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     marginBottom: 6,
     fontWeight: '500',
   },
@@ -1430,18 +1436,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#E8E8E8',
     marginBottom: 16,
     fontSize: 16,
+    fontFamily: 'Poppins-Regular',
   },
 
   inputError: {
-    borderColor: '#ef4444',
+    borderColor: '#EF4444',
   },
 
   errorText: {
-    color: '#ef4444',
+    color: '#EF4444',
     fontSize: 13,
+    fontFamily: 'Poppins-Regular',
     marginTop: -8,
     marginBottom: 12,
   },
@@ -1455,25 +1463,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#E8E8E8',
     marginBottom: 16,
   },
 
   dropdownPlaceholder: {
-    color: '#94a3b8',
+    color: '#AAAAAA',
     fontSize: 16,
+    fontFamily: 'Poppins-Regular',
   },
 
   dropdownText: {
-    color: '#0f172a',
+    color: '#111111',
     fontSize: 16,
+    fontFamily: 'Poppins-Regular',
   },
 
   dropdownList: {
     backgroundColor: 'white',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#E8E8E8',
     marginBottom: 16,
     overflow: 'hidden',
   },
@@ -1481,37 +1491,40 @@ const styles = StyleSheet.create({
   dropdownItem: {
     padding: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: '#F9F9F9',
   },
 
   dropdownItemText: {
     fontSize: 16,
-    color: '#0f172a',
+    fontFamily: 'Poppins-Regular',
+    color: '#111111',
   },
 
   imageUploadBox: {
     height: 130,
     borderWidth: 2,
     borderStyle: 'dashed',
-    borderColor: '#B03385',
+    borderColor: '#f8ac1b',
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fdf2f8',
+    backgroundColor: '#FFF6E3',
     marginBottom: 16,
   },
 
   uploadText: {
     marginTop: 12,
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#B03385',
+    color: '#f8ac1b',
   },
 
   uploadSubText: {
     marginTop: 4,
-    color: '#64748b',
+    color: '#666666',
     fontSize: 13,
+    fontFamily: 'Poppins-Regular',
   },
 
   imagePreviewScroll: {
@@ -1528,7 +1541,7 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#E8E8E8',
   },
 
   removeImageBtn: {
@@ -1542,17 +1555,17 @@ const styles = StyleSheet.create({
   categoryChip: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#F9F9F9',
     borderRadius: 20,
     marginRight: 10,
   },
 
   categoryActive: {
-    backgroundColor: '#B03385',
+    backgroundColor: '#f8ac1b',
   },
 
   categoryText: {
-    color: '#334155',
+    color: '#444444',
     fontWeight: '500',
   },
 
@@ -1563,7 +1576,7 @@ const styles = StyleSheet.create({
   sizeChip: {
     paddingHorizontal: 18,
     paddingVertical: 10,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#F9F9F9',
     borderRadius: 20,
     marginRight: 10,
     minWidth: 60,
@@ -1571,11 +1584,11 @@ const styles = StyleSheet.create({
   },
 
   sizeChipActive: {
-    backgroundColor: '#B03385',
+    backgroundColor: '#f8ac1b',
   },
 
   sizeText: {
-    color: '#334155',
+    color: '#444444',
     fontWeight: '500',
   },
 
@@ -1593,17 +1606,18 @@ const styles = StyleSheet.create({
     height: 42,
     borderRadius: 21,
     borderWidth: 2,
-    borderColor: '#e2e8f0',
+    borderColor: '#E8E8E8',
     marginBottom: 6,
   },
 
   colorText: {
     fontSize: 13,
-    color: '#334155',
+    fontFamily: 'Poppins-Regular',
+    color: '#444444',
   },
 
   colorTextActive: {
-    color: '#B03385',
+    color: '#f8ac1b',
     fontWeight: '600',
   },
 
@@ -1618,20 +1632,22 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#E8E8E8',
     paddingHorizontal: 12,
   },
 
   rupee: {
     fontSize: 18,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#B03385',
+    color: '#f8ac1b',
     marginRight: 6,
   },
 
   priceTextInput: {
     flex: 1,
     fontSize: 16,
+    fontFamily: 'Poppins-Regular',
   },
 
   textarea: {
@@ -1639,21 +1655,24 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#E8E8E8',
     minHeight: 120,
     textAlignVertical: 'top',
     fontSize: 16,
+    fontFamily: 'Poppins-Regular',
     marginBottom: 24,
   },
 
   dateText: {
     fontSize: 16,
-    color: '#0f172a',
+    fontFamily: 'Poppins-Regular',
+    color: '#111111',
   },
 
   datePlaceholder: {
     fontSize: 16,
-    color: '#94a3b8',
+    fontFamily: 'Poppins-Regular',
+    color: '#AAAAAA',
   },
 
   loadingContainer: {
@@ -1665,8 +1684,9 @@ const styles = StyleSheet.create({
 
   loadingText: {
     marginTop: 16,
-    color: '#475569',
+    color: '#666666',
     fontSize: 16,
+    fontFamily: 'Poppins-Regular',
   },
 
   addressLoading: {
@@ -1677,11 +1697,11 @@ const styles = StyleSheet.create({
   },
 
   savedAddressCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
+    shadowColor: '#111111',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -1696,25 +1716,29 @@ const styles = StyleSheet.create({
 
   cardTitle: {
     fontSize: 18,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#111827',
+    color: '#111111',
     marginLeft: 12,
   },
 
   addressLine: {
     fontSize: 15,
-    color: '#334155',
+    fontFamily: 'Poppins-Regular',
+    color: '#444444',
     marginBottom: 4,
   },
 
   addressCity: {
     fontSize: 15,
-    color: '#334155',
+    fontFamily: 'Poppins-Regular',
+    color: '#444444',
   },
 
   addressCountry: {
     fontSize: 14,
-    color: '#64748b',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     marginTop: 4,
   },
 
@@ -1725,7 +1749,7 @@ const styles = StyleSheet.create({
 
   useThisBtn: {
     flex: 1,
-    backgroundColor: '#B03385',
+    backgroundColor: '#111111',
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
@@ -1733,14 +1757,15 @@ const styles = StyleSheet.create({
   },
 
   useThisText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontWeight: '600',
     fontSize: 15,
+    fontFamily: 'Poppins-SemiBold',
   },
 
   addNewBtn: {
     flex: 1,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#F9F9F9',
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
@@ -1748,14 +1773,16 @@ const styles = StyleSheet.create({
   },
 
   addNewText: {
-    color: '#B03385',
+    color: '#f8ac1b',
     fontWeight: '600',
     fontSize: 15,
+    fontFamily: 'Poppins-SemiBold',
   },
 
   sectionSubtitle: {
     fontSize: 15,
-    color: '#64748b',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     marginBottom: 16,
   },
 
@@ -1766,7 +1793,7 @@ const styles = StyleSheet.create({
 
   cancelBtn: {
     flex: 1,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#F9F9F9',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -1774,23 +1801,25 @@ const styles = StyleSheet.create({
   },
 
   cancelText: {
-    color: '#374151',
+    color: '#444444',
     fontWeight: '600',
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
   },
 
   saveBtn: {
     flex: 1,
-    backgroundColor: '#B03385',
+    backgroundColor: '#111111',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
   },
 
   saveText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontWeight: '600',
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
   },
 
   useSavedLink: {
@@ -1801,17 +1830,18 @@ const styles = StyleSheet.create({
   },
 
   useSavedText: {
-    color: '#B03385',
+    color: '#f8ac1b',
     fontSize: 14,
+    fontFamily: 'Poppins-Regular',
     marginLeft: 8,
   },
 
   summaryCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 20,
     marginHorizontal: 0,
-    shadowColor: '#000',
+    shadowColor: '#111111',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -1820,14 +1850,16 @@ const styles = StyleSheet.create({
 
   summaryCardTitle: {
     fontSize: 22,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#111827',
+    color: '#111111',
     marginBottom: 4,
   },
 
   summaryCardSubtitle: {
     fontSize: 14,
-    color: '#64748b',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     marginBottom: 20,
   },
 
@@ -1837,8 +1869,9 @@ const styles = StyleSheet.create({
 
   sectionLabel: {
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#1e293b',
+    color: '#111111',
     marginBottom: 12,
   },
 
@@ -1852,8 +1885,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#e5e7eb',
-    backgroundColor: '#f9fafb',
+    borderColor: '#E8E8E8',
+    backgroundColor: '#F9F9F9',
   },
 
   previewImageLarge: {
@@ -1865,15 +1898,16 @@ const styles = StyleSheet.create({
     width: 140,
     height: 140,
     borderRadius: 12,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#F9F9F9',
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 8,
   },
 
   noImageText: {
-    color: '#94a3b8',
+    color: '#AAAAAA',
     fontSize: 13,
+    fontFamily: 'Poppins-Regular',
     marginTop: 8,
   },
 
@@ -1883,18 +1917,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: '#F9F9F9',
   },
 
   detailLabel: {
     fontSize: 15,
-    color: '#475569',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     fontWeight: '500',
   },
 
   detailValue: {
     fontSize: 15,
-    color: '#111827',
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
     fontWeight: '600',
     textAlign: 'right',
     flex: 1,
@@ -1905,7 +1941,7 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: '#f1f5f9',
+    borderTopColor: '#F9F9F9',
   },
 
   priceRow: {
@@ -1917,14 +1953,16 @@ const styles = StyleSheet.create({
 
   priceLabel: {
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#1e293b',
+    color: '#111111',
   },
 
   priceValue: {
     fontSize: 18,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#111827',
+    color: '#111111',
   },
 
   discountRow: {
@@ -1935,15 +1973,17 @@ const styles = StyleSheet.create({
 
   originalPrice: {
     fontSize: 15,
-    color: '#6b7280',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     textDecorationLine: 'line-through',
     marginRight: 8,
   },
 
   discountBadge: {
-    backgroundColor: '#16a34a',
-    color: '#fff',
+    backgroundColor: '#16A34A',
+    color: '#FFFFFF',
     fontSize: 13,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -1952,7 +1992,8 @@ const styles = StyleSheet.create({
 
   rentalPrice: {
     fontSize: 16,
-    color: '#B03385',
+    fontFamily: 'Poppins-SemiBold',
+    color: '#f8ac1b',
     fontWeight: '600',
   },
 
@@ -1963,13 +2004,15 @@ const styles = StyleSheet.create({
 
   descriptionText: {
     fontSize: 15,
-    color: '#4b5563',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     lineHeight: 22,
   },
 
   finalNote: {
     fontSize: 13,
-    color: '#64748b',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     textAlign: 'center',
     fontStyle: 'italic',
     marginTop: 16,
@@ -1984,11 +2027,11 @@ const styles = StyleSheet.create({
 
   modalContainer: {
     width: width * 0.82,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 28,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#111111',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.35,
     shadowRadius: 20,
@@ -2001,15 +2044,17 @@ const styles = StyleSheet.create({
 
   modalTitle: {
     fontSize: 22,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#111827',
+    color: '#111111',
     marginBottom: 12,
     textAlign: 'center',
   },
 
   modalMessage: {
     fontSize: 16,
-    color: '#4b5563',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 28,
@@ -2033,6 +2078,7 @@ const styles = StyleSheet.create({
   modalConfirmText: {
     color: 'white',
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
   },
 
@@ -2041,13 +2087,14 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center',
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#F9F9F9',
     minWidth: 120,
   },
 
   modalCancelText: {
-    color: '#374151',
+    color: '#444444',
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
   },
 });

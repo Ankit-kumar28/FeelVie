@@ -90,7 +90,7 @@ export default function MarketplaceScreen() {
   const colors = ['Red', 'Blue', 'Black', 'White', 'Green', 'Pink', 'Orange', 'Yellow', 'Purple', 'Grey'];
   const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
-  const BASE_URL = 'https://feelvie.yaytech.in';
+  const BASE_URL = 'https://api.feelvie.com';
   const PRODUCTS_ENDPOINT = `${BASE_URL}/api/catalog/products/`;
   const WISHLIST_ENDPOINT = `${BASE_URL}/api/wishlist/items/`;
 
@@ -287,7 +287,7 @@ export default function MarketplaceScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#B03385" style={{ flex: 1 }} />
+        <ActivityIndicator size="large" color="#f8ac1b" style={{ flex: 1 }} />
       </SafeAreaView>
     );
   }
@@ -296,36 +296,36 @@ export default function MarketplaceScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       <View style={[styles.topHeader, { paddingTop: insets.top + 8 }]}>
         <Text style={styles.headerTitle}>Marketplace</Text>
 
         <View style={styles.headerIcons}>
           <TouchableOpacity onPress={() => navigation.navigate('Search')} style={styles.iconBtn}>
-            <Icon name="search" size={24} color="#111" />
+            <Icon name="search" size={24} color="#111111" />
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.navigate('MyWishList')} style={styles.iconBtn}>
-            <Icon name="favorite-border" size={24} color="#111" />
+            <Icon name="favorite-border" size={24} color="#111111" />
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.navigate('CartScreen')} style={styles.iconBtn}>
-            <Icon name="shopping-cart" size={24} color="#111" />
+            <Icon name="shopping-cart" size={24} color="#111111" />
           </TouchableOpacity>
         </View>
       </View>
 
       <View style={[styles.sortFilterBar, { top: headerHeight }]}>
         <TouchableOpacity style={styles.barButton} onPress={openSort}>
-          <Icon name="sort" size={20} color="#333" />
+          <Icon name="sort" size={20} color="#444444" />
           <Text style={styles.barText}>Sort</Text>
         </TouchableOpacity>
 
         <View style={styles.barDivider} />
 
         <TouchableOpacity style={styles.barButton} onPress={openFilter}>
-          <Icon name="filter-list" size={20} color="#333" />
+          <Icon name="filter-list" size={20} color="#444444" />
           <Text style={styles.barText}>Filter</Text>
         </TouchableOpacity>
       </View>
@@ -373,12 +373,12 @@ export default function MarketplaceScreen() {
                   hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
                 >
                   {status.isToggling ? (
-                    <ActivityIndicator size="small" color="#fff" />
+                    <ActivityIndicator size="small" color="#FFFFFF" />
                   ) : (
                     <Icon
                       name={status.inWishlist ? 'favorite' : 'favorite-border'}
                       size={24}
-                      color={status.inWishlist ? '#ef4444' : '#ffffff'}
+                      color={status.inWishlist ? '#EF4444' : '#FFFFFF'}
                       style={styles.heartShadow}
                     />
                   )}
@@ -418,7 +418,7 @@ export default function MarketplaceScreen() {
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetTitle}>Sort By</Text>
               <TouchableOpacity onPress={closeSort}>
-                <Icon name="close" size={26} color="#000" />
+                <Icon name="close" size={26} color="#111111" />
               </TouchableOpacity>
             </View>
 
@@ -450,7 +450,7 @@ export default function MarketplaceScreen() {
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetTitle}>Filter</Text>
               <TouchableOpacity onPress={closeFilter}>
-                <Icon name="close" size={26} color="#000" />
+                <Icon name="close" size={26} color="#111111" />
               </TouchableOpacity>
             </View>
 
@@ -497,7 +497,7 @@ export default function MarketplaceScreen() {
                             selectedColors.includes(c) && styles.checkboxSelected,
                           ]}
                         >
-                          {selectedColors.includes(c) && <Icon name="check" size={16} color="#fff" />}
+                          {selectedColors.includes(c) && <Icon name="check" size={16} color="#FFFFFF" />}
                         </View>
                         <Text style={styles.checkboxLabel}>{c}</Text>
                       </TouchableOpacity>
@@ -524,7 +524,7 @@ export default function MarketplaceScreen() {
                             selectedSizes.includes(s) && styles.checkboxSelected,
                           ]}
                         >
-                          {selectedSizes.includes(s) && <Icon name="check" size={16} color="#fff" />}
+                          {selectedSizes.includes(s) && <Icon name="check" size={16} color="#FFFFFF" />}
                         </View>
                         <Text style={styles.checkboxLabel}>{s}</Text>
                       </TouchableOpacity>
@@ -545,9 +545,9 @@ export default function MarketplaceScreen() {
                       step={100}
                       value={priceRange[1]}
                       onValueChange={val => setPriceRange([priceRange[0], val])}
-                      minimumTrackTintColor="#B03385"
-                      maximumTrackTintColor="#ddd"
-                      thumbTintColor="#B03385"
+                      minimumTrackTintColor="#f8ac1b"
+                      maximumTrackTintColor="#E8E8E8"
+                      thumbTintColor="#f8ac1b"
                     />
                     <Slider
                       style={styles.slider}
@@ -556,9 +556,9 @@ export default function MarketplaceScreen() {
                       step={100}
                       value={priceRange[0]}
                       onValueChange={val => setPriceRange([val, priceRange[1]])}
-                      minimumTrackTintColor="#B03385"
-                      maximumTrackTintColor="#ddd"
-                      thumbTintColor="#B03385"
+                      minimumTrackTintColor="#f8ac1b"
+                      maximumTrackTintColor="#E8E8E8"
+                      thumbTintColor="#f8ac1b"
                     />
                   </View>
                 )}
@@ -586,7 +586,7 @@ export default function MarketplaceScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f9fa' },
+  container: { flex: 1, backgroundColor: '#F9F9F9' },
 
   topHeader: {
     flexDirection: 'row',
@@ -594,16 +594,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingBottom: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: '#E8E8E8',
     zIndex: 10,
   },
 
   headerTitle: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#B03385',
+    fontFamily: 'serif',
+    fontStyle: 'italic',
+    fontWeight: '800',
+    color: '#111111',
+    letterSpacing: -0.5,
   },
 
   headerIcons: {
@@ -616,9 +619,9 @@ const styles = StyleSheet.create({
 
   sortFilterBar: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: '#E8E8E8',
     position: 'absolute',
     left: 0,
     right: 0,
@@ -626,7 +629,7 @@ const styles = StyleSheet.create({
     zIndex: 9,
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: '#111111',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.06,
         shadowRadius: 3,
@@ -645,13 +648,14 @@ const styles = StyleSheet.create({
 
   barText: {
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#333',
+    color: '#444444',
   },
 
   barDivider: {
     width: StyleSheet.hairlineWidth,
-    backgroundColor: '#d1d5db',
+    backgroundColor: '#E8E8E8',
   },
 
   productsList: {
@@ -667,11 +671,11 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     marginBottom: 16,
     borderRadius: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     overflow: 'hidden',
     ...Platform.select({
       ios: {
-        shadowColor: '#b5b3b3',
+        shadowColor: '#AAAAAA',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.08,
         shadowRadius: 6,
@@ -686,7 +690,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
     aspectRatio: IMAGE_ASPECT_RATIO,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#F9F9F9',
   },
 
   productImage: {
@@ -713,7 +717,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     left: 8,
-    backgroundColor: '#dc2626',
+    backgroundColor: '#EF4444',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -723,6 +727,7 @@ const styles = StyleSheet.create({
   discountText: {
     color: 'white',
     fontSize: 11.5,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
   },
 
@@ -733,8 +738,9 @@ const styles = StyleSheet.create({
 
   productName: {
     fontSize: 14.5,
+    fontFamily: 'Poppins-Regular',
     fontWeight: '500',
-    color: '#111827',
+    color: '#111111',
     lineHeight: 19,
     marginBottom: 6,
   },
@@ -748,21 +754,24 @@ const styles = StyleSheet.create({
 
   sellingPrice: {
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#111827',
+    color: '#111111',
   },
 
   originalPrice: {
     fontSize: 13,
-    color: '#6b7280',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     textDecorationLine: 'line-through',
   },
 
   discountInRow: {
     fontSize: 11.5,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#ffffff',
-    backgroundColor: '#16a34ac3',
+    color: '#FFFFFF',
+    backgroundColor: '#16A34Ac3',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -771,15 +780,17 @@ const styles = StyleSheet.create({
   errorText: {
     textAlign: 'center',
     padding: 40,
-    color: '#dc2626',
+    color: '#EF4444',
     fontSize: 16,
+    fontFamily: 'Poppins-Regular',
   },
 
   emptyText: {
     textAlign: 'center',
     padding: 40,
-    color: '#666',
+    color: '#666666',
     fontSize: 16,
+    fontFamily: 'Poppins-Regular',
   },
 
   // Modal styles (unchanged)
@@ -789,7 +800,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: SCREEN_HEIGHT * 0.85,
@@ -800,23 +811,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#E8E8E8',
   },
-  sheetTitle: { fontSize: 18, fontWeight: '700' },
+  sheetTitle: { fontSize: 18, fontFamily: 'Poppins-SemiBold', fontWeight: '700' },
   sheetContent: { padding: 16 },
   sortRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5',
+    borderBottomColor: '#F9F9F9',
   },
   radioOuter: {
     width: 20,
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: '#B03385',
+    borderColor: '#f8ac1b',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -825,41 +836,41 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#B03385',
+    backgroundColor: '#f8ac1b',
   },
-  sortText: { fontSize: 16 },
+  sortText: { fontSize: 16, fontFamily: 'Poppins-Regular' },
 
   filterBody: { flexDirection: 'row', flex: 1 },
-  leftSidebar: { width: 120, backgroundColor: '#f8f9fa' },
-  sidebarItem: { padding: 16, borderBottomWidth: 1, borderBottomColor: '#eee' },
-  sidebarItemActive: { backgroundColor: '#fff', borderLeftWidth: 4, borderLeftColor: '#B03385' },
-  sidebarText: { fontSize: 15, color: '#555' },
-  sidebarTextActive: { color: '#B03385', fontWeight: '600' },
+  leftSidebar: { width: 120, backgroundColor: '#F9F9F9' },
+  sidebarItem: { padding: 16, borderBottomWidth: 1, borderBottomColor: '#E8E8E8' },
+  sidebarItemActive: { backgroundColor: '#FFFFFF', borderLeftWidth: 4, borderLeftColor: '#f8ac1b' },
+  sidebarText: { fontSize: 15, fontFamily: 'Poppins-Regular', color: '#666666' },
+  sidebarTextActive: { color: '#f8ac1b', fontWeight: '600' },
   rightContent: { flex: 1, padding: 16 },
-  sectionTitle: { fontSize: 16, fontWeight: '600', marginBottom: 12 },
+  sectionTitle: { fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '600', marginBottom: 12 },
   checkboxRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
-  checkbox: { width: 20, height: 20, borderRadius: 4, borderWidth: 2, borderColor: '#B03385', marginRight: 12 },
-  checkboxSelected: { backgroundColor: '#B03385' },
-  checkboxLabel: { fontSize: 15 },
-  priceLabel: { fontSize: 16, marginBottom: 16, textAlign: 'center', fontWeight: '500' },
+  checkbox: { width: 20, height: 20, borderRadius: 4, borderWidth: 2, borderColor: '#f8ac1b', marginRight: 12 },
+  checkboxSelected: { backgroundColor: '#f8ac1b' },
+  checkboxLabel: { fontSize: 15, fontFamily: 'Poppins-Regular' },
+  priceLabel: { fontSize: 16, fontFamily: 'Poppins-Regular', marginBottom: 16, textAlign: 'center', fontWeight: '500' },
   slider: { width: '100%', height: 40 },
 
   filterFooter: {
     flexDirection: 'row',
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: '#E8E8E8',
   },
   clearBtn: { flex: 1, alignItems: 'center', padding: 14 },
-  clearText: { color: '#B03385', fontWeight: '600' },
+  clearText: { color: '#111111', fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
   closeBtn: { flex: 1, alignItems: 'center', padding: 14 },
-  closeText: { color: '#666', fontWeight: '600' },
+  closeText: { color: '#666666', fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
   applyBtn: {
     flex: 1,
-    backgroundColor: '#B03385',
-    borderRadius: 8,
+    backgroundColor: '#111111',
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  applyText: { color: '#fff', fontWeight: '600' },
+  applyText: { color: '#FFFFFF', fontWeight: '700', fontFamily: 'Poppins-SemiBold' },
 });

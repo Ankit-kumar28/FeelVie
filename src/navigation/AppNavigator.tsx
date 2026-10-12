@@ -51,6 +51,7 @@ import CheckoutScreen from '../screens/CheckoutScreen';
 import WalletScreen from '../screens/Wallet';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import VirtualTryOnHistoryScreen from '../screens/virtualTry/VirtualTryOnHistoryScreen';
+import SampleOutfitScreen from '../screens/SampleOutfitScreen';
 
 console.log("SearchScreen imported in AppNavigator:", !!SearchScreen);
 const Stack = createNativeStackNavigator();
@@ -87,49 +88,55 @@ function AppStack() {
         gestureEnabled: true,
       }}
     >
-       <Stack.Screen name="Splash" component={SplashScreen} />
+
+      {/* Core */}
+      <Stack.Screen name="Splash" component={SplashScreen} />
       <Stack.Screen name="MainTabs" component={MainTabNavigator} />
-      <Stack.Screen name="Search" component={SearchScreen} />
-      <Stack.Screen name="Marketplace" component={MarketplaceScreen} />
-
-      {/* Sell flow */}
-      <Stack.Screen name="SellOptions" component={SellOptionsScreen} />
-      <Stack.Screen name="SellProduct" component={SellProductScreen} />
-      <Stack.Screen name="RentProduct" component={RentProductScreen} />
-
-      {/* Other protected screens */}
-      <Stack.Screen name="CartScreen" component={CartScreen} />
-      <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
       <Stack.Screen name="PersonalInfoScreen" component={PersonalInfoScreen} />
-      <Stack.Screen name="AddressScreen" component={AddressScreen} />
-      <Stack.Screen name="PaymentInfoScreen" component={PaymentInfoScreen} />
+      <Stack.Screen name="WalletScreen" component={WalletScreen} />
+
+      {/* Try-on screens */}
       <Stack.Screen name="VirtualTryOn" component={VirtualTryOnScreen} />
+      <Stack.Screen name="TryOnResult" component={TryOnResult} />
+      <Stack.Screen name="VirtualTryOnDetails" component={VirtualTryOnDetails} />
+      <Stack.Screen name="ImageScoreValidation" component={ImageScoreValidationScreen} />
+      <Stack.Screen name="VirtualTryOnHistory" component={VirtualTryOnHistoryScreen} />
       <Stack.Screen name="TryOn404" component={TryOn404Screen} />
-      <Stack.Screen name="MyWishList" component={MyWishListScreen} />
-      <Stack.Screen name="SearchResults" component={SearchResultsScreen} />
+      <Stack.Screen name="SampleOutfit" component={SampleOutfitScreen} />
+
+      {/* Help & support */}
       <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
       <Stack.Screen name="ChatSupport" component={ChatSupportScreen} />
       <Stack.Screen name="AboutUs" component={AboutUsScreen} />
       <Stack.Screen name="TermsOfUse" component={TermsOfUseScreen} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
       <Stack.Screen name="FAQs" component={FAQsScreen} />
-      <Stack.Screen name="MyListings" component={MyListingsScreen} />
-      <Stack.Screen name="EditAddress" component={EditAddressScreen} />
+
+      {/* Browse & discovery */}
+      <Stack.Screen name="Search" component={SearchScreen} />
+      <Stack.Screen name="SearchResults" component={SearchResultsScreen} />
+      <Stack.Screen name="Marketplace" component={MarketplaceScreen} />
+      <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
+      <Stack.Screen name="MyWishList" component={MyWishListScreen} />
+
+      {/* Buy flow */}
+      <Stack.Screen name="CartScreen" component={CartScreen} />
+      <Stack.Screen name="Checkout" component={CheckoutScreen} />
       <Stack.Screen name="MyOrders" component={MyOrdersScreen} />
       <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
-      <Stack.Screen name="TryOnResult" component={TryOnResult} />
-      <Stack.Screen name="VirtualTryOnDetails" component={VirtualTryOnDetails} />
-      <Stack.Screen name="ImageScoreValidation" component={ImageScoreValidationScreen} />
+
+      {/* Sell flow */}
+      <Stack.Screen name="SellOptions" component={SellOptionsScreen} />
+      <Stack.Screen name="SellProduct" component={SellProductScreen} />
+      <Stack.Screen name="RentProduct" component={RentProductScreen} />
+      <Stack.Screen name="MyListings" component={MyListingsScreen} />
+
+      {/* Account details */}
+      <Stack.Screen name="AddressScreen" component={AddressScreen} />
+      <Stack.Screen name="EditAddress" component={EditAddressScreen} />
+      <Stack.Screen name="PaymentInfoScreen" component={PaymentInfoScreen} />
       <Stack.Screen name="DetailedUserInfo" component={DetailedUserInfoScreen} />
-      <Stack.Screen name="VirtualTryOnHistory" component={VirtualTryOnHistoryScreen} />
-      <Stack.Screen name="Checkout" component={CheckoutScreen} />
-
-      <Stack.Screen name="WalletScreen" component={WalletScreen} />
-
-
-
-      {/* You can add more screens here later */}
     </Stack.Navigator>
   );
 }

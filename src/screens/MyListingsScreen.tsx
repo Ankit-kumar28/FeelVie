@@ -59,7 +59,7 @@ export default function MyListingsScreen() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const BASE_URL = 'https://feelvie.yaytech.in';
+  const BASE_URL = 'https://api.feelvie.com';
   const PRODUCTS_ENDPOINT = `${BASE_URL}/api/catalog/products/my_products/`;
   const WISHLIST_ENDPOINT = `${BASE_URL}/api/wishlist/items/`;
 
@@ -197,18 +197,18 @@ export default function MyListingsScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#B03385" style={{ flex: 1 }} />
+        <ActivityIndicator size="large" color="#f8ac1b" style={{ flex: 1 }} />
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       <View style={[styles.topHeader, { paddingTop: insets.top }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-back-ios" size={26} color="#1C1C1E" />
+          <Icon name="arrow-back-ios" size={26} color="#111111" />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>My Listings</Text>
@@ -217,7 +217,7 @@ export default function MyListingsScreen() {
           onPress={() => navigation.navigate('MyWishList')}
           style={styles.headerAction}
         >
-          <Icon name="favorite-border" size={28} color="#1C1C1E" />
+          <Icon name="favorite-border" size={28} color="#111111" />
         </TouchableOpacity>
       </View>
 
@@ -257,12 +257,12 @@ export default function MyListingsScreen() {
                     hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
                   >
                     {status.isToggling ? (
-                      <ActivityIndicator size="small" color="#fff" />
+                      <ActivityIndicator size="small" color="#FFFFFF" />
                     ) : (
                       <Icon
                         name={status.inWishlist ? 'favorite' : 'favorite-border'}
                         size={24}
-                        color={status.inWishlist ? '#ef4444' : '#ffffff'}
+                        color={status.inWishlist ? '#EF4444' : '#FFFFFF'}
                         style={styles.heartShadow}
                       />
                     )}
@@ -295,7 +295,7 @@ export default function MyListingsScreen() {
           }}
           ListEmptyComponent={() => (
             <View style={styles.emptyContainer}>
-              <Icon name="inventory-2" size={80} color="#e0e0e0" />
+              <Icon name="inventory-2" size={80} color="#E8E8E8" />
               <Text style={styles.emptyText}>No products listed yet</Text>
               <Text style={styles.emptySubText}>Your uploaded items will appear here</Text>
             </View>
@@ -309,7 +309,7 @@ export default function MyListingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#F9F9F9',
   },
 
   topHeader: {
@@ -318,15 +318,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: '#E8E8E8',
   },
   backButton: { padding: 6 },
   headerTitle: {
     fontSize: 21,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#B03385',
+    color: '#f8ac1b',
   },
   headerAction: { padding: 8 },
 
@@ -343,11 +344,11 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     marginBottom: 16,
     borderRadius: 12,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     overflow: 'hidden',
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: '#111111',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.08,
         shadowRadius: 6,
@@ -362,7 +363,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
     aspectRatio: IMAGE_ASPECT_RATIO,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#F9F9F9',
   },
   productImage: {
     ...StyleSheet.absoluteFillObject,
@@ -391,8 +392,9 @@ const styles = StyleSheet.create({
 
   productName: {
     fontSize: 14,
+    fontFamily: 'Poppins-Regular',
     fontWeight: '500',
-    color: '#111827',
+    color: '#111111',
     lineHeight: 18,
     marginBottom: 6,
   },
@@ -405,19 +407,22 @@ const styles = StyleSheet.create({
   },
   sellingPrice: {
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#111827',
+    color: '#111111',
   },
   originalPrice: {
     fontSize: 13,
-    color: '#6b7280',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     textDecorationLine: 'line-through',
   },
   discountBadge: {
     fontSize: 11,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#ffffff',
-    backgroundColor: '#16a34ac3',
+    color: '#FFFFFF',
+    backgroundColor: '#16A34Ac3',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -432,20 +437,23 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 19,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#4b5563',
+    color: '#666666',
     marginTop: 16,
   },
   emptySubText: {
     fontSize: 14,
-    color: '#9ca3af',
+    fontFamily: 'Poppins-Regular',
+    color: '#AAAAAA',
     textAlign: 'center',
     marginTop: 8,
   },
 
   errorText: {
-    color: '#dc2626',
+    color: '#EF4444',
     fontSize: 15,
+    fontFamily: 'Poppins-Regular',
     textAlign: 'center',
     paddingVertical: 20,
     paddingHorizontal: 16,

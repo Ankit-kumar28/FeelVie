@@ -57,7 +57,7 @@ export default function AddressScreen({ navigation }) {
       const token = await AsyncStorage.getItem('access_token');
       if (!token) return;
 
-      const response = await fetch('https://feelvie.yaytech.in/api/auth/addresses/', {
+      const response = await fetch('https://api.feelvie.com/api/auth/addresses/', {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -93,12 +93,12 @@ export default function AddressScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-left" size={26} color="#111827" />
+          <Icon name="arrow-left" size={26} color="#111111" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Address</Text>
         <View style={{ width: 26 }} />
@@ -107,7 +107,7 @@ export default function AddressScreen({ navigation }) {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {loading ? (
           <View style={styles.centered}>
-            <ActivityIndicator size="large" color="#B4338A" />
+            <ActivityIndicator size="large" color="#f8ac1b" />
             <Text style={styles.loadingText}>Loading address...</Text>
           </View>
         ) : recentAddress ? (
@@ -116,7 +116,7 @@ export default function AddressScreen({ navigation }) {
             <View style={styles.cardHeader}>
               <View style={styles.headerLeft}>
                 <View style={styles.iconCircle}>
-                  <Icon name="map-marker-outline" size={28} color="#ffffff" />
+                  <Icon name="map-marker-outline" size={28} color="#FFFFFF" />
                 </View>
                 <Text style={styles.cardTitle}>
                   {recentAddress.is_default ? 'Delivery Address' : 'Delivery Address'}
@@ -124,7 +124,7 @@ export default function AddressScreen({ navigation }) {
               </View>
 
               <TouchableOpacity onPress={handleEdit} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-                <Icon name="pencil" size={22} color="#6b7280" />
+                <Icon name="pencil" size={22} color="#666666" />
               </TouchableOpacity>
             </View>
 
@@ -135,7 +135,7 @@ export default function AddressScreen({ navigation }) {
             <Text style={styles.phoneText}>+91 {recentAddress.phone}</Text>
 
             <View style={styles.addressLine}>
-              <Icon name="map-marker" size={16} color="#6b7280" style={{ marginRight: 8 }} />
+              <Icon name="map-marker" size={16} color="#666666" style={{ marginRight: 8 }} />
               <Text style={styles.addressText}>
                 {recentAddress.line1}
                 {recentAddress.line2 ? `, ${recentAddress.line2}` : ''}
@@ -156,7 +156,7 @@ export default function AddressScreen({ navigation }) {
           </View>
         ) : (
           <View style={styles.emptyState}>
-            <Icon name="map-marker-radius" size={90} color="#e5e7eb" />
+            <Icon name="map-marker-radius" size={90} color="#E8E8E8" />
             <Text style={styles.emptyTitle}>No Address Added</Text>
             <Text style={styles.emptySubtitle}>
               Add your delivery address for faster checkout
@@ -176,7 +176,7 @@ export default function AddressScreen({ navigation }) {
           ]}
         >
           <TouchableOpacity activeOpacity={0.85} onPress={handleAddNew}>
-            <Icon name="plus" size={32} color="#ffffff" />
+            <Icon name="plus" size={32} color="#FFFFFF" />
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -187,7 +187,7 @@ export default function AddressScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#F9F9F9',
   },
   header: {
     flexDirection: 'row',
@@ -195,14 +195,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: '#F9F9F9',
   },
   headerTitle: {
     fontSize: 20,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#B03385',
+    color: '#111111',
   },
 
   scrollContent: {
@@ -219,18 +220,19 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 15,
-    color: '#6b7280',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
   },
 
   // Card ab full width → no horizontal margin
   addressCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     padding: 24,
     paddingTop: 20,
     paddingVertical: 20,
     borderWidth: 1,
-    borderColor: '#d9dbde',
-    shadowColor: '#000',
+    borderColor: '#E8E8E8',
+    shadowColor: '#111111',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.07,
     shadowRadius: 8,
@@ -256,33 +258,36 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 21,
-    backgroundColor: '#8b326d',
+    backgroundColor: '#f8ac1b',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
   },
   cardTitle: {
     fontSize: 21,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#1f2937',
+    color: '#111111',
   },
 
   // ← Naya divider line title ke niche
   divider: {
     height: 1,
-    backgroundColor: '#e2e8f0',
+    backgroundColor: '#E8E8E8',
     marginBottom: 20,
   },
 
   nameText: {
     fontSize: 18,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#111827',
+    color: '#111111',
     marginBottom: 6,
   },
   phoneText: {
     fontSize: 16,
-    color: '#4b5563',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     marginBottom: 16,
   },
 
@@ -293,33 +298,37 @@ const styles = StyleSheet.create({
   },
   addressText: {
     fontSize: 15,
+    fontFamily: 'Poppins-Regular',
     lineHeight: 22,
-    color: '#374151',
+    color: '#444444',
     flex: 1,
   },
   cityText: {
     fontSize: 15,
-    color: '#374151',
+    fontFamily: 'Poppins-Regular',
+    color: '#444444',
     marginBottom: 6,
   },
   countryText: {
     fontSize: 14,
-    color: '#6b7280',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
   },
 
   activeLabelContainer: {
     position: 'absolute',
     bottom: 16,
     right: 16,
-    backgroundColor: '#ecfdf5',
+    backgroundColor: '#EFF7F0',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 10,
   },
   activeLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#10b981',
+    color: '#16A34A',
   },
 
   emptyState: {
@@ -329,27 +338,30 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 22,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#1f2937',
+    color: '#111111',
     marginTop: 24,
   },
   emptySubtitle: {
     fontSize: 15,
-    color: '#6b7280',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     marginTop: 12,
     textAlign: 'center',
     lineHeight: 22,
   },
   addFirstButton: {
     marginTop: 36,
-    backgroundColor: '#B4338A',
+    backgroundColor: '#111111',
     paddingVertical: 16,
     paddingHorizontal: 36,
     borderRadius: 14,
   },
   addFirstButtonText: {
-    color: '#ffffff',
+    color: '#FFFFFF',
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
   },
 
@@ -360,10 +372,10 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#B4338A',
+    backgroundColor: '#f8ac1b',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#B4338A',
+    shadowColor: '#f8ac1b',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.35,
     shadowRadius: 12,

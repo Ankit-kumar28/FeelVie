@@ -23,7 +23,7 @@ import RazorpayCheckout from 'react-native-razorpay';
 import { BASE_URL } from '../../config/env';
 
 const { width } = Dimensions.get('window');
-// const BASE_URL = 'https://feelvie.yaytech.in';
+// const BASE_URL = 'https://api.feelvie.com';
 
 type ModalType = 'success' | 'error' | 'warning' | 'info';
 
@@ -109,19 +109,19 @@ function CustomModal({
 }: CustomModalProps) {
   const getIcon = () => {
     switch (type) {
-      case 'success': return <Icon name="check-circle" size={64} color="#10b981" />;
-      case 'error': return <Icon name="alert-circle" size={64} color="#ef4444" />;
-      case 'warning': return <Icon name="alert" size={64} color="#f59e0b" />;
-      default: return <Icon name="information" size={64} color="#3b82f6" />;
+      case 'success': return <Icon name="check-circle" size={64} color="#16A34A" />;
+      case 'error': return <Icon name="alert-circle" size={64} color="#EF4444" />;
+      case 'warning': return <Icon name="alert" size={64} color="#f8ac1b" />;
+      default: return <Icon name="information" size={64} color="#111111" />;
     }
   };
 
   const getButtonColor = () => {
     switch (type) {
-      case 'success': return '#10b981';
-      case 'error': return '#ef4444';
-      case 'warning': return '#f59e0b';
-      default: return '#3b82f6';
+      case 'success': return '#16A34A';
+      case 'error': return '#EF4444';
+      case 'warning': return '#f8ac1b';
+      default: return '#111111';
     }
   };
 
@@ -313,7 +313,7 @@ export default function CartScreen() {
         setStep(1);
         setPaymentMethod(null);
         setSelectedAddress(null);
-        navigation.navigate('Home');
+        navigation.navigate('MainTabs', { screen: 'Marketplace' });
       },
       'Continue Shopping'
     );
@@ -523,7 +523,7 @@ export default function CartScreen() {
         order_id: razorpay_order_id,
         name: 'Feelvie',
         prefill: { email, contact: phone, name: fullName },
-        theme: { color: '#B03385' },
+        theme: { color: '#f8ac1b' },
         modal: {
           ondismiss: () => {
             console.log('[RAZORPAY] Checkout modal dismissed / cancelled');
@@ -685,17 +685,17 @@ export default function CartScreen() {
         <View style={[styles.headerContainer, { paddingTop: insets.top }]}>
           <View style={styles.header}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Icon name="arrow-left" size={24} color="#111827" />
+              <Icon name="arrow-left" size={24} color="#111111" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>My Cart</Text>
             <TouchableOpacity onPress={() => navigation.navigate('MyWishList')}>
-              <Icon name="heart-outline" size={26} color="#000000" />
+              <Icon name="heart-outline" size={26} color="#111111" />
             </TouchableOpacity>
           </View>
         </View>
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#B03385" />
-          <Text style={{ marginTop: 20, fontSize: 16, color: '#64748b' }}>
+          <ActivityIndicator size="large" color="#f8ac1b" />
+          <Text style={{ marginTop: 20, fontSize: 16, color: '#666666' }}>
             Refreshing cart...
           </Text>
         </View>
@@ -708,14 +708,14 @@ export default function CartScreen() {
       <View style={[styles.headerContainer, { paddingTop: insets.top }]}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => step === 1 ? navigation.goBack() : setStep(step - 1)}>
-            <Icon name="arrow-left" size={24} color="#111827" />
+            <Icon name="arrow-left" size={24} color="#111111" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>My Cart</Text>
           <TouchableOpacity
             style={styles.wishlistHeaderBtn}
             onPress={() => navigation.navigate('MyWishList')}
           >
-            <Icon name="heart-outline" size={26} color="#000000" />
+            <Icon name="heart-outline" size={26} color="#111111" />
           </TouchableOpacity>
         </View>
       </View>
@@ -731,7 +731,7 @@ export default function CartScreen() {
                 s > step && styles.stepFuture,
               ]}>
                 {s < step ? (
-                  <Icon name="check" size={18} color="#fff" />
+                  <Icon name="check" size={18} color="#FFFFFF" />
                 ) : (
                   <Text style={[
                     styles.stepNumber,
@@ -771,10 +771,10 @@ export default function CartScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={['#B03385', '#ec4899', '#c026d3']}
-              tintColor="#B03385"
+              colors={['#f8ac1b', '#f8ac1b', '#f8ac1b']}
+              tintColor="#f8ac1b"
               title={step === 1 ? "Updating cart..." : step === 2 ? "Loading addresses..." : "Refreshing..."}
-              titleColor="#64748b"
+              titleColor="#666666"
             />
           }
           keyboardShouldPersistTaps="handled"
@@ -783,14 +783,14 @@ export default function CartScreen() {
             <>
               {displayItems.length === 0 ? (
                 <View style={styles.emptyStateContainer}>
-                  <Ionicons name="cart-outline" size={100} color="#d1d5db" />
+                  <Ionicons name="cart-outline" size={100} color="#E8E8E8" />
                   <Text style={styles.emptyTitle}>Your cart is empty</Text>
                   <Text style={styles.emptySubtitle}>
                     Pull down to refresh or add items to continue shopping
                   </Text>
                   <TouchableOpacity
                     style={styles.shopNowBtn}
-                    onPress={() => navigation.navigate("Home")}
+                    onPress={() => navigation.navigate('MainTabs', { screen: 'Marketplace' })}
                   >
                     <Text style={styles.shopNowText}>Continue Shopping</Text>
                   </TouchableOpacity>
@@ -803,7 +803,7 @@ export default function CartScreen() {
                         ? Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)
                         : 0;
 
-                    const colorHex = item.colorHex || '#000000';
+                    const colorHex = item.colorHex || '#111111';
 
                     return (
                       <View style={styles.cardContainer} key={item.cartId}>
@@ -893,7 +893,7 @@ export default function CartScreen() {
                               }}
                             >
                               <Text style={styles.wishlistText}>Move to Wishlist</Text>
-                              <Ionicons name="arrow-forward-outline" size={18} color="#64748b" style={{ marginLeft: 8 }} />
+                              <Ionicons name="arrow-forward-outline" size={18} color="#666666" style={{ marginLeft: 8 }} />
                             </TouchableOpacity>
                           </View>
                         </TouchableOpacity>
@@ -905,7 +905,7 @@ export default function CartScreen() {
                             handleRemove(item);
                           }}
                         >
-                          <Ionicons name="close" size={20} color="#64748b" />
+                          <Ionicons name="close" size={20} color="#666666" />
                         </TouchableOpacity>
                       </View>
                     );
@@ -951,7 +951,7 @@ export default function CartScreen() {
 
               {loadingAddress ? (
                 <View style={styles.centered}>
-                  <ActivityIndicator size="large" color="#B03385" />
+                  <ActivityIndicator size="large" color="#f8ac1b" />
                   <Text style={styles.loadingText}>Loading addresses...</Text>
                 </View>
               ) : savedAddresses.length > 0 ? (
@@ -1008,7 +1008,7 @@ export default function CartScreen() {
                                 })
                               }
                             >
-                              <Icon name="pencil" size={20} color="#B03385" />
+                              <Icon name="pencil" size={20} color="#f8ac1b" />
                             </TouchableOpacity>
                           )}
                         </View>
@@ -1027,13 +1027,13 @@ export default function CartScreen() {
                       })
                     }
                   >
-                    <Icon name="plus-circle-outline" size={24} color="#B03385" />
+                    <Icon name="plus-circle-outline" size={24} color="#f8ac1b" />
                     <Text style={styles.addNewAddressText}>Add New Address</Text>
                   </TouchableOpacity>
                 </>
               ) : (
                 <View style={styles.emptyAddressContainer}>
-                  <Icon name="map-marker-off" size={80} color="#d1d5db" />
+                  <Icon name="map-marker-off" size={80} color="#E8E8E8" />
                   <Text style={styles.emptyTitle}>No Addresses Found</Text>
                   <Text style={styles.emptySubtitle}>
                     Please add a delivery address to continue
@@ -1068,7 +1068,7 @@ export default function CartScreen() {
                 ]}
                 onPress={() => setPaymentMethod('cod')}
               >
-                <Icon name="cash" size={28} color={paymentMethod === 'cod' ? '#B03385' : '#64748b'} />
+                <Icon name="cash" size={28} color={paymentMethod === 'cod' ? '#f8ac1b' : '#666666'} />
                 <View style={styles.paymentTextContainer}>
                   <Text style={styles.paymentTitle}>Cash on Delivery</Text>
                   <Text style={styles.paymentSubtitle}>Pay when item is delivered</Text>
@@ -1082,7 +1082,7 @@ export default function CartScreen() {
                 ]}
                 onPress={() => setPaymentMethod('online')}
               >
-                <Icon name="credit-card-outline" size={28} color={paymentMethod === 'online' ? '#B03385' : '#64748b'} />
+                <Icon name="credit-card-outline" size={28} color={paymentMethod === 'online' ? '#f8ac1b' : '#666666'} />
                 <View style={styles.paymentTextContainer}>
                   <Text style={styles.paymentTitle}>Pay Online</Text>
                   <Text style={styles.paymentSubtitle}>UPI, Cards, Wallets</Text>
@@ -1133,7 +1133,7 @@ export default function CartScreen() {
             disabled={!canGoNext() || submitting}
           >
             {submitting ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color="#FFFFFF" />
             ) : (
               <Text style={styles.placeOrderText}>
                 {step === 1
@@ -1162,13 +1162,13 @@ export default function CartScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
+  container: { flex: 1, backgroundColor: '#F9F9F9' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 
   headerContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: '#E8E8E8',
   },
 
   header: {
@@ -1184,8 +1184,9 @@ const styles = StyleSheet.create({
 
   headerTitle: {
     fontSize: 26,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#B03385',
+    color: '#111111',
   },
 
   wishlistHeaderBtn: {
@@ -1199,9 +1200,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingTop: 10,
     paddingBottom:12,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: '#F9F9F9',
   },
 
   stepWrapper: { alignItems: 'center', width: 80 },
@@ -1210,25 +1211,25 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: '#E8E8E8',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#d1d5db',
+    borderColor: '#E8E8E8',
   },
 
-  stepCompleted: { backgroundColor: '#B03385', borderColor: '#B03385' },
-  stepActive: { backgroundColor: '#fff', borderColor: '#B03385', borderWidth: 3 },
-  stepFuture: { backgroundColor: '#f3f4f6', borderColor: '#d1d5db' },
+  stepCompleted: { backgroundColor: '#f8ac1b', borderColor: '#f8ac1b' },
+  stepActive: { backgroundColor: '#FFFFFF', borderColor: '#f8ac1b', borderWidth: 3 },
+  stepFuture: { backgroundColor: '#F9F9F9', borderColor: '#E8E8E8' },
 
-  stepNumber: { fontSize: 14, fontWeight: '600', color: '#6b7280' },
-  stepNumberActive: { color: '#B03385', fontWeight: '700' },
+  stepNumber: { fontSize: 14, fontFamily: 'Poppins-SemiBold', fontWeight: '600', color: '#666666' },
+  stepNumberActive: { color: '#f8ac1b', fontWeight: '700' },
 
-  stepLabel: { marginTop: 6, fontSize: 12, fontWeight: '500', color: '#9ca3af' },
-  stepLabelActive: { color: '#111827', fontWeight: '700' },
+  stepLabel: { marginTop: 6, fontSize: 12, fontFamily: 'Poppins-Regular', fontWeight: '500', color: '#AAAAAA' },
+  stepLabelActive: { color: '#111111', fontWeight: '700' },
 
-  stepConnector: { height: 2, width: 80, backgroundColor: '#d0d1d1', marginHorizontal: -10, marginBottom: 18 },
-  stepConnectorCompleted: { backgroundColor: '#B03385' },
+  stepConnector: { height: 2, width: 80, backgroundColor: '#E8E8E8', marginHorizontal: -10, marginBottom: 18 },
+  stepConnectorCompleted: { backgroundColor: '#f8ac1b' },
 
   scrollContent: { padding: 16, paddingBottom: 160 },
 
@@ -1237,25 +1238,25 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#F9F9F9',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    shadowColor: '#000',
+    shadowColor: '#111111',
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
   },
 
   placeOrderBtn: {
-    backgroundColor: '#B03385',
+    backgroundColor: '#111111',
     paddingVertical: 16,
     borderRadius: 30,
     alignItems: 'center',
   },
 
-  btnDisabled: { backgroundColor: '#cbd5e1' },
+  btnDisabled: { backgroundColor: '#E8E8E8' },
 
-  placeOrderText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  placeOrderText: { color: '#FFFFFF', fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '700' },
 
   cardContainer: {
     position: 'relative',
@@ -1264,12 +1265,12 @@ const styles = StyleSheet.create({
 
   card: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
-    shadowColor: '#000',
+    borderColor: '#E8E8E8',
+    shadowColor: '#111111',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -1279,19 +1280,19 @@ const styles = StyleSheet.create({
 
   details: { flex: 1, marginLeft: 16 },
 
-  title: { fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 6 },
+  title: { fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#111111', marginBottom: 6 },
 
   metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 8 },
 
-  meta: { fontSize: 13, color: '#64748b' },
+  meta: { fontSize: 13, fontFamily: 'Poppins-Regular', color: '#666666' },
 
-  sizeBold: { fontWeight: '700', color: '#111827' },
+  sizeBold: { fontWeight: '700', color: '#111111' },
 
   colorRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
 
-  colorDot: { width: 14, height: 14, borderRadius: 7, borderWidth: 1, borderColor: '#d1d5db' },
+  colorDot: { width: 14, height: 14, borderRadius: 7, borderWidth: 1, borderColor: '#E8E8E8' },
 
-  colorName: { fontSize: 13, fontWeight: '600' },
+  colorName: { fontSize: 13, fontFamily: 'Poppins-SemiBold', fontWeight: '600' },
 
   priceRow: {
     flexDirection: 'row',
@@ -1302,11 +1303,12 @@ const styles = StyleSheet.create({
 
   priceContainer: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 },
 
-  price: { fontSize: 18, fontWeight: '700', color: '#B03385' },
+  price: { fontSize: 18, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#111111' },
 
   originalPrice: {
     fontSize: 14,
-    color: '#94a3b8',
+    fontFamily: 'Poppins-Regular',
+    color: '#AAAAAA',
     textDecorationLine: 'line-through',
     marginLeft: 8,
   },
@@ -1314,10 +1316,10 @@ const styles = StyleSheet.create({
   quantityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#F9F9F9',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#E8E8E8',
     height: 36,
   },
 
@@ -1326,72 +1328,74 @@ const styles = StyleSheet.create({
     height: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#E8E8E8',
   },
 
-  qtyText: { fontSize: 18, fontWeight: '700', color: '#B03385' },
+  qtyText: { fontSize: 18, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#f8ac1b' },
 
   quantityDisplay: {
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#111827',
+    color: '#111111',
     marginHorizontal: 12,
   },
 
   wishlistRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
 
-  wishlistText: { fontSize: 13, color: '#64748b', marginLeft: 6 },
+  wishlistText: { fontSize: 13, fontFamily: 'Poppins-Regular', color: '#666666', marginLeft: 6 },
 
   removeIcon: {
     position: 'absolute',
     top: 12,
     right: 12,
     padding: 8,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#F9F9F9',
     borderRadius: 20,
   },
 
   priceCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#E8E8E8',
   },
 
-  priceCardTitle: { fontSize: 17, fontWeight: '700', color: '#111827', marginBottom: 12 },
+  priceCardTitle: { fontSize: 17, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#111111', marginBottom: 12 },
 
   priceLine: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
 
-  label: { fontSize: 14, color: '#64748b' },
+  label: { fontSize: 14, fontFamily: 'Poppins-Regular', color: '#666666' },
 
-  value: { fontSize: 14, fontWeight: '600', color: '#111827' },
+  value: { fontSize: 14, fontFamily: 'Poppins-SemiBold', fontWeight: '600', color: '#111111' },
 
-  free: { color: '#16a34a', fontWeight: '700' },
+  free: { color: '#16A34A', fontWeight: '700' },
 
   totalLine: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
+    borderTopColor: '#E8E8E8',
     paddingTop: 12,
     marginTop: 8,
   },
 
-  totalLabel: { fontSize: 16, fontWeight: '700', color: '#111827' },
+  totalLabel: { fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#111111' },
 
-  totalValue: { fontSize: 18, fontWeight: '800', color: '#B03385' },
+  totalValue: { fontSize: 18, fontFamily: 'Poppins-SemiBold', fontWeight: '800', color: '#f8ac1b' },
 
   savings: {
     marginTop: 12,
     textAlign: 'center',
-    color: '#15803d',
+    color: '#16A34A',
     fontWeight: '700',
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
   },
 
   emptyStateContainer: {
@@ -1404,15 +1408,17 @@ const styles = StyleSheet.create({
 
   emptyTitle: {
     fontSize: 26,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#1e293b',
+    color: '#111111',
     marginTop: 24,
     marginBottom: 8,
   },
 
   emptySubtitle: {
     fontSize: 16,
-    color: '#64748b',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 32,
@@ -1420,29 +1426,30 @@ const styles = StyleSheet.create({
 
   shopNowBtn: {
     marginTop: 8,
-    backgroundColor: '#B03385',
+    backgroundColor: '#111111',
     paddingHorizontal: 48,
     paddingVertical: 16,
     borderRadius: 30,
   },
 
-  shopNowText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  shopNowText: { color: '#FFFFFF', fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '700' },
 
   sectionTitle: {
     fontSize: 18,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#111827',
+    color: '#111111',
     marginBottom: 16,
   },
 
   addressCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1.5,
-    borderColor: '#e5e7eb',
-    shadowColor: '#000',
+    borderColor: '#E8E8E8',
+    shadowColor: '#111111',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.07,
     shadowRadius: 8,
@@ -1450,9 +1457,9 @@ const styles = StyleSheet.create({
   },
 
   addressCardSelected: {
-    borderColor: '#B03385',
+    borderColor: '#f8ac1b',
     borderWidth: 2,
-    backgroundColor: '#fdf2f8',
+    backgroundColor: '#FFF6E3',
   },
 
   cardHeader: {
@@ -1465,7 +1472,7 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#B03385',
+    borderColor: '#f8ac1b',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -1476,7 +1483,7 @@ const styles = StyleSheet.create({
     width: 14,
     height: 14,
     borderRadius: 7,
-    backgroundColor: '#B03385',
+    backgroundColor: '#f8ac1b',
   },
 
   addressMain: {
@@ -1492,21 +1499,24 @@ const styles = StyleSheet.create({
 
   nameText: {
     fontSize: 17,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#111827',
+    color: '#111111',
     marginRight: 10,
   },
 
   phoneText: {
     fontSize: 15,
-    color: '#4b5563',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     marginBottom: 8,
   },
 
   addressFullText: {
     fontSize: 15,
+    fontFamily: 'Poppins-Regular',
     lineHeight: 22,
-    color: '#374151',
+    color: '#444444',
   },
 
   editIcon: {
@@ -1521,15 +1531,16 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     paddingVertical: 16,
     borderWidth: 2,
-    borderColor: '#B03385',
+    borderColor: '#f8ac1b',
     borderStyle: 'dashed',
     borderRadius: 16,
-    backgroundColor: '#fff5f9',
+    backgroundColor: '#FFF6E3',
   },
 
   addNewAddressText: {
-    color: '#B03385',
+    color: '#f8ac1b',
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
     marginLeft: 12,
   },
@@ -1543,15 +1554,16 @@ const styles = StyleSheet.create({
 
   addFirstButton: {
     marginTop: 32,
-    backgroundColor: '#B03385',
+    backgroundColor: '#111111',
     paddingHorizontal: 48,
     paddingVertical: 16,
     borderRadius: 30,
   },
 
   addFirstButtonText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
   },
 
@@ -1564,38 +1576,39 @@ const styles = StyleSheet.create({
 
   loadingText: {
     marginTop: 16,
-    color: '#64748b',
+    color: '#666666',
     fontSize: 16,
+    fontFamily: 'Poppins-Regular',
   },
 
   paymentOption: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#E8E8E8',
     alignItems: 'center',
   },
 
   paymentSelected: {
-    borderColor: '#B03385',
+    borderColor: '#f8ac1b',
     borderWidth: 2,
-    backgroundColor: '#fdf2f8',
+    backgroundColor: '#FFF6E3',
   },
 
   paymentTextContainer: { marginLeft: 16, flex: 1 },
 
-  paymentTitle: { fontSize: 16, fontWeight: '600', color: '#111827' },
+  paymentTitle: { fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '600', color: '#111111' },
 
-  paymentSubtitle: { fontSize: 13, color: '#64748b', marginTop: 2 },
+  paymentSubtitle: { fontSize: 13, fontFamily: 'Poppins-Regular', color: '#666666', marginTop: 2 },
 
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
 
   modalContainer: {
     width: width * 0.84,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 32,
     alignItems: 'center',
@@ -1603,23 +1616,23 @@ const styles = StyleSheet.create({
 
   modalIconContainer: { marginBottom: 24 },
 
-  modalTitle: { fontSize: 22, fontWeight: '700', color: '#111827', marginBottom: 12 },
+  modalTitle: { fontSize: 22, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#111111', marginBottom: 12 },
 
-  modalMessage: { fontSize: 16, color: '#4b5563', textAlign: 'center', lineHeight: 24, marginBottom: 32 },
+  modalMessage: { fontSize: 16, fontFamily: 'Poppins-Regular', color: '#666666', textAlign: 'center', lineHeight: 24, marginBottom: 32 },
 
   modalButtons: { flexDirection: 'row', width: '100%', gap: 12 },
 
   modalConfirmBtn: { flex: 1, paddingVertical: 16, borderRadius: 16, alignItems: 'center' },
 
-  modalConfirmText: { color: 'white', fontSize: 16, fontWeight: '700' },
+  modalConfirmText: { color: 'white', fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '700' },
 
   modalCancelBtn: {
     flex: 1,
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center',
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#F9F9F9',
   },
 
-  modalCancelText: { color: '#374151', fontSize: 16, fontWeight: '700' },
+  modalCancelText: { color: '#444444', fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '700' },
 });

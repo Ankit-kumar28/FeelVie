@@ -97,7 +97,7 @@ export default function SearchScreen() {
     try {
       const token = await AsyncStorage.getItem('access_token');
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const url = `https://feelvie.yaytech.in/api/catalog/products/search_suggestions/?q=${encodeURIComponent(text.trim())}`;
+      const url = `https://api.feelvie.com/api/catalog/products/search_suggestions/?q=${encodeURIComponent(text.trim())}`;
 
       const res = await fetch(url, { headers });
       if (!res.ok) throw new Error('API failed');
@@ -116,15 +116,15 @@ export default function SearchScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Icon name="arrow-back" size={28} color="#000" />
+          <Icon name="arrow-back" size={28} color="#111111" />
         </TouchableOpacity>
 
         <View style={styles.searchBox}>
-          <Icon name="search" size={20} color="#888" style={{ marginRight: 10 }} />
+          <Icon name="search" size={20} color="#AAAAAA" style={{ marginRight: 10 }} />
           <TextInput
             style={styles.input}
             placeholder="Search products..."
@@ -136,7 +136,7 @@ export default function SearchScreen() {
             onSubmitEditing={handleSearchSubmit}
             returnKeyType="search"
             autoFocus
-            placeholderTextColor="#999"
+            placeholderTextColor="#AAAAAA"
           />
         </View>
       </View>
@@ -149,12 +149,12 @@ export default function SearchScreen() {
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.suggestionItem} onPress={() => handleSuggestionPress(item)}>
               <View style={styles.suggestionRow}>
-                <Icon name="search" size={18} color="#777" style={{ marginRight: 12 }} />
+                <Icon name="search" size={18} color="#AAAAAA" style={{ marginRight: 12 }} />
                 <Text style={styles.suggestionText}>{item}</Text>
                 <Icon 
                   name="chevron-right" 
                   size={20} 
-                  color="#B03385" 
+                  color="#f8ac1b" 
                   style={styles.arrowIcon} 
                 />
               </View>
@@ -194,32 +194,32 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#E8E8E8',
   },
   backBtn: { padding: 8 },
   searchBox: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F9F9F9',
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 48,
     marginLeft: 8,
   },
-  input: { flex: 1, fontSize: 16, color: '#000' },
-  suggestionsList: { maxHeight: 220, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#eee' },
+  input: { flex: 1, fontSize: 16, fontFamily: 'Poppins-Regular', color: '#111111' },
+  suggestionsList: { maxHeight: 220, backgroundColor: '#FFFFFF', borderBottomWidth: 1, borderBottomColor: '#E8E8E8' },
   suggestionItem: { 
     paddingVertical: 12, 
     borderBottomWidth: 1, 
-    borderBottomColor: '#f5f5f5' 
+    borderBottomColor: '#F9F9F9' 
   },
   suggestionRow: {
     flexDirection: 'row',
@@ -229,8 +229,9 @@ const styles = StyleSheet.create({
   },
   suggestionText: { 
     flex: 1, 
-    fontSize: 16, 
-    color: '#333' 
+    fontSize: 16,
+    fontFamily: 'Poppins-Regular', 
+    color: '#444444' 
   },
   arrowIcon: {
     marginLeft: 12,
@@ -243,17 +244,23 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     marginBottom: 12 
   },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: '#333' },
-  clearText: { color: '#B03385', fontWeight: '500' },
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: 'serif',
+    fontStyle: 'italic',
+    fontWeight: '800',
+    color: '#111111',
+  },
+  clearText: { color: '#f8ac1b', fontWeight: '600', fontFamily: 'Poppins-SemiBold', fontSize: 13 },
   chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   chip: {
-    backgroundColor: '#fff0f5',
+    backgroundColor: '#FFF6E3',
     paddingVertical: 10,
     paddingHorizontal: 18,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#ffc1cc',
+    borderColor: '#F6DCA6',
   },
-  chipText: { fontSize: 15, color: '#B03385', fontWeight: '500' },
-  emptyRecent: { textAlign: 'center', color: '#888', fontSize: 16, marginTop: 40 },
+  chipText: { fontSize: 14, fontFamily: 'Poppins-Regular', color: '#111111', fontWeight: '500' },
+  emptyRecent: { textAlign: 'center', color: '#AAAAAA', fontSize: 16, fontFamily: 'Poppins-Regular', marginTop: 40 },
 });
