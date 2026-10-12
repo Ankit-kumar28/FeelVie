@@ -303,9 +303,29 @@ export default function ProfileScreen() {
         {/* Menu Sections */}
         <View style={styles.sectionsContainer}>
           <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Shopping</Text>
+            <View style={styles.menuGroupCard}>
+              <MenuItem icon="bag-personal-outline" title="Browse Marketplace" onPress={() => navigation.navigate('Marketplace')} />
+              <MenuItem icon="package-variant-closed" title="My Orders" onPress={() => navigation.navigate('MyOrders')} />
+              <MenuItem icon="cart-outline" title="My Cart" onPress={() => navigation.navigate('CartScreen')} />
+              <MenuItem icon="heart-outline" title="My Wishlist" onPress={() => navigation.navigate('MyWishList')} />
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Selling</Text>
+            <View style={styles.menuGroupCard}>
+              <MenuItem icon="tag-plus-outline" title="Sell or Rent an Item" onPress={() => navigation.navigate('SellOptions')} />
+              <MenuItem icon="format-list-bulleted" title="My Listings" onPress={() => navigation.navigate('MyListings')} />
+            </View>
+          </View>
+
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>PAYMENT</Text>
             <View style={styles.menuGroupCard}>
               <MenuItem icon="wallet-outline" title="Wallet & Coins" onPress={() => navigation.navigate('WalletScreen')} />
+              <MenuItem icon="bank-outline" title="Payment & Payouts" onPress={() => navigation.navigate('PaymentInfoScreen')} />
+              <MenuItem icon="map-marker-outline" title="Saved Addresses" onPress={() => navigation.navigate('AddressScreen')} />
             </View>
           </View>
 

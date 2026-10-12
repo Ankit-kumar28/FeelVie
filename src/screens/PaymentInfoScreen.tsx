@@ -61,7 +61,7 @@ export default function PaymentInfoScreen({ navigation }) {
       const token = await AsyncStorage.getItem('access_token');
       if (!token) return;
 
-      const response = await fetch('https://feelvie.yaytech.in/api/auth/bank-details/', {
+      const response = await fetch('https://api.feelvie.com/api/auth/bank-details/', {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -118,7 +118,7 @@ export default function PaymentInfoScreen({ navigation }) {
         upi_id: formBank.upi_id.trim() || null,
       };
 
-      const response = await fetch('https://feelvie.yaytech.in/api/auth/bank-details/', {
+      const response = await fetch('https://api.feelvie.com/api/auth/bank-details/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -168,11 +168,11 @@ export default function PaymentInfoScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       <View style={[styles.header, { paddingTop: insets.top }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-left" size={26} color="#111827" />
+          <Icon name="arrow-left" size={26} color="#111111" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Payment Info</Text>
         <View style={{ width: 26 }} />
@@ -184,7 +184,7 @@ export default function PaymentInfoScreen({ navigation }) {
             <View style={styles.cardHeader}>
               <View style={styles.headerLeft}>
                 <View style={styles.iconCircle}>
-                  <Icon name="bank-outline" size={26} color="#ffffff" />
+                  <Icon name="bank-outline" size={26} color="#FFFFFF" />
                 </View>
                 <Text style={styles.cardTitle}>Bank Account</Text>
               </View>
@@ -205,7 +205,7 @@ export default function PaymentInfoScreen({ navigation }) {
           </View>
         ) : (
           <View style={styles.emptyState}>
-            <Icon name="bank-outline" size={80} color="#d1d5db" />
+            <Icon name="bank-outline" size={80} color="#E8E8E8" />
             <Text style={styles.emptyTitle}>No Bank Details Added</Text>
             <Text style={styles.emptySubtitle}>
               Add your bank account to receive rent payouts securely
@@ -216,7 +216,7 @@ export default function PaymentInfoScreen({ navigation }) {
               onPress={openAddForm}
               activeOpacity={0.85}
             >
-              <Icon name="plus-circle-outline" size={26} color="#ffffff" style={{ marginRight: 12 }} />
+              <Icon name="plus-circle-outline" size={26} color="#FFFFFF" style={{ marginRight: 12 }} />
               <Text style={styles.addBankButtonText}>Add Bank Details</Text>
             </TouchableOpacity>
           </View>
@@ -230,7 +230,7 @@ export default function PaymentInfoScreen({ navigation }) {
           onPress={openAddForm}
           activeOpacity={0.82}
         >
-          <Icon name="plus" size={30} color="#ffffff" />
+          <Icon name="plus" size={30} color="#FFFFFF" />
         </TouchableOpacity>
       )}
 
@@ -240,7 +240,7 @@ export default function PaymentInfoScreen({ navigation }) {
           <View style={styles.formContainer}>
             <View style={styles.formHeader}>
               <TouchableOpacity onPress={() => setShowForm(false)}>
-                <Icon name="arrow-left" size={24} color="#111827" />
+                <Icon name="arrow-left" size={24} color="#111111" />
               </TouchableOpacity>
               <Text style={styles.formTitle}>Add Bank Details</Text>
               <View style={{ width: 24 }} />
@@ -258,7 +258,7 @@ export default function PaymentInfoScreen({ navigation }) {
                 <TextInput
                   style={[styles.input, errors.account_holder_name && styles.inputError]}
                   placeholder="Name as in bank account"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor="#AAAAAA"
                   value={formBank.account_holder_name}
                   onChangeText={(t) => {
                     setFormBank({ ...formBank, account_holder_name: t });
@@ -272,7 +272,7 @@ export default function PaymentInfoScreen({ navigation }) {
                   style={[styles.input, errors.account_number && styles.inputError]}
                   placeholder="Bank account number"
                   keyboardType="numeric"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor="#AAAAAA"
                   value={formBank.account_number}
                   onChangeText={(t) => {
                     setFormBank({ ...formBank, account_number: t });
@@ -286,7 +286,7 @@ export default function PaymentInfoScreen({ navigation }) {
                   style={[styles.input, errors.ifsc_code && styles.inputError]}
                   placeholder="e.g. SBIN0001234"
                   autoCapitalize="characters"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor="#AAAAAA"
                   value={formBank.ifsc_code}
                   onChangeText={(t) => {
                     setFormBank({ ...formBank, ifsc_code: t });
@@ -299,7 +299,7 @@ export default function PaymentInfoScreen({ navigation }) {
                 <TextInput
                   style={styles.input}
                   placeholder="yourname@upi"
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor="#AAAAAA"
                   value={formBank.upi_id}
                   onChangeText={(t) => setFormBank({ ...formBank, upi_id: t })}
                 />
@@ -310,7 +310,7 @@ export default function PaymentInfoScreen({ navigation }) {
                   disabled={bankLoading}
                 >
                   {bankLoading ? (
-                    <ActivityIndicator color="#fff" />
+                    <ActivityIndicator color="#FFFFFF" />
                   ) : (
                     <Text style={styles.saveText}>Save Bank Details</Text>
                   )}
@@ -326,7 +326,7 @@ export default function PaymentInfoScreen({ navigation }) {
         <View style={styles.successModalOverlay}>
           <View style={styles.successModalContainer}>
             <View style={styles.successIconCircle}>
-              <Icon name="check-circle" size={64} color="#ffffff" />
+              <Icon name="check-circle" size={64} color="#FFFFFF" />
             </View>
             <Text style={styles.successTitle}>Saved Successfully!</Text>
             <Text style={styles.successMessage}>Your bank account is ready for payouts.</Text>
@@ -349,7 +349,7 @@ export default function PaymentInfoScreen({ navigation }) {
       >
         <View style={styles.limitModalOverlay}>
           <View style={styles.limitModalContainer}>
-            <Icon name="information-outline" size={56} color="#B03385" style={{ marginBottom: 16 }} />
+            <Icon name="information-outline" size={56} color="#f8ac1b" style={{ marginBottom: 16 }} />
             <Text style={styles.limitModalTitle}>Limit Reached</Text>
             <Text style={styles.limitModalMessage}>
               You can only add one bank account at this time. Contact support if you need to update or change your details.
@@ -370,7 +370,7 @@ export default function PaymentInfoScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#F9F9F9',
   },
   header: {
     flexDirection: 'row',
@@ -378,14 +378,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: '#F9F9F9',
   },
   headerTitle: {
     fontSize: 20,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#B03385',
+    color: '#111111',
   },
 
   scrollContent: {
@@ -395,13 +396,13 @@ const styles = StyleSheet.create({
 
   // ── Saved Bank Card ──────────────────────────────────────
   savedCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     padding: 20,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#E8E8E8',
     borderRadius: 16,
     margin: 16,
-    shadowColor: '#000',
+    shadowColor: '#111111',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 10,
@@ -422,56 +423,62 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#B03385',
+    backgroundColor: '#f8ac1b',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
   },
   cardTitle: {
     fontSize: 20,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#1f2937',
+    color: '#111111',
   },
   divider: {
     height: 1,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: '#E8E8E8',
     marginBottom: 20,
   },
   holderName: {
     fontSize: 18,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#111827',
+    color: '#111111',
     marginBottom: 8,
   },
   accountNumber: {
     fontSize: 22,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
     letterSpacing: 1,
-    color: '#1e293b',
+    color: '#111111',
     marginBottom: 12,
   },
   ifsc: {
     fontSize: 15,
-    color: '#4b5563',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     marginBottom: 6,
   },
   upi: {
     fontSize: 15,
-    color: '#4b5563',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
   },
   activeLabelContainer: {
     position: 'absolute',
     bottom: 20,
     right: 20,
-    backgroundColor: '#ecfdf5',
+    backgroundColor: '#EFF7F0',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
   },
   activeLabel: {
     fontSize: 13,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#10b981',
+    color: '#16A34A',
   },
 
   // ── Empty State ──────────────────────────────────────────
@@ -484,14 +491,16 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 24,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#1f2937',
+    color: '#111111',
     marginTop: 28,
     marginBottom: 12,
   },
   emptySubtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 40,
@@ -499,19 +508,20 @@ const styles = StyleSheet.create({
   addBankButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#B03385',
+    backgroundColor: '#111111',
     paddingVertical: 18,
     paddingHorizontal: 40,
     borderRadius: 16,
-    shadowColor: '#B03385',
+    shadowColor: '#f8ac1b',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.32,
     shadowRadius: 10,
     elevation: 8,
   },
   addBankButtonText: {
-    color: '#ffffff',
+    color: '#FFFFFF',
     fontSize: 18,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
   },
 
@@ -523,10 +533,10 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#B03385',
+    backgroundColor: '#f8ac1b',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#111111',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.34,
     shadowRadius: 12,
@@ -536,7 +546,7 @@ const styles = StyleSheet.create({
   // ── Form Overlay ─────────────────────────────────────────
   formOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     zIndex: 20,
   },
   formContainer: { flex: 1 },
@@ -547,63 +557,69 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 40,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: '#E8E8E8',
   },
   formTitle: {
     fontSize: 20,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#111827',
+    color: '#111111',
   },
   formContent: {
     padding: 24,
   },
   inputLabel: {
     fontSize: 15,
-    color: '#475569',
+    fontFamily: 'Poppins-SemiBold',
+    color: '#666666',
     marginBottom: 8,
     fontWeight: '600',
   },
   input: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#F9F9F9',
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#E8E8E8',
     fontSize: 16,
+    fontFamily: 'Poppins-Regular',
     marginBottom: 8,
   },
   inputError: {
-    borderColor: '#ef4444',
+    borderColor: '#EF4444',
   },
   errorText: {
-    color: '#ef4444',
+    color: '#EF4444',
     fontSize: 13,
+    fontFamily: 'Poppins-Regular',
     marginBottom: 16,
   },
   saveBtn: {
-    backgroundColor: '#B03385',
+    backgroundColor: '#111111',
     paddingVertical: 18,
     borderRadius: 16,
     alignItems: 'center',
     marginTop: 40,
   },
   saveText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 17,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
   },
   disabledBtn: {
-    backgroundColor: '#9ca3af',
+    backgroundColor: '#AAAAAA',
   },
   apiErrorContainer: {
-    backgroundColor: '#fee2e2',
+    backgroundColor: '#FDECEC',
     padding: 16,
     borderRadius: 12,
     margin: 20,
   },
   apiErrorText: {
-    color: '#b91c1c',
+    color: '#EF4444',
     fontSize: 15,
+    fontFamily: 'Poppins-Regular',
     textAlign: 'center',
   },
 
@@ -616,45 +632,48 @@ const styles = StyleSheet.create({
     zIndex: 30,
   },
   successModalContainer: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 36,
     width: '84%',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#111111',
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.3,
     shadowRadius: 24,
     elevation: 16,
   },
   successIconCircle: {
-    backgroundColor: '#10b981',
+    backgroundColor: '#16A34A',
     borderRadius: 999,
     padding: 24,
     marginBottom: 24,
   },
   successTitle: {
     fontSize: 26,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#111827',
+    color: '#111111',
     marginBottom: 12,
   },
   successMessage: {
     fontSize: 16,
-    color: '#4b5563',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     textAlign: 'center',
     marginBottom: 32,
     lineHeight: 24,
   },
   successButton: {
-    backgroundColor: '#B03385',
+    backgroundColor: '#111111',
     paddingVertical: 16,
     paddingHorizontal: 60,
     borderRadius: 16,
   },
   successButtonText: {
-    color: '#ffffff',
+    color: '#FFFFFF',
     fontSize: 17,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
   },
 
@@ -666,7 +685,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   limitModalContainer: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 32,
     width: '82%',
@@ -674,26 +693,29 @@ const styles = StyleSheet.create({
   },
   limitModalTitle: {
     fontSize: 22,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#111827',
+    color: '#111111',
     marginBottom: 12,
   },
   limitModalMessage: {
     fontSize: 16,
-    color: '#4b5563',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     textAlign: 'center',
     marginBottom: 28,
     lineHeight: 24,
   },
   limitModalButton: {
-    backgroundColor: '#B03385',
+    backgroundColor: '#111111',
     paddingVertical: 14,
     paddingHorizontal: 56,
     borderRadius: 16,
   },
   limitModalButtonText: {
-    color: '#ffffff',
+    color: '#FFFFFF',
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
   },
 });

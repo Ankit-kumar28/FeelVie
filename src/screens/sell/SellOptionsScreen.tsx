@@ -6,65 +6,82 @@ import {
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
+  ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import SellProductScreen from '../ProductScreen';
-import RentProductScreen from './RentProductScreen';
+import ScreenHeader from '../../components/ScreenHeader';
+
+interface Option {
+  route: string;
+  icon: string;
+  title: string;
+  subtitle: string;
+}
+
+const OPTIONS: Option[] = [
+  {
+    route: 'SellProduct',
+    icon: 'cash-multiple',
+    title: 'Sell Your Dress',
+    subtitle: 'List it once and earn as soon as it sells',
+  },
+  {
+    route: 'RentProduct',
+    icon: 'hanger',
+    title: 'Rent Your Dress',
+    subtitle: 'Keep the dress, earn from it every day',
+  },
+];
 
 export default function SellOptionsScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-      <View style={styles.container}>
-        <Text style={styles.heading}> 🩷 Start Earning 🩷 </Text>
-        <Text style={styles.subHeading}>
-          Choose how you want to list your outfit
-        </Text>
+      <ScreenHeader
+        title="Start Earning"
+        right={
+          <TouchableOpacity onPress={() => navigation.navigate('MyListings')}>
+            <Text style={styles.headerLink}>My Listings</Text>
+          </TouchableOpacity>
+        }
+      />
 
-        {/* SELL CARD */}
-        <TouchableOpacity
-          style={styles.card}
-          activeOpacity={0.85}
-          onPress={() => navigation.navigate('SellProduct' as never)}
-        >
-          <View style={styles.iconContainer}>
-            <Icon name="cash-multiple" size={26} color="#fff" />
-          </View>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.heading}>Turn your wardrobe into income</Text>
+        <Text style={styles.subHeading}>Choose how you want to list your outfit</Text>
 
-          <View style={styles.textContainer}>
-            <Text style={styles.cardTitle}>Sell Your Used Dress</Text>
-            <Text style={styles.cardSub}>
-              List once and earn instantly
-            </Text>
-          </View>
+        {OPTIONS.map(option => (
+          <TouchableOpacity
+            key={option.route}
+            style={styles.card}
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate(option.route)}
+          >
+            <View style={styles.iconContainer}>
+              <Icon name={option.icon} size={24} color="#FFFFFF" />
+            </View>
 
-          <Icon name="chevron-right" size={22} color="#1E3A8A" />
-        </TouchableOpacity>
+            <View style={styles.textContainer}>
+              <Text style={styles.cardTitle}>{option.title}</Text>
+              <Text style={styles.cardSub}>{option.subtitle}</Text>
+            </View>
 
-        {/* RENT CARD */}
-        {/* <TouchableOpacity
-          style={styles.card}
-          activeOpacity={0.85}
-          onPress={() => navigation.navigate('RentProduct' as never)}
-        >
-          <View style={[styles.iconContainer, { backgroundColor: '#2563EB' }]}>
-            <Icon name="hanger" size={24} color="#fff" />
-          </View>
+            <Icon name="chevron-right" size={22} color="#AAAAAA" />
+          </TouchableOpacity>
+        ))}
 
-          <View style={styles.textContainer}>
-            <Text style={styles.cardTitle}>Rent Your Dress</Text>
-            <Text style={styles.cardSub}>
-              Earn daily from your wardrobe
-            </Text>
-          </View>
-
-          <Icon name="chevron-right" size={22} color="#1E3A8A" />
-        </TouchableOpacity> */}
-      </View>
+        <View style={styles.noteBox}>
+          <Icon name="information-outline" size={18} color="#111111" />
+          <Text style={styles.noteText}>
+            Listings are reviewed before they appear in the marketplace. You can track
+            their status any time under My Listings.
+          </Text>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -72,60 +89,81 @@ export default function SellOptionsScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F4F8FF', // soft blue background
+    backgroundColor: '#FFFFFF',
+  },
+  headerLink: {
+    fontSize: 13,
+    fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    color: '#f8ac1b',
   },
   container: {
-    flex: 1,
-    padding: 24,
-    justifyContent: 'center',
+    padding: 20,
+    paddingTop: 28,
   },
   heading: {
-    fontSize: 24,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 8,
-    color: '#B03385', // deep blue
+    fontSize: 22,
+    fontFamily: 'serif',
+    fontStyle: 'italic',
+    fontWeight: '800',
+    color: '#111111',
+    marginBottom: 6,
   },
   subHeading: {
     fontSize: 14,
-    textAlign: 'center',
-    color: '#4B5563',
-    marginBottom: 40,
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
+    marginBottom: 28,
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
-    padding: 20,
-    borderRadius: 18,
-    marginBottom: 20,
-
-    shadowColor: '#1E3A8A',
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
+    backgroundColor: '#F9F9F9',
+    padding: 18,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    marginBottom: 14,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#B03385',// deep blue accent
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#111111',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 14,
   },
   textContainer: {
     flex: 1,
   },
   cardTitle: {
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#111827',
+    color: '#111111',
   },
   cardSub: {
     fontSize: 13,
-    marginTop: 4,
-    color: '#6B7280',
+    fontFamily: 'Poppins-Regular',
+    marginTop: 3,
+    color: '#666666',
+  },
+  noteBox: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 14,
+    padding: 14,
+    borderRadius: 12,
+    backgroundColor: '#FFF6E3',
+    borderWidth: 1,
+    borderColor: '#F6DCA6',
+  },
+  noteText: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: 'Poppins-Regular',
+    color: '#444444',
+    lineHeight: 18,
   },
 });

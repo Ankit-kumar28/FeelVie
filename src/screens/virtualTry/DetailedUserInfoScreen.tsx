@@ -111,7 +111,7 @@ export default function DetailedUserInfoScreen({ route, navigation }) {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Info Section */}
         <View style={styles.infoBox}>
-          <Icon name="information-outline" size={24} color="#000" />
+          <Icon name="information-outline" size={24} color="#111111" />
           <View style={styles.infoTextContainer}>
             <Text style={styles.infoTitle}>Personalize Your Try-On</Text>
             <Text style={styles.infoText}>
@@ -131,7 +131,7 @@ export default function DetailedUserInfoScreen({ route, navigation }) {
               <Icon
                 name="account"
                 size={20}
-                color={category ? '#000' : '#999999'}
+                color={category ? '#111111' : '#AAAAAA'}
               />
               <Text
                 style={[
@@ -142,7 +142,7 @@ export default function DetailedUserInfoScreen({ route, navigation }) {
                 {category || 'Select category'}
               </Text>
             </View>
-            <Icon name="chevron-down" size={20} color="#999999" />
+            <Icon name="chevron-down" size={20} color="#AAAAAA" />
           </TouchableOpacity>
         </View>
 
@@ -157,7 +157,7 @@ export default function DetailedUserInfoScreen({ route, navigation }) {
               <Icon
                 name="human"
                 size={20}
-                color={bodySize ? '#000' : '#999999'}
+                color={bodySize ? '#111111' : '#AAAAAA'}
               />
               <Text
                 style={[
@@ -168,7 +168,7 @@ export default function DetailedUserInfoScreen({ route, navigation }) {
                 {bodySize || 'Select size'}
               </Text>
             </View>
-            <Icon name="chevron-down" size={20} color="#999999" />
+            <Icon name="chevron-down" size={20} color="#AAAAAA" />
           </TouchableOpacity>
         </View>
 
@@ -176,11 +176,11 @@ export default function DetailedUserInfoScreen({ route, navigation }) {
         <View style={styles.formGroup}>
           <Text style={styles.label}>Height (cm or inches)</Text>
           <View style={styles.inputContainer}>
-            <Icon name="ruler" size={20} color="#999999" />
+            <Icon name="ruler" size={20} color="#AAAAAA" />
             <TextInput
               style={styles.input}
               placeholder="E.g., 170 or 5'8"
-              placeholderTextColor="#CCCCCC"
+              placeholderTextColor="#E8E8E8"
               value={height}
               onChangeText={setHeight}
               keyboardType="default"
@@ -192,11 +192,11 @@ export default function DetailedUserInfoScreen({ route, navigation }) {
         <View style={styles.formGroup}>
           <Text style={styles.label}>Waist Size (inches or cm)</Text>
           <View style={styles.inputContainer}>
-            <Icon name="format-line-spacing" size={20} color="#999999" />
+            <Icon name="format-line-spacing" size={20} color="#AAAAAA" />
             <TextInput
               style={styles.input}
               placeholder="E.g., 32 or 81"
-              placeholderTextColor="#CCCCCC"
+              placeholderTextColor="#E8E8E8"
               value={waistSize}
               onChangeText={setWaistSize}
               keyboardType="default"
@@ -209,7 +209,7 @@ export default function DetailedUserInfoScreen({ route, navigation }) {
           style={styles.skipButton}
           onPress={() => setShowSkipConfirm(true)}
         >
-          <Icon name="skip-forward" size={20} color="#000" />
+          <Icon name="skip-forward" size={20} color="#111111" />
           <Text style={styles.skipButtonText}>Skip & Auto-Generate</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -342,7 +342,7 @@ export default function DetailedUserInfoScreen({ route, navigation }) {
       >
         <View style={styles.confirmModalOverlay}>
           <View style={styles.confirmModalContent}>
-            <Icon name="help-circle" size={48} color="#000" />
+            <Icon name="help-circle" size={48} color="#111111" />
             <Text style={styles.confirmModalTitle}>Skip Details?</Text>
             <Text style={styles.confirmModalText}>
               Auto-generation will use default values. You can always adjust your preferences later.
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: '#F9F9F9',
   },
   backButton: {
     padding: 8,
@@ -391,6 +391,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
     color: '#111111',
     flex: 1,
@@ -402,7 +403,7 @@ const styles = StyleSheet.create({
     paddingBottom: 180,
   },
   infoBox: {
-    backgroundColor: '#FFF8E1',
+    backgroundColor: '#FFF6E3',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -416,13 +417,15 @@ const styles = StyleSheet.create({
   },
   infoTitle: {
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#F57C00',
+    color: '#f8ac1b',
     marginBottom: 4,
   },
   infoText: {
     fontSize: 13,
-    color: '#E65100',
+    fontFamily: 'Poppins-Regular',
+    color: '#f8ac1b',
     fontWeight: '400',
   },
   formGroup: {
@@ -430,20 +433,21 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
     color: '#111111',
     marginBottom: 10,
   },
   selectButton: {
     borderWidth: 1.5,
-    borderColor: '#E0E0E0',
+    borderColor: '#E8E8E8',
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#F9F9F9',
   },
   selectButtonContent: {
     flexDirection: 'row',
@@ -452,7 +456,8 @@ const styles = StyleSheet.create({
   },
   selectButtonText: {
     fontSize: 14,
-    color: '#999999',
+    fontFamily: 'Poppins-Regular',
+    color: '#AAAAAA',
     marginLeft: 12,
     fontWeight: '500',
   },
@@ -461,17 +466,18 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     borderWidth: 1.5,
-    borderColor: '#E0E0E0',
+    borderColor: '#E8E8E8',
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#F9F9F9',
   },
   input: {
     flex: 1,
     fontSize: 14,
+    fontFamily: 'Poppins-Regular',
     color: '#111111',
     marginLeft: 12,
     padding: 0,
@@ -479,7 +485,7 @@ const styles = StyleSheet.create({
   },
   skipButton: {
     borderWidth: 1.5,
-    borderColor: '#000',
+    borderColor: '#111111',
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
@@ -490,8 +496,9 @@ const styles = StyleSheet.create({
   },
   skipButtonText: {
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#000',
+    color: '#111111',
     marginLeft: 8,
   },
   bottomBar: {
@@ -500,7 +507,7 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
+    borderTopColor: '#F9F9F9',
     position: 'absolute',
     bottom: 0,
     left: 0,
@@ -511,7 +518,7 @@ const styles = StyleSheet.create({
   secondaryBtn: {
     flex: 0.35,
     borderWidth: 1.5,
-    borderColor: '#000',
+    borderColor: '#111111',
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',
@@ -519,12 +526,13 @@ const styles = StyleSheet.create({
   },
   secondaryBtnText: {
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#000',
+    color: '#111111',
   },
   primaryBtn: {
     flex: 0.65,
-    backgroundColor: '#000',
+    backgroundColor: '#111111',
     borderRadius: 8,
     paddingVertical: 14,
     flexDirection: 'row',
@@ -536,6 +544,7 @@ const styles = StyleSheet.create({
   },
   primaryBtnText: {
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
     color: '#FFFFFF',
   },
@@ -557,10 +566,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: '#F9F9F9',
   },
   modalTitle: {
     fontSize: 18,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
     color: '#111111',
   },
@@ -575,26 +585,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 10,
     marginBottom: 8,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#F9F9F9',
   },
   modalOptionActive: {
-    backgroundColor: '#FFF3E0',
+    backgroundColor: '#FFF6E3',
   },
   optionCheckbox: {
     width: 24,
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#E0E0E0',
+    borderColor: '#E8E8E8',
     alignItems: 'center',
     justifyContent: 'center',
   },
   optionCheckboxActive: {
-    backgroundColor: '#000',
-    borderColor: '#000',
+    backgroundColor: '#111111',
+    borderColor: '#111111',
   },
   modalOptionText: {
     fontSize: 14,
+    fontFamily: 'Poppins-Regular',
     fontWeight: '500',
     color: '#666666',
     marginLeft: 12,
@@ -616,24 +627,25 @@ const styles = StyleSheet.create({
     width: '30%',
     aspectRatio: 1,
     borderWidth: 1.5,
-    borderColor: '#E0E0E0',
+    borderColor: '#E8E8E8',
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#F9F9F9',
   },
   sizeOptionActive: {
-    borderColor: '#000',
-    backgroundColor: '#FFF8E1',
+    borderColor: '#111111',
+    backgroundColor: '#FFF6E3',
 
   },
   sizeOptionText: {
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
     color: '#666666',
   },
   sizeOptionTextActive: {
-    color: '#000',
+    color: '#111111',
   },
   confirmModalOverlay: {
     flex: 1,
@@ -651,6 +663,7 @@ const styles = StyleSheet.create({
   },
   confirmModalTitle: {
     fontSize: 18,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
     color: '#111111',
     marginTop: 16,
@@ -658,6 +671,7 @@ const styles = StyleSheet.create({
   },
   confirmModalText: {
     fontSize: 14,
+    fontFamily: 'Poppins-Regular',
     color: '#666666',
     textAlign: 'center',
     marginBottom: 24,
@@ -671,25 +685,27 @@ const styles = StyleSheet.create({
   confirmCancelBtn: {
     flex: 1,
     borderWidth: 1.5,
-    borderColor: '#000',
+    borderColor: '#111111',
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
   },
   confirmCancelBtnText: {
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#000',
+    color: '#111111',
   },
   confirmConfirmBtn: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#111111',
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
   },
   confirmConfirmBtnText: {
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
     color: '#FFFFFF',
   },

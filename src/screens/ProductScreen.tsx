@@ -23,7 +23,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Share from 'react-native-share';
 
 const { width } = Dimensions.get('window');
-const BASE_URL = 'https://feelvie.yaytech.in';
+const BASE_URL = 'https://api.feelvie.com';
 
 interface Variant {
   id?: number;
@@ -202,7 +202,7 @@ export default function ProductDetailScreen() {
       image: product.images?.[0]?.image_url || product.images?.[0]?.image || 'no image',
     });
 
-    const productLink = `https://feelvie.yaytech.in/products/${product.id}`;
+    const productLink = `https://api.feelvie.com/products/${product.id}`;
     const firstImage = product.images?.[0]?.image_url || product.images?.[0]?.image;
 
     const shareOptions: any = {
@@ -514,8 +514,8 @@ export default function ProductDetailScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.center}>
-        <ActivityIndicator size="large" color="#B03385" />
-        <Text style={{ marginTop: 16, color: '#64748b' }}>Loading product...</Text>
+        <ActivityIndicator size="large" color="#f8ac1b" />
+        <Text style={{ marginTop: 16, color: '#666666' }}>Loading product...</Text>
       </SafeAreaView>
     );
   }
@@ -523,8 +523,8 @@ export default function ProductDetailScreen() {
   if (error || !product) {
     return (
       <SafeAreaView style={styles.center}>
-        <Icon name="error-outline" size={64} color="#ef4444" />
-        <Text style={{ marginTop: 16, fontSize: 18, color: '#374151', textAlign: 'center' }}>
+        <Icon name="error-outline" size={64} color="#EF4444" />
+        <Text style={{ marginTop: 16, fontSize: 18, color: '#444444', textAlign: 'center' }}>
           {error || "Product not found"}
         </Text>
         <TouchableOpacity style={styles.retryBtn} onPress={fetchProduct}>
@@ -540,30 +540,30 @@ export default function ProductDetailScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back-ios" size={24} color="#000000" />
+          <Icon name="arrow-back-ios" size={24} color="#111111" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{'Product Details'}</Text> 
 
         <View style={styles.headerActions}>
           <TouchableOpacity onPress={toggleWishlist} disabled={wishlistLoading}>
             {wishlistLoading ? (
-              <ActivityIndicator size="small" color="#ef4444" />
+              <ActivityIndicator size="small" color="#EF4444" />
             ) : (
               <Icon
                 name={isInWishlist ? "favorite" : "favorite-border"}
                 size={26}
-                color={isInWishlist ? "#ef4444" : "#000000"}
+                color={isInWishlist ? "#EF4444" : "#111111"}
               />
             )}
           </TouchableOpacity>
 
           <TouchableOpacity onPress={shareProduct}>
-            <Icon name="share" size={24} color="#000000" style={{ marginLeft: 20 }} />
+            <Icon name="share" size={24} color="#111111" style={{ marginLeft: 20 }} />
           </TouchableOpacity>
         </View>
       </View>
@@ -628,7 +628,7 @@ export default function ProductDetailScreen() {
           {inStock ? (
             <Text style={styles.stockText}>In Stock</Text>
           ) : (
-            <Text style={[styles.stockText, { color: '#ef4444' }]}>Out of Stock</Text>
+            <Text style={[styles.stockText, { color: '#EF4444' }]}>Out of Stock</Text>
           )}
         </View>
 
@@ -650,13 +650,13 @@ export default function ProductDetailScreen() {
                     <View
                       style={[
                         styles.colorCircle,
-                        { backgroundColor: col?.hex_code || '#9ca3af' },
+                        { backgroundColor: col?.hex_code || '#AAAAAA' },
                         selected && styles.colorSelected,
                       ]}
                     >
-                      {selected && <Icon name="check" size={18} color="#fff" />}
+                      {selected && <Icon name="check" size={18} color="#FFFFFF" />}
                     </View>
-                    <Text style={[styles.colorLabel, selected && { color: "#B03385", fontWeight: '700' }]}>
+                    <Text style={[styles.colorLabel, selected && { color: "#f8ac1b", fontWeight: '700' }]}>
                       {colorName}
                     </Text>
                   </TouchableOpacity>
@@ -699,7 +699,7 @@ export default function ProductDetailScreen() {
                           style={[
                             styles.sizeText,
                             isSelected && styles.sizeTextSelected,
-                            !available && !isSelected && { color: '#94a3b8' },
+                            !available && !isSelected && { color: '#AAAAAA' },
                           ]}
                         >
                           {size}
@@ -726,15 +726,15 @@ export default function ProductDetailScreen() {
         {/* Trust Badges */}
         <View style={styles.trustContainer}>
           <View style={styles.trustBadge}>
-            <Icon name="local-shipping" size={20} color="#16a34a" />
+            <Icon name="local-shipping" size={20} color="#16A34A" />
             <Text style={styles.trustText}>Free Delivery</Text>
           </View>
           <View style={styles.trustBadge}>
-            <Icon name="payments" size={20} color="#B03385" />
+            <Icon name="payments" size={20} color="#f8ac1b" />
             <Text style={styles.trustText}>COD Available</Text>
           </View>
           <View style={styles.trustBadge}>
-            <Icon name="verified" size={20} color="#eab308" />
+            <Icon name="verified" size={20} color="#f8ac1b" />
             <Text style={styles.trustText}>Verified Seller</Text>
           </View>
         </View>
@@ -810,10 +810,10 @@ export default function ProductDetailScreen() {
       disabled={!inStock || addingToCart || !selectedVariant?.id}
     >
       {addingToCart ? (
-        <ActivityIndicator color="#fff" size="small" />
+        <ActivityIndicator color="#FFFFFF" size="small" />
       ) : (
         <>
-          <Icon name="shopping-cart" size={20} color="#fff" style={{ marginRight: 8 }} />
+          <Icon name="shopping-cart" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
           <Text style={styles.addToCartText}>Add to Cart</Text>
         </>
       )}
@@ -839,22 +839,22 @@ export default function ProductDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8fafc' },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F9F9F9' },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: '#F9F9F9',
   },
-  headerTitle: { fontSize: 22, fontWeight: '700', color: '#111827' },
+  headerTitle: { fontSize: 22, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#111111' },
   headerActions: { flexDirection: 'row', alignItems: 'center' },
   carousel: { position: 'relative' },
-  mainImage: { width, height: width * 1.12, backgroundColor: '#f9fafb' },
+  mainImage: { width, height: width * 1.12, backgroundColor: '#F9F9F9' },
   dotsContainer: {
     position: 'absolute',
     bottom: 16,
@@ -865,46 +865,47 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#000',
+    backgroundColor: '#111111',
     marginHorizontal: 4,
   },
-  priceSection: { padding: 16, backgroundColor: '#fff' },
+  priceSection: { padding: 16, backgroundColor: '#FFFFFF' },
   priceRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
-  currentPrice: { fontSize: 28, fontWeight: '800', color: '#111827' },
+  currentPrice: { fontSize: 28, fontFamily: 'Poppins-SemiBold', fontWeight: '800', color: '#111111' },
   originalPrice: {
     fontSize: 18,
-    color: '#6b7280',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     textDecorationLine: 'line-through',
     marginLeft: 12,
   },
   discountBadge: {
-    backgroundColor: '#16a34a',
+    backgroundColor: '#16A34A',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
     marginLeft: 10,
   },
-  discountText: { color: '#fff', fontWeight: '700', fontSize: 14 },
-  savings: { color: '#16a34a', fontWeight: '600', marginTop: 6, fontSize: 15 },
-  productTitle: { fontSize: 22, fontWeight: '700', color: '#111827', paddingHorizontal: 16, marginBottom: 10 },
+  discountText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14, fontFamily: 'Poppins-SemiBold' },
+  savings: { color: '#16A34A', fontWeight: '600', marginTop: 6, fontSize: 15, fontFamily: 'Poppins-SemiBold' },
+  productTitle: { fontSize: 22, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#111111', paddingHorizontal: 16, marginBottom: 10 },
   metaRow: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 16, marginBottom: 16 },
-  conditionText: { fontSize: 15, color: '#475569' },
-  stockText: { fontSize: 15, fontWeight: '700', color: '#16a34a' },
-  section: { padding: 16, borderTopWidth: 8, borderTopColor: '#f8fafc' },
-  sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: 14, color: '#111827' },
+  conditionText: { fontSize: 15, fontFamily: 'Poppins-Regular', color: '#666666' },
+  stockText: { fontSize: 15, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#16A34A' },
+  section: { padding: 16, borderTopWidth: 8, borderTopColor: '#F9F9F9' },
+  sectionTitle: { fontSize: 18, fontFamily: 'Poppins-SemiBold', fontWeight: '700', marginBottom: 14, color: '#111111' },
   colorOption: { alignItems: 'center', marginRight: 24 },
   colorCircle: {
     width: 50,
     height: 50,
     borderRadius: 25,
     borderWidth: 2.5,
-    borderColor: '#e5e7eb',
+    borderColor: '#E8E8E8',
     marginBottom: 8,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  colorSelected: { borderColor: '#B03385', borderWidth: 3.5 },
-  colorLabel: { fontSize: 14, color: '#475569', fontWeight: '500' },
+  colorSelected: { borderColor: '#f8ac1b', borderWidth: 3.5 },
+  colorLabel: { fontSize: 14, fontFamily: 'Poppins-Regular', color: '#666666', fontWeight: '500' },
   sizeGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -917,59 +918,60 @@ const styles = StyleSheet.create({
     margin: 8,
     borderRadius: 38,
     borderWidth: 1.5,
-    borderColor: '#cbd5e1',
-    backgroundColor: '#ffffff',
+    borderColor: '#E8E8E8',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
   sizeSelected: {
-    backgroundColor: '#B03385',
-    borderColor: '#B03385',
+    backgroundColor: '#f8ac1b',
+    borderColor: '#f8ac1b',
   },
   sizeUnavailable: {
     opacity: 0.5,
-    backgroundColor: '#f1f5f9',
-    borderColor: '#e2e8f0',
+    backgroundColor: '#F9F9F9',
+    borderColor: '#E8E8E8',
   },
   sizeText: {
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#334155',
+    color: '#444444',
     letterSpacing: 0.3,
   },
   sizeTextSelected: {
-    color: '#ffffff',
+    color: '#FFFFFF',
     fontWeight: '700',
   },
-  emptyText: { color: '#f87171', fontSize: 15, fontStyle: 'italic' },
-  stockInfo: { marginTop: 12, color: '#16a34a', fontWeight: '600', fontSize: 14 },
+  emptyText: { color: '#EF4444', fontSize: 15, fontFamily: 'Poppins-Regular', fontStyle: 'italic' },
+  stockInfo: { marginTop: 12, color: '#16A34A', fontWeight: '600', fontSize: 14, fontFamily: 'Poppins-SemiBold' },
   trustContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingVertical: 16,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#F9F9F9',
     marginHorizontal: 16,
     borderRadius: 12,
     marginBottom: 16,
   },
   trustBadge: { alignItems: 'center' },
-  trustText: { fontSize: 13, color: '#475569', marginTop: 6, fontWeight: '500' },
-  description: { fontSize: 15, lineHeight: 24, color: '#4b5563' },
-  readMore: { color: "#B03385", fontWeight: '700', marginTop: 10, fontSize: 15 },
+  trustText: { fontSize: 13, fontFamily: 'Poppins-Regular', color: '#666666', marginTop: 6, fontWeight: '500' },
+  description: { fontSize: 15, fontFamily: 'Poppins-Regular', lineHeight: 24, color: '#666666' },
+  readMore: { color: "#f8ac1b", fontWeight: '700', marginTop: 10, fontSize: 15, fontFamily: 'Poppins-SemiBold' },
   similarItem: { width: 140, marginRight: 16, alignItems: 'center' },
-  similarImg: { width: 140, height: 140, borderRadius: 12, backgroundColor: '#f3f4f6' },
-  similarName: { fontSize: 14, marginTop: 10, textAlign: 'center', color: '#111827' },
-  similarPrice: { fontSize: 15, color: '#B03385', fontWeight: '700', marginTop: 4 },
+  similarImg: { width: 140, height: 140, borderRadius: 12, backgroundColor: '#F9F9F9' },
+  similarName: { fontSize: 14, fontFamily: 'Poppins-Regular', marginTop: 10, textAlign: 'center', color: '#111111' },
+  similarPrice: { fontSize: 15, fontFamily: 'Poppins-SemiBold', color: '#f8ac1b', fontWeight: '700', marginTop: 4 },
   bottomBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: '#ffffff',
+    borderTopColor: '#FFFFFF',
     elevation: 1,              // Android shadow
-    shadowColor: '#000',        // iOS shadow
+    shadowColor: '#111111',        // iOS shadow
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.10,
     shadowRadius: 12,
@@ -990,7 +992,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#B03385',     // slightly brighter violet
+    backgroundColor: '#111111',     // slightly brighter violet
     borderRadius: 12,
     padding: 14,
     // minHeight: 44,
@@ -1000,7 +1002,7 @@ const styles = StyleSheet.create({
 
   buyNowButton: {
     flex: 1.3,                   // Buy Now slightly wider (common pattern)
-    backgroundColor: '#1a3571',   // dark charcoal black
+    backgroundColor: '#111111',   // dark charcoal black
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
@@ -1014,24 +1016,26 @@ const styles = StyleSheet.create({
   },
 
   addToCartText: {
-    color: '#ffffff',
+    color: '#FFFFFF',
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
     letterSpacing: 0.2,
   },
 
   buyNowText: {
-    color: '#ffffff',
+    color: '#FFFFFF',
     fontSize: 18,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
     letterSpacing: 0.3,
   },
   retryBtn: {
     marginTop: 20,
-    backgroundColor: "#B03385",
+    backgroundColor: "#f8ac1b",
     paddingVertical: 14,
     paddingHorizontal: 36,
     borderRadius: 12,
   },
-  retryText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  retryText: { color: '#FFFFFF', fontWeight: '700', fontSize: 16, fontFamily: 'Poppins-SemiBold' },
 });

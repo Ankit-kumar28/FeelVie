@@ -46,10 +46,10 @@ const itemWidth = (SCREEN_WIDTH - 32) / numColumns;
 
 const SkeletonCard = () => (
   <View style={styles.productCard}>
-    <View style={[styles.productImage, { backgroundColor: '#f1f5f9' }]} />
+    <View style={[styles.productImage, { backgroundColor: '#F9F9F9' }]} />
     <View style={styles.info}>
-      <View style={{ height: 16, backgroundColor: '#f1f5f9', borderRadius: 4, marginBottom: 6 }} />
-      <View style={{ height: 14, width: 80, backgroundColor: '#f1f5f9', borderRadius: 4 }} />
+      <View style={{ height: 16, backgroundColor: '#F9F9F9', borderRadius: 4, marginBottom: 6 }} />
+      <View style={{ height: 14, width: 80, backgroundColor: '#F9F9F9', borderRadius: 4 }} />
     </View>
   </View>
 );
@@ -92,12 +92,12 @@ const ProductCard = memo(({
         hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
       >
         {wishlistStatus.isToggling ? (
-          <ActivityIndicator size="small" color="#fff" />
+          <ActivityIndicator size="small" color="#FFFFFF" />
         ) : (
           <Icon
             name={wishlistStatus.inWishlist ? 'favorite' : 'favorite-border'}
             size={18}
-            color={wishlistStatus.inWishlist ? '#ef4444' : '#ffffff'}
+            color={wishlistStatus.inWishlist ? '#EF4444' : '#FFFFFF'}
             style={styles.heartShadow}
           />
         )}
@@ -108,11 +108,11 @@ const ProductCard = memo(({
         style={styles.aiContainer}
         onPress={() => handleVirtualTryOn(item)}
       >
-        <Text style={{ color: '#000', fontSize: 13, fontWeight: '600' }}>Try on</Text>
+        <Text style={{ color: '#111111', fontSize: 13, fontWeight: '600' }}>Try on</Text>
         <Icon
           name="auto-awesome"
           size={14}
-          color="#000"
+          color="#111111"
           style={styles.aiShadow}
         />
       </TouchableOpacity>
@@ -502,25 +502,25 @@ export default function SearchResults() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {/* Header */}
       <View style={[styles.header]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
-          <Icon name="arrow-back" size={26} color="#000" />
+          <Icon name="arrow-back" size={26} color="#111111" />
         </TouchableOpacity>
         <Text style={styles.title} numberOfLines={1}>
           {title || query || 'Products'}
         </Text>
         {/* <View style={styles.rightIcons}>
           <TouchableOpacity onPress={() => navigation.navigate('Search')} style={styles.iconButton}>
-            <Icon name="search" size={24} color="#000" />
+            <Icon name="search" size={24} color="#111111" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('MyWishList')} style={styles.iconButton}>
-            <Icon name="favorite-border" size={24} color="#000" />
+            <Icon name="favorite-border" size={24} color="#111111" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('CartScreen')} style={styles.iconButton}>
-            <Icon name="shopping-cart" size={24} color="#000" />
+            <Icon name="shopping-cart" size={24} color="#111111" />
           </TouchableOpacity>
         </View> */}
       </View>
@@ -553,11 +553,11 @@ export default function SearchResults() {
           numColumns={2}
           columnWrapperStyle={styles.row}
           contentContainerStyle={styles.listContent}
-          // refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#B03385']} />}
+          // refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#f8ac1b']} />}
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
           ListFooterComponent={
-            loadingMore ? <ActivityIndicator size="small" color="#B03385" style={{ padding: 20 }} /> : null
+            loadingMore ? <ActivityIndicator size="small" color="#f8ac1b" style={{ padding: 20 }} /> : null
           }
           getItemLayout={getItemLayout}
           initialNumToRender={10}
@@ -570,12 +570,12 @@ export default function SearchResults() {
       {/* Bottom Bar */}
       {/* <View style={styles.bottomBar}>
         <TouchableOpacity style={styles.bottomBtn} onPress={openSort}>
-          <Icon name="sort" size={22} color="#000" />
+          <Icon name="sort" size={22} color="#111111" />
           <Text style={styles.bottomBtnText}>Sort By</Text>
         </TouchableOpacity>
         <View style={styles.bottomDivider} />
         <TouchableOpacity style={styles.bottomBtn} onPress={openFilter}>
-          <Icon name="filter-list" size={22} color="#000" />
+          <Icon name="filter-list" size={22} color="#111111" />
           <Text style={styles.bottomBtnText}>Filter</Text>
         </TouchableOpacity>
       </View> */}
@@ -587,7 +587,7 @@ export default function SearchResults() {
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetTitle}>Sort By</Text>
               <TouchableOpacity onPress={closeSort}>
-                <Icon name="close" size={26} color="#000" />
+                <Icon name="close" size={26} color="#111111" />
               </TouchableOpacity>
             </View>
 
@@ -619,7 +619,7 @@ export default function SearchResults() {
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetTitle}>Filter</Text>
               <TouchableOpacity onPress={closeFilter}>
-                <Icon name="close" size={26} color="#000" />
+                <Icon name="close" size={26} color="#111111" />
               </TouchableOpacity>
             </View>
 
@@ -662,7 +662,7 @@ export default function SearchResults() {
                           styles.checkbox,
                           selectedColors.includes(c) && styles.checkboxSelected,
                         ]}>
-                          {selectedColors.includes(c) && <Icon name="check" size={16} color="#fff" />}
+                          {selectedColors.includes(c) && <Icon name="check" size={16} color="#FFFFFF" />}
                         </View>
                         <Text style={styles.checkboxLabel}>{c}</Text>
                       </TouchableOpacity>
@@ -687,7 +687,7 @@ export default function SearchResults() {
                           styles.checkbox,
                           selectedSizes.includes(s) && styles.checkboxSelected,
                         ]}>
-                          {selectedSizes.includes(s) && <Icon name="check" size={16} color="#fff" />}
+                          {selectedSizes.includes(s) && <Icon name="check" size={16} color="#FFFFFF" />}
                         </View>
                         <Text style={styles.checkboxLabel}>{s}</Text>
                       </TouchableOpacity>
@@ -708,9 +708,9 @@ export default function SearchResults() {
                       step={100}
                       value={priceRange[1]}
                       onValueChange={(val) => setPriceRange([priceRange[0], val])}
-                      minimumTrackTintColor="#B03385"
-                      maximumTrackTintColor="#ddd"
-                      thumbTintColor="#B03385"
+                      minimumTrackTintColor="#f8ac1b"
+                      maximumTrackTintColor="#E8E8E8"
+                      thumbTintColor="#f8ac1b"
                     />
                     <Slider
                       style={styles.slider}
@@ -719,9 +719,9 @@ export default function SearchResults() {
                       step={100}
                       value={priceRange[0]}
                       onValueChange={(val) => setPriceRange([val, priceRange[1]])}
-                      minimumTrackTintColor="#B03385"
-                      maximumTrackTintColor="#ddd"
-                      thumbTintColor="#B03385"
+                      minimumTrackTintColor="#f8ac1b"
+                      maximumTrackTintColor="#E8E8E8"
+                      thumbTintColor="#f8ac1b"
                     />
                   </View>
                 )}
@@ -744,20 +744,21 @@ export default function SearchResults() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f9fa' },
+  container: { flex: 1, backgroundColor: '#F9F9F9' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#E8E8E8',
   },
   title: {
     fontSize: 18,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#000',
+    color: '#111111',
     flex: 1,
     marginHorizontal: 16,
   },
@@ -778,13 +779,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     marginHorizontal: 4,
     borderRadius: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#E8E8E8',
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: '#111111',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.08,
         shadowRadius: 6,
@@ -798,7 +799,7 @@ const styles = StyleSheet.create({
   productImage: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#F9F9F9',
   },
 
   heartContainer: {
@@ -815,7 +816,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 8,
     left: 8,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     paddingVertical: 4,
     width: '90%',
     height: 32,
@@ -847,8 +848,9 @@ const styles = StyleSheet.create({
 
   name: {
     fontSize: 14,
+    fontFamily: 'Poppins-Regular',
     fontWeight: '500',
-    color: '#111827',
+    color: '#111111',
     lineHeight: 18,
     marginBottom: 6,
   },
@@ -862,21 +864,24 @@ const styles = StyleSheet.create({
 
   sellingPrice: {
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#111827',
+    color: '#111111',
   },
 
   originalPrice: {
     fontSize: 13,
-    color: '#6b7280',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     textDecorationLine: 'line-through',
   },
 
   discountBadge: {
     fontSize: 11,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#ffffff',
-    backgroundColor: '#16a34ac3',
+    color: '#FFFFFF',
+    backgroundColor: '#16A34Ac3',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -885,8 +890,8 @@ const styles = StyleSheet.create({
   bottomBar: {
     flexDirection: 'row',
     borderTopWidth: 1,
-    borderTopColor: '#eee',
-    backgroundColor: '#fff',
+    borderTopColor: '#E8E8E8',
+    backgroundColor: '#FFFFFF',
     height: 70,
     paddingBottom:10,
   },
@@ -897,8 +902,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
   },
-  bottomBtnText: { fontSize: 14, fontWeight: '600' },
-  bottomDivider: { width: 1, backgroundColor: '#eee' },
+  bottomBtnText: { fontSize: 14, fontFamily: 'Poppins-SemiBold', fontWeight: '600' },
+  bottomDivider: { width: 1, backgroundColor: '#E8E8E8' },
 
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
   bottomSheet: {
@@ -906,7 +911,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: SCREEN_HEIGHT * 1.6,
@@ -917,23 +922,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#E8E8E8',
   },
-  sheetTitle: { fontSize: 18, fontWeight: '700' },
+  sheetTitle: { fontSize: 18, fontFamily: 'Poppins-SemiBold', fontWeight: '700' },
   sheetContent: { padding: 16 },
   sortRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5',
+    borderBottomColor: '#F9F9F9',
   },
   radioOuter: {
     width: 20,
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: '#B03385',
+    borderColor: '#f8ac1b',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -942,42 +947,42 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#B03385',
+    backgroundColor: '#f8ac1b',
   },
-  sortText: { fontSize: 16 },
+  sortText: { fontSize: 16, fontFamily: 'Poppins-Regular' },
 
   filterBody: { flex: 1, flexDirection: 'row' },
-  leftSidebar: { width: 120, backgroundColor: '#f8f9fa' },
-  sidebarItem: { padding: 16, borderBottomWidth: 1, borderBottomColor: '#eee' },
-  sidebarItemActive: { backgroundColor: '#fff', borderLeftWidth: 4, borderLeftColor: '#B03385' },
-  sidebarText: { fontSize: 15, color: '#555' },
-  sidebarTextActive: { color: '#B03385', fontWeight: '600' },
+  leftSidebar: { width: 120, backgroundColor: '#F9F9F9' },
+  sidebarItem: { padding: 16, borderBottomWidth: 1, borderBottomColor: '#E8E8E8' },
+  sidebarItemActive: { backgroundColor: '#FFFFFF', borderLeftWidth: 4, borderLeftColor: '#f8ac1b' },
+  sidebarText: { fontSize: 15, fontFamily: 'Poppins-Regular', color: '#666666' },
+  sidebarTextActive: { color: '#f8ac1b', fontWeight: '600' },
   rightContent: { flex: 1, padding: 16 },
-  sectionTitle: { fontSize: 16, fontWeight: '600', marginBottom: 12 },
+  sectionTitle: { fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '600', marginBottom: 12 },
   checkboxRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
   checkbox: {
     width: 20,
     height: 20,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: '#B03385',
+    borderColor: '#f8ac1b',
     marginRight: 12,
   },
-  checkboxSelected: { backgroundColor: '#B03385' },
+  checkboxSelected: { backgroundColor: '#f8ac1b' },
   slider: { width: '100%', height: 40 },
 
   filterFooter: {
     flexDirection: 'row',
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: '#E8E8E8',
   },
   closeBtn: { flex: 1, alignItems: 'center', padding: 14 },
-  applyBtn: { flex: 1, backgroundColor: '#B03385', borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  applyText: { color: '#fff', fontWeight: '600' },
+  applyBtn: { flex: 1, backgroundColor: '#111111', borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  applyText: { color: '#FFFFFF', fontWeight: '600' },
 
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  loadingText: { marginTop: 20, color: '#666' },
-  errorText: { textAlign: 'center', marginTop: 50, color: '#ef4444' },
-  noResults: { textAlign: 'center', marginTop: 50, color: '#666' },
+  loadingText: { marginTop: 20, color: '#666666' },
+  errorText: { textAlign: 'center', marginTop: 50, color: '#EF4444' },
+  noResults: { textAlign: 'center', marginTop: 50, color: '#666666' },
 });

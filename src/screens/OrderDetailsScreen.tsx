@@ -16,7 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
-const BASE_URL = 'https://feelvie.yaytech.in';
+const BASE_URL = 'https://api.feelvie.com';
 
 interface OrderItem {
   id: number;
@@ -134,13 +134,14 @@ export default function OrderDetailsScreen() {
 
   const getStatusInfo = (status: string) => {
     const s = status.toLowerCase();
-    if (s.includes('delivered')) return { color: '#10b981', label: 'Delivered', bg: '#ecfdf5' };
-    if (s.includes('shipped')) return { color: '#3b82f6', label: 'Shipped', bg: '#eff6ff' };
-    if (s.includes('confirmed')) return { color: '#f59e0b', label: 'Confirmed', bg: '#fffbeb' };
+    if (s.includes('delivered')) return { color: '#16A34A', label: 'Delivered', bg: '#EFF7F0' };
+    if (s.includes('shipped')) return { color: '#111111', label: 'Shipped', bg: '#FFF6E3' };
+    // Gold on gold-tint is unreadable — keep the tint, darken the text.
+    if (s.includes('confirmed')) return { color: '#444444', label: 'Confirmed', bg: '#FFF6E3' };
     if (s.includes('placed') || s.includes('pending'))
-      return { color: '#64748b', label: 'Placed', bg: '#f3f4f6' };
-    if (s.includes('cancel')) return { color: '#ef4444', label: 'Cancelled', bg: '#fee2e2' };
-    return { color: '#6b7280', label: status.charAt(0).toUpperCase() + status.slice(1), bg: '#f3f4f6' };
+      return { color: '#666666', label: 'Placed', bg: '#F9F9F9' };
+    if (s.includes('cancel')) return { color: '#EF4444', label: 'Cancelled', bg: '#FDECEC' };
+    return { color: '#666666', label: status.charAt(0).toUpperCase() + status.slice(1), bg: '#F9F9F9' };
   };
 
   const openProductDetail = (productId: number) => {
@@ -156,14 +157,14 @@ export default function OrderDetailsScreen() {
       <SafeAreaView style={styles.container}>
         <View style={[styles.header, { paddingTop: insets.top }]}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="arrow-left" size={28} color="#000" />
+            <Icon name="arrow-left" size={28} color="#111111" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Order Details</Text>
           <View style={{ width: 28 }} />
         </View>
         <View style={styles.center}>
           <Text style={styles.emptyTitle}>Invalid Order</Text>
-          <Text style={{ marginTop: 8, color: '#666', textAlign: 'center' }}>
+          <Text style={{ marginTop: 8, color: '#666666', textAlign: 'center' }}>
             No order ID received. Please try again from My Orders.
           </Text>
         </View>
@@ -176,14 +177,14 @@ export default function OrderDetailsScreen() {
       <SafeAreaView style={styles.container}>
         <View style={[styles.header, { paddingTop: insets.top }]}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="arrow-left" size={28} color="#000" />
+            <Icon name="arrow-left" size={28} color="#111111" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Order Details</Text>
           <View style={{ width: 28 }} />
         </View>
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#B03385" />
-          <Text style={{ marginTop: 12, color: '#666' }}>Loading order...</Text>
+          <ActivityIndicator size="large" color="#f8ac1b" />
+          <Text style={{ marginTop: 12, color: '#666666' }}>Loading order...</Text>
         </View>
       </SafeAreaView>
     );
@@ -194,7 +195,7 @@ export default function OrderDetailsScreen() {
       <SafeAreaView style={styles.container}>
         <View style={[styles.header, { paddingTop: insets.top }]}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="arrow-left" size={28} color="#000" />
+            <Icon name="arrow-left" size={28} color="#111111" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Order Details</Text>
           <View style={{ width: 28 }} />
@@ -212,7 +213,7 @@ export default function OrderDetailsScreen() {
     <SafeAreaView style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-left" size={28} color="#000" />
+          <Icon name="arrow-left" size={28} color="#111111" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Order Details</Text>
         <View style={{ width: 28 }} />
@@ -265,7 +266,7 @@ export default function OrderDetailsScreen() {
               </Text>
             </View>
 
-            <Icon name="chevron-right" size={26} color="#444" />
+            <Icon name="chevron-right" size={26} color="#444444" />
           </TouchableOpacity>
         ))}
 
@@ -281,47 +282,47 @@ export default function OrderDetailsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f9fa' },
+  container: { flex: 1, backgroundColor: '#F9F9F9' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#E8E8E8',
   },
-  headerTitle: { fontSize: 20, fontWeight: '700', color: '#000' },
+  headerTitle: { fontSize: 20, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#111111' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  emptyTitle: { fontSize: 20, fontWeight: '600', color: '#333' },
+  emptyTitle: { fontSize: 20, fontFamily: 'Poppins-SemiBold', fontWeight: '600', color: '#444444' },
   scrollContent: { paddingBottom: 40 },
   orderSummaryCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     padding: 16,
     margin: 12,
     marginBottom: 8,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: '#E8E8E8',
   },
-  orderId: { fontSize: 18, fontWeight: 'bold', color: '#000' },
-  orderDate: { fontSize: 14, color: '#555', marginTop: 4 },
+  orderId: { fontSize: 18, fontFamily: 'Poppins-SemiBold', fontWeight: 'bold', color: '#111111' },
+  orderDate: { fontSize: 14, fontFamily: 'Poppins-Regular', color: '#666666', marginTop: 4 },
   statusRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 },
   statusTag: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },
-  statusLabel: { fontSize: 14, fontWeight: '700' },
-  paymentInfo: { fontSize: 14, color: '#444' },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#000', marginLeft: 16, marginTop: 16, marginBottom: 8 },
-  itemRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', padding: 16, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
-  itemImage: { width: 90, height: 90, borderRadius: 8, backgroundColor: '#f8f9fa' },
+  statusLabel: { fontSize: 14, fontFamily: 'Poppins-SemiBold', fontWeight: '700' },
+  paymentInfo: { fontSize: 14, fontFamily: 'Poppins-Regular', color: '#444444' },
+  sectionTitle: { fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#111111', marginLeft: 16, marginTop: 16, marginBottom: 8 },
+  itemRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', padding: 16, borderBottomWidth: 1, borderBottomColor: '#F9F9F9' },
+  itemImage: { width: 90, height: 90, borderRadius: 8, backgroundColor: '#F9F9F9' },
   itemInfo: { flex: 1, marginLeft: 16, marginRight: 12 },
-  itemName: { fontSize: 16, fontWeight: '600', color: '#111', lineHeight: 22, marginBottom: 6 },
+  itemName: { fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '600', color: '#111111', lineHeight: 22, marginBottom: 6 },
   priceRow: { flexDirection: 'row', alignItems: 'baseline', marginBottom: 4 },
-  itemPrice: { fontSize: 16, fontWeight: 'bold', color: '#B03385' },
-  itemQty: { fontSize: 14, color: '#555', marginLeft: 4 },
-  itemTotal: { fontSize: 13, color: '#777', marginTop: 2 },
-  totalCard: { backgroundColor: '#fff', margin: 12, marginTop: 16, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#eee' },
+  itemPrice: { fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: 'bold', color: '#f8ac1b' },
+  itemQty: { fontSize: 14, fontFamily: 'Poppins-Regular', color: '#666666', marginLeft: 4 },
+  itemTotal: { fontSize: 13, fontFamily: 'Poppins-Regular', color: '#AAAAAA', marginTop: 2 },
+  totalCard: { backgroundColor: '#FFFFFF', margin: 12, marginTop: 16, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#E8E8E8' },
   totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  totalLabel: { fontSize: 17, fontWeight: '600', color: '#222' },
-  grandTotal: { fontSize: 18, fontWeight: 'bold', color: '#B03385' },
+  totalLabel: { fontSize: 17, fontFamily: 'Poppins-SemiBold', fontWeight: '600', color: '#111111' },
+  grandTotal: { fontSize: 18, fontFamily: 'Poppins-SemiBold', fontWeight: 'bold', color: '#f8ac1b' },
 });

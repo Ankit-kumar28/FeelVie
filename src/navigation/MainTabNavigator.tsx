@@ -13,6 +13,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 import VirtualTryOnScreen from '../screens/virtualTry/VirtualTryOnScreen';
 import SampleOutfitScreen from '../screens/SampleOutfitScreen';
 import VirtualTryOnHistoryScreen from '../screens/virtualTry/VirtualTryOnHistoryScreen';
+import MarketplaceScreen from '../screens/MarketplaceScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -34,17 +35,14 @@ export default function MainTabNavigator() {
       }}
       tabBar={(props) => <CustomTabBar {...props} />}
     >
-      <Tab.Screen name="Home"         component={HomeScreen} />
-      <Tab.Screen name="SampleOutfit" component={SampleOutfitScreen} />
-      <Tab.Screen name="TryOn"        component={VirtualTryOnScreen} />
-      <Tab.Screen name="History"      component={VirtualTryOnHistoryScreen} />
-      <Tab.Screen name="Profile"      component={ProfileScreen} />
-
-      {/* ── Restore these for full app ──
-      
+      {/* Five slots, with Try-On deliberately in the middle so the raised
+          centre button stays centred. Sample outfits now live in the stack
+          and are reached from Home. */}
+      <Tab.Screen name="Home"        component={HomeScreen} />
       <Tab.Screen name="Marketplace" component={MarketplaceScreen} />
-      <Tab.Screen name="Cart"        component={CartScreen} />
-      */}
+      <Tab.Screen name="TryOn"       component={VirtualTryOnScreen} />
+      <Tab.Screen name="History"     component={VirtualTryOnHistoryScreen} />
+      <Tab.Screen name="Profile"     component={ProfileScreen} />
     </Tab.Navigator>
   );
 }
@@ -151,21 +149,21 @@ function getIconName(name: string) {
   switch (name) {
     case 'TryOn':   return 'shirt-outline';
     case 'Profile': return 'person-outline';
-    case 'Home':        return 'home-outline';
+    case 'Home':         return 'home-outline';
     case 'SampleOutfit': return 'grid-outline';
     case 'History':      return 'time-outline';
-    // case 'Marketplace': return 'tag-outline';
-    // case 'Cart':        return 'shopping-bag-outline';
-    default: return 'circle-outline';
+    case 'Marketplace':  return 'bag-handle-outline';
+    default: return 'ellipse-outline';
   }
 }
 
 function getLabel(name: string) {
   switch (name) {
-    case 'TryOn':   return 'Try On';
-    case 'Profile': return 'Me';
+    case 'TryOn':        return 'Try On';
+    case 'Profile':      return 'Me';
     case 'SampleOutfit': return 'Samples';
     case 'History':      return 'History';
+    case 'Marketplace':  return 'Shop';
     default: return name;
   }
 }

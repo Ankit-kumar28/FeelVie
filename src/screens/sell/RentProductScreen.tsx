@@ -58,6 +58,8 @@ export default function RentProductScreen() {
   // Step 3
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
 
+  const paymentMethods = ['UPI', 'Bank Transfer', 'FeelVie Wallet'];
+
   const toggleSize = (size: string) => {
     setSelectedSizes(prev =>
       prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]
@@ -143,12 +145,12 @@ export default function RentProductScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity onPress={() => (step === 1 ? navigation.goBack() : setStep(step - 1))}>
-          <Icon name="arrow-left" size={26} color="#111" />
+          <Icon name="arrow-left" size={26} color="#111111" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{getStepTitle()}</Text>
         <View style={{ width: 26 }} />
@@ -175,7 +177,7 @@ export default function RentProductScreen() {
 
             <Text style={styles.label}>Photos (min 3 suggested) *</Text>
             <TouchableOpacity style={styles.photoBox} onPress={openImageOptions}>
-              <Icon name="camera-plus" size={36} color="#2563eb" />
+              <Icon name="camera-plus" size={36} color="#111111" />
               <Text style={styles.photoText}>Add Photos</Text>
             </TouchableOpacity>
 
@@ -195,7 +197,7 @@ export default function RentProductScreen() {
                   style={[styles.chip, category === c && styles.chipActive]}
                   onPress={() => setCategory(c)}
                 >
-                  <Text style={[styles.chipText, category === c && { color: '#fff' }]}>{c}</Text>
+                  <Text style={[styles.chipText, category === c && { color: '#FFFFFF' }]}>{c}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -208,7 +210,7 @@ export default function RentProductScreen() {
                   style={[styles.chip, selectedSizes.includes(s) && styles.chipActive]}
                   onPress={() => toggleSize(s)}
                 >
-                  <Text style={[styles.chipText, selectedSizes.includes(s) && { color: '#fff' }]}>{s}</Text>
+                  <Text style={[styles.chipText, selectedSizes.includes(s) && { color: '#FFFFFF' }]}>{s}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -235,7 +237,7 @@ export default function RentProductScreen() {
                   style={[styles.smallChip, condition === c && styles.smallChipActive]}
                   onPress={() => setCondition(c)}
                 >
-                  <Text style={[styles.smallChipText, condition === c && { color: '#fff' }]}>{c}</Text>
+                  <Text style={[styles.smallChipText, condition === c && { color: '#FFFFFF' }]}>{c}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -314,7 +316,7 @@ export default function RentProductScreen() {
                 style={[styles.paymentOption, selectedPayment === m && styles.paymentActive]}
                 onPress={() => setSelectedPayment(m)}
               >
-                <Icon name={selectedPayment === m ? 'radiobox-marked' : 'radiobox-blank'} size={24} color="#2563eb" />
+                <Icon name={selectedPayment === m ? 'radiobox-marked' : 'radiobox-blank'} size={24} color="#111111" />
                 <Text style={styles.paymentText}>{m}</Text>
               </TouchableOpacity>
             ))}
@@ -346,7 +348,7 @@ export default function RentProductScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb' },
+  container: { flex: 1, backgroundColor: '#F9F9F9' },
 
   header: {
     flexDirection: 'row',
@@ -354,40 +356,42 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingBottom: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#E8E8E8',
   },
-  headerTitle: { fontSize: 19, fontWeight: '700', color: '#111' },
+  headerTitle: { fontSize: 19, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#111111' },
 
   progressBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
   },
-  progressBg: { flex: 1, height: 8, backgroundColor: '#e5e7eb', borderRadius: 4 },
-  progressFill: { height: '100%', backgroundColor: '#2563eb', borderRadius: 4 },
-  progressText: { marginLeft: 12, fontSize: 14, fontWeight: '600', color: '#2563eb' },
+  progressBg: { flex: 1, height: 8, backgroundColor: '#E8E8E8', borderRadius: 4 },
+  progressFill: { height: '100%', backgroundColor: '#111111', borderRadius: 4 },
+  progressText: { marginLeft: 12, fontSize: 14, fontFamily: 'Poppins-SemiBold', fontWeight: '600', color: '#111111' },
 
   scrollContent: { padding: 20 },
 
   label: {
     fontSize: 15,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#1f2937',
+    color: '#111111',
     marginBottom: 6,
     marginTop: 12,
   },
 
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: '#E8E8E8',
     fontSize: 16,
+    fontFamily: 'Poppins-Regular',
     marginBottom: 12,
   },
 
@@ -397,14 +401,14 @@ const styles = StyleSheet.create({
     height: 140,
     borderWidth: 2,
     borderStyle: 'dashed',
-    borderColor: '#9ca3af',
+    borderColor: '#AAAAAA',
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#F9F9F9',
     marginBottom: 12,
   },
-  photoText: { marginTop: 8, color: '#2563eb', fontWeight: '600' },
+  photoText: { marginTop: 8, color: '#111111', fontWeight: '600' },
 
   previewRow: { marginBottom: 20 },
   previewImg: { width: 90, height: 90, borderRadius: 12, marginRight: 10 },
@@ -413,90 +417,90 @@ const styles = StyleSheet.create({
   chip: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#F9F9F9',
     borderRadius: 20,
     marginRight: 10,
   },
-  chipActive: { backgroundColor: '#2563eb' },
-  chipText: { color: '#374151', fontWeight: '500' },
+  chipActive: { backgroundColor: '#111111' },
+  chipText: { color: '#444444', fontWeight: '500' },
 
   colorChip: { alignItems: 'center', marginRight: 16 },
-  colorDot: { width: 40, height: 40, borderRadius: 20, borderWidth: 2, borderColor: '#d1d5db', marginBottom: 6 },
-  colorName: { fontSize: 13, color: '#374151' },
+  colorDot: { width: 40, height: 40, borderRadius: 20, borderWidth: 2, borderColor: '#E8E8E8', marginBottom: 6 },
+  colorName: { fontSize: 13, fontFamily: 'Poppins-Regular', color: '#444444' },
 
   rowChips: { flexDirection: 'row', flexWrap: 'wrap' },
   smallChip: {
     paddingHorizontal: 14,
     paddingVertical: 8,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#F9F9F9',
     borderRadius: 20,
     marginRight: 10,
     marginBottom: 10,
   },
-  smallChipActive: { backgroundColor: '#2563eb' },
-  smallChipText: { color: '#374151' },
+  smallChipActive: { backgroundColor: '#111111' },
+  smallChipText: { color: '#444444' },
 
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: '#E8E8E8',
     paddingHorizontal: 14,
     marginBottom: 16,
   },
-  rupee: { fontSize: 20, fontWeight: '600', color: '#2563eb', marginRight: 6 },
-  priceInput: { flex: 1, fontSize: 17, paddingVertical: 14 },
-  periodText: { color: '#6b7280', fontWeight: '500' },
+  rupee: { fontSize: 20, fontFamily: 'Poppins-SemiBold', fontWeight: '600', color: '#111111', marginRight: 6 },
+  priceInput: { flex: 1, fontSize: 17, fontFamily: 'Poppins-Regular', paddingVertical: 14 },
+  periodText: { color: '#666666', fontWeight: '500' },
 
   dateRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
-  dateInput: { flex: 1, backgroundColor: '#fff', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#d1d5db' },
-  toText: { marginHorizontal: 12, color: '#6b7280', fontSize: 16 },
+  dateInput: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#E8E8E8' },
+  toText: { marginHorizontal: 12, color: '#666666', fontSize: 16, fontFamily: 'Poppins-Regular' },
 
   row: { flexDirection: 'row' },
 
   paymentOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: '#E8E8E8',
     marginBottom: 12,
   },
-  paymentActive: { borderColor: '#2563eb', backgroundColor: '#eff6ff' },
-  paymentText: { marginLeft: 12, fontSize: 16, color: '#111827' },
+  paymentActive: { borderColor: '#111111', backgroundColor: '#FFF6E3' },
+  paymentText: { marginLeft: 12, fontSize: 16, fontFamily: 'Poppins-Regular', color: '#111111' },
 
   summaryCard: {
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#F9F9F9',
     borderRadius: 16,
     padding: 16,
     marginTop: 24,
   },
-  summaryTitle: { fontSize: 17, fontWeight: '700', marginBottom: 12 },
-  previewTitle: { fontSize: 18, fontWeight: '700', color: '#111827', marginBottom: 8 },
-  previewPrice: { fontSize: 20, fontWeight: '700', color: '#2563eb', marginBottom: 4 },
-  previewDeposit: { fontSize: 15, color: '#4b5563', marginBottom: 4 },
-  previewLocation: { fontSize: 15, color: '#6b7280' },
+  summaryTitle: { fontSize: 17, fontFamily: 'Poppins-SemiBold', fontWeight: '700', marginBottom: 12 },
+  previewTitle: { fontSize: 18, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#111111', marginBottom: 8 },
+  previewPrice: { fontSize: 20, fontFamily: 'Poppins-SemiBold', fontWeight: '700', color: '#111111', marginBottom: 4 },
+  previewDeposit: { fontSize: 15, fontFamily: 'Poppins-Regular', color: '#666666', marginBottom: 4 },
+  previewLocation: { fontSize: 15, fontFamily: 'Poppins-Regular', color: '#666666' },
 
   bottomBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#F9F9F9',
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
+    borderTopColor: '#E8E8E8',
   },
   btn: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#111111',
     paddingVertical: 16,
     borderRadius: 30,
     alignItems: 'center',
   },
-  btnDisabled: { backgroundColor: '#9ca3af' },
-  btnText: { color: 'white', fontSize: 16, fontWeight: '700' },
+  btnDisabled: { backgroundColor: '#AAAAAA' },
+  btnText: { color: 'white', fontSize: 16, fontFamily: 'Poppins-SemiBold', fontWeight: '700' },
 });

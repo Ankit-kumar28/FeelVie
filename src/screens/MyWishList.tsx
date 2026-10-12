@@ -20,7 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import { useCart } from '../context/CartContext'; // adjust path if needed
 
-const BASE_URL = 'https://feelvie.yaytech.in';
+const BASE_URL = 'https://api.feelvie.com';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (SCREEN_WIDTH - 36) / 2;
 
@@ -239,7 +239,7 @@ export default function MyWishListScreen() {
 
   const renderSkeleton = () => (
     <View style={styles.card}>
-      <View style={[styles.image, { backgroundColor: '#e5e7eb' }]} />
+      <View style={[styles.image, { backgroundColor: '#E8E8E8' }]} />
       <View style={styles.info}>
         <View style={[styles.skeletonLine, { width: '80%', height: 16 }]} />
         <View style={[styles.skeletonLine, { width: '50%', marginTop: 8 }]} />
@@ -266,7 +266,7 @@ export default function MyWishListScreen() {
           hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
           disabled={isAdding}
         >
-          <Icon name="close" size={18} color="#ef4444" />
+          <Icon name="close" size={18} color="#EF4444" />
         </TouchableOpacity>
 
         {/* Image */}
@@ -313,7 +313,7 @@ export default function MyWishListScreen() {
             activeOpacity={0.7}
           >
             {isAdding ? (
-              <ActivityIndicator size="small" color="#B03385" />
+              <ActivityIndicator size="small" color="#f8ac1b" />
             ) : (
               <Text style={styles.moveToBagText}>MOVE TO CART</Text>
             )}
@@ -325,21 +325,21 @@ export default function MyWishListScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={26} color="#111827" />
+          <Icon name="arrow-back" size={26} color="#111111" />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Wishlist</Text>
 
         <TouchableOpacity
-          onPress={() => navigation.navigate('Cart')}
+          onPress={() => navigation.navigate('CartScreen')}
           activeOpacity={0.7}
         >
-          <Icon name="shopping-cart" size={26} color="#111827" />
+          <Icon name="shopping-cart" size={26} color="#111111" />
         </TouchableOpacity>
       </View>
 
@@ -355,7 +355,7 @@ export default function MyWishListScreen() {
         />
       ) : error || wishlistItems.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Icon name="favorite-border" size={90} color="#d1d5db" />
+          <Icon name="favorite-border" size={90} color="#E8E8E8" />
           <Text style={styles.emptyTitle}>
             {error || 'Your Wishlist is Empty'}
           </Text>
@@ -391,7 +391,7 @@ export default function MyWishListScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
   },
 
   header: {
@@ -400,14 +400,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingBottom: 14,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: '#F9F9F9',
   },
   headerTitle: {
     fontSize: 19,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#B03385',
+    color: '#f8ac1b',
   },
 
   list: {
@@ -421,18 +422,18 @@ const styles = StyleSheet.create({
 
   card: {
     width: CARD_WIDTH,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 10,
     overflow: 'hidden',
     marginBottom: 16,
     borderWidth: 0.5,
-    borderColor: '#e9e9e9',
+    borderColor: '#E8E8E8',
   },
 
   imageWrapper: {
     width: '100%',
     height: CARD_WIDTH * 1.0,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#F9F9F9',
   },
   image: {
     flex: 1,
@@ -445,8 +446,9 @@ const styles = StyleSheet.create({
 
   name: {
     fontSize: 13,
+    fontFamily: 'Poppins-Regular',
     fontWeight: '500',
-    color: '#1f2937',
+    color: '#111111',
     lineHeight: 18,
     marginBottom: 6,
   },
@@ -460,21 +462,24 @@ const styles = StyleSheet.create({
   },
   currentPrice: {
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#B03385',
+    color: '#111111',
   },
   originalPrice: {
     fontSize: 12,
-    color: '#9ca3af',
+    fontFamily: 'Poppins-Regular',
+    color: '#AAAAAA',
     textDecorationLine: 'line-through',
   },
   discountBadge: {
     fontSize: 11,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    // color: '#16a34a',
-    // backgroundColor: '#f0fdf4',
-    color: '#ffffff',
-    backgroundColor: '#16a34ac3',
+    // color: '#16A34A',
+    // backgroundColor: '#EFF7F0',
+    color: '#FFFFFF',
+    backgroundColor: '#16A34Ac3',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -492,7 +497,7 @@ const styles = StyleSheet.create({
 
   separatorLine: {
     height: 0.8,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: '#E8E8E8',
     marginVertical: 8,
   },
 
@@ -502,8 +507,9 @@ const styles = StyleSheet.create({
   },
   moveToBagText: {
     fontSize: 13,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#B03385',
+    color: '#f8ac1b',
     // textDecorationLine: 'underline',
   },
   moveToBagDisabled: {
@@ -512,7 +518,7 @@ const styles = StyleSheet.create({
 
   // Skeleton
   skeletonLine: {
-    backgroundColor: '#e5e7eb',
+    backgroundColor: '#E8E8E8',
     borderRadius: 4,
   },
 
@@ -525,27 +531,30 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 22,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#1e293b',
+    color: '#111111',
     marginTop: 24,
   },
   emptySubtitle: {
     fontSize: 15,
-    color: '#6b7280',
+    fontFamily: 'Poppins-Regular',
+    color: '#666666',
     textAlign: 'center',
     marginTop: 8,
     lineHeight: 22,
   },
   shopBtn: {
     marginTop: 32,
-    backgroundColor: '#B03385',
+    backgroundColor: '#111111',
     paddingHorizontal: 36,
     paddingVertical: 16,
     borderRadius: 12,
   },
   shopBtnText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
   },
 });

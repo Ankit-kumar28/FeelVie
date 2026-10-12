@@ -28,6 +28,7 @@ import ImagePicker from 'react-native-image-crop-picker';
 import Toast from 'react-native-toast-message';
 import Carousel from 'react-native-banner-carousel';
 import DeviceInfo from 'react-native-device-info';
+import useCartCount from '../hooks/useCartCount';
 
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -67,8 +68,17 @@ interface CarouselItem {
 
 const BASE_URL = 'https://api.feelvie.com';
 
+/** Entry points into the marketplace side of the app. */
+const SHOP_ACTIONS: { route: string; icon: string; label: string }[] = [
+  { route: 'Marketplace', icon: 'storefront-outline', label: 'Shop' },
+  { route: 'SellOptions', icon: 'tag-outline', label: 'Sell / Rent' },
+  { route: 'MyOrders', icon: 'package-variant-closed', label: 'Orders' },
+  { route: 'MyWishList', icon: 'heart-outline', label: 'Wishlist' },
+];
+
 export default function HomeScreen() {
   const navigation = useNavigation<any>();
+  const { count: cartCount } = useCartCount();
 
   const [carousels, setCarousels] = useState<CarouselItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -241,6 +251,49 @@ export default function HomeScreen() {
     fetchHomeData();
   };
 
+  // Shared by the skeleton and the loaded screen so the two never drift apart.
+  const renderHeader = () => (
+    <View style={styles.header}>
+      <Text style={styles.logo}>FeelVie</Text>
+
+      <View style={styles.headerIcons}>
+        <TouchableOpacity
+          style={styles.headerIconBtn}
+          onPress={() => navigation.navigate('Search')}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Icon name="search" size={22} color="#111111" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.headerIconBtn}
+          onPress={() => navigation.navigate('MyWishList')}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Icon name="favorite-border" size={22} color="#111111" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.headerIconBtn}
+          onPress={() => navigation.navigate('CartScreen')}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Icon name="shopping-cart" size={22} color="#111111" />
+          {cartCount > 0 && (
+            <View style={styles.cartBadge}>
+              <Text style={styles.cartBadgeText}>{cartCount > 99 ? '99+' : cartCount}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.creditBadge} onPress={() => navigation.navigate('WalletScreen')}>
+          <Icon name="account-balance-wallet" size={16} color="#000" />
+          <Text style={styles.creditText}>{creditBalance}</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
   const renderCarousel = (item: CarouselItem, index: number) => (
     <Image
       key={index}
@@ -255,13 +308,7 @@ export default function HomeScreen() {
         <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
         {/* Header */}
-        <View style={[styles.header]}>
-          <Text style={styles.logo}>FeelVie</Text>
-          <TouchableOpacity style={styles.creditBadge} onPress={() => navigation.navigate('WalletScreen')}>
-            <Icon name="account-balance-wallet" size={16} color="#000" />
-            <Text style={styles.creditText}>{creditBalance} Credit</Text>
-          </TouchableOpacity>
-        </View>
+        {renderHeader()}
 
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Carousel Skeleton */}
@@ -328,13 +375,7 @@ export default function HomeScreen() {
       </Modal>
 
       {/* Header */}
-      <View style={[styles.header]}>
-        <Text style={styles.logo}>FeelVie</Text>
-        <TouchableOpacity style={styles.creditBadge} onPress={() => navigation.navigate('WalletScreen')}>
-          <Icon name="account-balance-wallet" size={16} color="#000" />
-          <Text style={styles.creditText}>{creditBalance} Credit</Text>
-        </TouchableOpacity>
-      </View>
+      {renderHeader()}
 
       <ScrollView
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#f8ac1b" />}
@@ -361,7 +402,12 @@ export default function HomeScreen() {
 
           {/* Garment + Photo selection boxes */}
           <View style={styles.selectionSection}>
-            <Text style={styles.sectionTitle}>Start Your Try-On</Text>
+            <View style={styles.selectionHeader}>
+              <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Start Your Try-On</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('SampleOutfit')}>
+                <Text style={styles.viewAllText}>Sample outfits</Text>
+              </TouchableOpacity>
+            </View>
             <View style={styles.selectionRow}>
               <TouchableOpacity
                 style={styles.selectionBox}
@@ -416,6 +462,32 @@ export default function HomeScreen() {
               </Text>
               <Icon name="auto-awesome" size={20} color="#FFFFFF" style={{ marginLeft: 8 }} />
             </TouchableOpacity>
+          </View>
+
+          {/* Shop shortcuts — the entry point into the marketplace flow */}
+          <View style={styles.shopSection}>
+            <View style={styles.recentHeader}>
+              <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Shop</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Marketplace')}>
+                <Text style={styles.viewAllText}>Browse all</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.shopGrid}>
+              {SHOP_ACTIONS.map(action => (
+                <TouchableOpacity
+                  key={action.route}
+                  style={styles.shopTile}
+                  activeOpacity={0.85}
+                  onPress={() => navigation.navigate(action.route)}
+                >
+                  <View style={styles.shopIconCircle}>
+                    <MCIcon name={action.icon} size={22} color="#111111" />
+                  </View>
+                  <Text style={styles.shopTileText} numberOfLines={1}>{action.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
 
           {/* Recent generations */}
@@ -529,7 +601,30 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-SemiBold',
     transform: [{ translateY: -1 }],
   },
-  headerIcons: { flexDirection: 'row', alignItems: 'center' },
+  headerIcons: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  headerIconBtn: {
+    padding: 6,
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    minWidth: 16,
+    height: 16,
+    paddingHorizontal: 3,
+    borderRadius: 8,
+    backgroundColor: '#f8ac1b',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
+  cartBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    fontFamily: 'Poppins-SemiBold',
+    color: '#111111',
+  },
 
   carouselContainer: {
     marginTop: 8,
@@ -556,6 +651,12 @@ const styles = StyleSheet.create({
   selectionSection: {
     marginTop: 28,
     paddingHorizontal: 20,
+  },
+  selectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
   selectionRow: {
     flexDirection: 'row',
@@ -627,6 +728,42 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
+  },
+
+  /* Shop shortcuts */
+  shopSection: {
+    marginTop: 32,
+  },
+  shopGrid: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    gap: 12,
+  },
+  shopTile: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    backgroundColor: '#F9F9F9',
+  },
+  shopIconCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  shopTileText: {
+    fontSize: 11,
+    fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    color: '#111111',
   },
 
   /* Recent generations */
@@ -726,7 +863,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     fontFamily: 'Poppins-SemiBold',
-    color: '#f8ac1b',
+    color: '#111111',
   },
   originalPrice: {
     fontSize: 12,

@@ -108,8 +108,8 @@ export default function EditAddressScreen({ navigation, route }: Props) {
       };
 
       const url = isEditMode
-        ? `https://feelvie.yaytech.in/api/auth/addresses/${form.id}/`
-        : 'https://feelvie.yaytech.in/api/auth/addresses/';
+        ? `https://api.feelvie.com/api/auth/addresses/${form.id}/`
+        : 'https://api.feelvie.com/api/auth/addresses/';
 
       const method = isEditMode ? 'PUT' : 'POST';
 
@@ -158,7 +158,7 @@ export default function EditAddressScreen({ navigation, route }: Props) {
     <SafeAreaView style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-left" size={26} color="#111827" />
+          <Icon name="arrow-left" size={26} color="#111111" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
           {isEditMode ? 'Edit Address' : 'Add New Address'}
@@ -189,7 +189,7 @@ export default function EditAddressScreen({ navigation, route }: Props) {
               value={form.name}
               onChangeText={text => handleChange('name', text)}
               autoCapitalize="words"
-               placeholderTextColor="#ccc"
+               placeholderTextColor="#E8E8E8"
             />
             {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
           </View>
@@ -202,7 +202,7 @@ export default function EditAddressScreen({ navigation, route }: Props) {
               placeholder="98765xxxxx"
               keyboardType="phone-pad"
               maxLength={10}
-               placeholderTextColor="#ccc"
+               placeholderTextColor="#E8E8E8"
               value={form.phone}
               onChangeText={text => handleChange('phone', text)}
             />
@@ -217,7 +217,7 @@ export default function EditAddressScreen({ navigation, route }: Props) {
               placeholder="123, Green Park"
               value={form.line1}
               onChangeText={text => handleChange('line1', text)}
-              placeholderTextColor="#ccc"
+              placeholderTextColor="#E8E8E8"
             />
             {errors.line1 && <Text style={styles.errorText}>{errors.line1}</Text>}
           </View>
@@ -229,7 +229,7 @@ export default function EditAddressScreen({ navigation, route }: Props) {
               style={styles.input}
               placeholder="Near Metro Station"
               value={form.line2}
-               placeholderTextColor="#ccc"
+               placeholderTextColor="#E8E8E8"
               onChangeText={text => handleChange('line2', text)}
             />
           </View>
@@ -242,7 +242,7 @@ export default function EditAddressScreen({ navigation, route }: Props) {
                 style={[styles.input, errors.city && styles.inputError]}
                 placeholder="Lucknow"
                 value={form.city}
-                 placeholderTextColor="#ccc"
+                 placeholderTextColor="#E8E8E8"
                 onChangeText={text => handleChange('city', text)}
               />
               {errors.city && <Text style={styles.errorText}>{errors.city}</Text>}
@@ -254,7 +254,7 @@ export default function EditAddressScreen({ navigation, route }: Props) {
                 style={[styles.input, errors.state && styles.inputError]}
                 placeholder="Uttar Pradesh"
                 value={form.state}
-                 placeholderTextColor="#ccc"
+                 placeholderTextColor="#E8E8E8"
                 onChangeText={text => handleChange('state', text)}
               />
               {errors.state && <Text style={styles.errorText}>{errors.state}</Text>}
@@ -269,7 +269,7 @@ export default function EditAddressScreen({ navigation, route }: Props) {
               placeholder="226001"
               keyboardType="numeric"
               maxLength={6}
-               placeholderTextColor="#ccc"
+               placeholderTextColor="#E8E8E8"
               value={form.postal_code}
               onChangeText={text => handleChange('postal_code', text)}
             />
@@ -293,7 +293,7 @@ export default function EditAddressScreen({ navigation, route }: Props) {
             activeOpacity={0.8}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color="#FFFFFF" />
             ) : (
               <Text style={styles.saveButtonText}>
                 {isEditMode ? 'Update Address' : 'Save Address'}
@@ -305,7 +305,7 @@ export default function EditAddressScreen({ navigation, route }: Props) {
 
       {success && (
         <View style={styles.successToast}>
-          <Icon name="check-circle" size={24} color="#fff" />
+          <Icon name="check-circle" size={24} color="#FFFFFF" />
           <Text style={styles.successToastText}>
             {isEditMode ? 'Address updated' : 'Address saved'} successfully
           </Text>
@@ -318,7 +318,7 @@ export default function EditAddressScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#F9F9F9',
   },
   header: {
     flexDirection: 'row',
@@ -327,15 +327,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     // paddingTop: Platform.select({ ios: 4, android: 40 }),
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: '#F9F9F9',
     marginTop: 12,
   },
   headerTitle: {
     fontSize: 20,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
-    color: '#B03385',
+    color: '#111111',
   },
   scrollContent: {
     padding: 24,
@@ -346,52 +347,57 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
-    color: '#374151',
+    color: '#444444',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#F9F9F9',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: '#111827',
+    fontFamily: 'Poppins-Regular',
+    color: '#111111',
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#E8E8E8',
   },
   inputError: {
-    borderColor: '#ef4444',
+    borderColor: '#EF4444',
   },
   errorText: {
-    color: '#ef4444',
+    color: '#EF4444',
     fontSize: 13,
+    fontFamily: 'Poppins-Regular',
     marginTop: 6,
   },
   disabledInput: {
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#F9F9F9',
     justifyContent: 'center',
   },
   disabledText: {
-    color: '#6b7280',
+    color: '#666666',
     fontSize: 16,
+    fontFamily: 'Poppins-Regular',
   },
   row: {
     flexDirection: 'row',
   },
   apiErrorContainer: {
-    backgroundColor: '#fee2e2',
+    backgroundColor: '#FDECEC',
     padding: 14,
     borderRadius: 12,
     marginBottom: 20,
   },
   apiErrorText: {
-    color: '#b91c1c',
+    color: '#EF4444',
     textAlign: 'center',
     fontSize: 14,
+    fontFamily: 'Poppins-Regular',
   },
   saveButton: {
-    backgroundColor: '#B4338A',
+    backgroundColor: '#111111',
     paddingVertical: 16,
     borderRadius: 14,
     alignItems: 'center',
@@ -399,11 +405,12 @@ const styles = StyleSheet.create({
     
   },
   saveButtonDisabled: {
-    backgroundColor: '#d1d5db',
+    backgroundColor: '#E8E8E8',
   },
   saveButtonText: {
-    color: '#ffffff',
+    color: '#FFFFFF',
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '700',
   },
   successToast: {
@@ -411,20 +418,21 @@ const styles = StyleSheet.create({
     bottom: 40,
     left: 24,
     right: 24,
-    backgroundColor: '#10b981',
+    backgroundColor: '#16A34A',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
     borderRadius: 30,
     elevation: 6,
-    shadowColor: '#000',
+    shadowColor: '#111111',
     shadowOpacity: 0.25,
     shadowRadius: 10,
   },
   successToastText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 15,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
     marginLeft: 10,
   },
